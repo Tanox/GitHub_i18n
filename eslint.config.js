@@ -36,7 +36,7 @@ export default [
           caughtErrorsIgnorePattern: '^_',
         },
       ],
-      'no-console': ['warn', { allow: ['error', 'warn', 'log'] }],
+      'no-console': ['warn', { allow: ['error', 'warn', 'log', 'time', 'timeEnd'] }],
       'no-debugger': 'error',
       'no-var': 'error',
       'prefer-const': 'error',

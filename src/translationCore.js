@@ -559,20 +559,8 @@ export const translationCore = {
     return Array.from(uniqueElements).filter((element) => element instanceof HTMLElement);
   },
 
-  shouldTranslateElement(element) {
-    if (!element || !(element instanceof HTMLElement)) {
-      return false;
-    }
-
-    if (element.hasAttribute('data-github-zh-translated')) {
-      return false;
-    }
-
-    if (!element.textContent.trim()) {
-      return false;
-    }
-
-    const skipTags = [
+  getSkipTags() {
+    return [
       'script',
       'style',
       'code',
@@ -586,389 +574,342 @@ export const translationCore = {
       'video',
       'audio',
     ];
-    const tagName = element.tagName.toLowerCase();
-    if (skipTags.includes(tagName)) {
+  },
+
+  getSkipClassPatterns() {
+    return [
+      /language-\w+/,
+      /highlight/,
+      /token/,
+      /no-translate/,
+      /octicon/,
+      /emoji/,
+      /avatar/,
+      /timestamp/,
+      /numeral/,
+      /filename/,
+      /hash/,
+      /sha/,
+      /shortsha/,
+      /hex-color/,
+      /code/,
+      /gist/,
+      /language-/,
+      /markdown-/,
+      /monaco-editor/,
+      /syntax-/,
+      /highlight-/,
+      /clipboard/,
+      /progress-/,
+      /count/,
+      /size/,
+      /time/,
+      /date/,
+      /sortable/,
+      /label/,
+      /badge/,
+      /url/,
+      /email/,
+      /key/,
+      /user-name/,
+      /repo-name/,
+    ];
+  },
+
+  getSkipIdPatternsBasic() {
+    return [/\d+/, /-\d+/, /_\d+/];
+  },
+
+  getSkipIdPatternsGitObjects() {
+    return [/sha-/, /hash-/, /commit-/, /issue-/, /pull-/, /pr-/, /repo-/, /user-/];
+  },
+
+  getSkipIdPatternsFileTree() {
+    return [/file-/, /blob-/, /tree-/, /branch-/, /tag-/, /release-/];
+  },
+
+  getSkipIdPatternsDiscussion() {
+    return [/gist-/, /discussion-/, /comment-/, /review-/];
+  },
+
+  getSkipIdPatternsActions() {
+    return [/workflow-/, /action-/, /job-/, /step-/, /runner-/];
+  },
+
+  getSkipIdPatternsPackages() {
+    return [/package-/, /registry-/, /marketplace-/];
+  },
+
+  getSkipIdPatternsOrgTeam() {
+    return [/organization-/, /team-/, /project-/, /milestone-/];
+  },
+
+  getSkipIdPatternsUsers() {
+    return [/assignee-/, /reporter-/, /reviewer-/, /author-/, /committer-/, /contributor-/];
+  },
+
+  getSkipIdPatternsFunding() {
+    return [/sponsor-/, /funding-/, /donation-/, /payment-/, /billing-/, /plan-/, /subscription-/];
+  },
+
+  getSkipIdPatternsSecurity() {
+    return [/license-/, /secret-/, /key-/, /token-/, /password-/, /credential-/, /certificate-/];
+  },
+
+  getSkipIdPatternsGitOps() {
+    return [/ssh-/, /git-/, /clone-/, /push-/, /pull-/, /fetch-/, /merge-/, /rebase-/];
+  },
+
+  getSkipIdPatternsGitOpsMore() {
+    return [/cherry-pick-/, /reset-/, /revert-/, /diff-/, /patch-/, /stash-/];
+  },
+
+  getSkipIdPatternsRefs() {
+    return [/ref-/, /head-/, /remote-/, /upstream-/, /origin-/, /local-/, /tracking-/, /merge-base-/];
+  },
+
+  getSkipIdPatternsAPI() {
+    return [/graphql-/, /rest-/, /api-/, /webhook-/, /event-/, /payload-/, /callback-/, /redirect-/];
+  },
+
+  getSkipIdPatternsAuth() {
+    return [/oauth-/, /sso-/, /ldap-/, /saml-/, /2fa-/, /mfa-/];
+  },
+
+  getSkipIdPatternsSecurityMore() {
+    return [/security-/, /vulnerability-/, /cve-/, /dependency-/, /alert-/];
+  },
+
+  getSkipIdPatternsScanning() {
+    return [/secret-scanning-/, /code-scanning-/, /codeql-/];
+  },
+
+  getSkipIdPatternsDeploy() {
+    return [/actions-/, /runner-/, /artifact-/, /cache-/, /environment-/, /deployment-/];
+  },
+
+  getSkipIdPatternsApps() {
+    return [/app-/, /oauth-app-/, /github-app-/, /integration-/];
+  },
+
+  getSkipIdPatternsSite() {
+    return [/listing-/, /usage-/, /limits-/, /quota-/, /traffic-/, /analytics-/, /insights-/];
+  },
+
+  getSkipIdPatternsSocial() {
+    return [/search-/, /explore-/, /trending-/, /stars-/, /forks-/, /watchers-/, /contributors-/];
+  },
+
+  getSkipIdPatternsUI() {
+    return [/activity-/, /events-/, /notifications-/, /feeds-/, /dashboard-/, /profile-/, /settings-/, /preferences-/];
+  }
+
+  getSkipIdPatterns() {
+    return [
+      ...this.getSkipIdPatternsBasic(),
+      ...this.getSkipIdPatternsGitObjects(),
+      ...this.getSkipIdPatternsFileTree(),
+      ...this.getSkipIdPatternsDiscussion(),
+      ...this.getSkipIdPatternsActions(),
+      ...this.getSkipIdPatternsPackages(),
+      ...this.getSkipIdPatternsOrgTeam(),
+      ...this.getSkipIdPatternsUsers(),
+      ...this.getSkipIdPatternsFunding(),
+      ...this.getSkipIdPatternsSecurity(),
+      ...this.getSkipIdPatternsGitOps(),
+      ...this.getSkipIdPatternsGitOpsMore(),
+      ...this.getSkipIdPatternsRefs(),
+      ...this.getSkipIdPatternsAPI(),
+      ...this.getSkipIdPatternsAuth(),
+      ...this.getSkipIdPatternsSecurityMore(),
+      ...this.getSkipIdPatternsScanning(),
+      ...this.getSkipIdPatternsDeploy(),
+      ...this.getSkipIdPatternsApps(),
+      ...this.getSkipIdPatternsSite(),
+      ...this.getSkipIdPatternsSocial(),
+      ...this.getSkipIdPatternsUI(),
+      /\b\w+[0-9]\w*\b/,
+    ];
+  },
+
+  checkBasicConditions(element) {
+    if (!element || !(element instanceof HTMLElement)) {
       return false;
     }
+    if (element.hasAttribute('data-github-zh-translated')) {
+      return false;
+    }
+    if (!element.textContent.trim()) {
+      return false;
+    }
+    return true;
+  },
 
-    if (
+  checkTagRestrictions(element) {
+    const tagName = element.tagName.toLowerCase();
+    return !this.getSkipTags().includes(tagName);
+  },
+
+  checkAttributeRestrictions(element) {
+    return !(
       element.hasAttribute('data-no-translate') ||
       (element.hasAttribute('translate') && element.getAttribute('translate') === 'no') ||
       element.hasAttribute('aria-hidden') ||
       element.hasAttribute('hidden')
-    ) {
-      return false;
-    }
+    );
+  },
 
+  checkClassRestrictions(element) {
     const className = element.className;
-    if (className) {
-      const skipClassPatterns = [
-        /language-\w+/,
-        /highlight/,
-        /token/,
-        /no-translate/,
-        /octicon/,
-        /emoji/,
-        /avatar/,
-        /timestamp/,
-        /numeral/,
-        /filename/,
-        /hash/,
-        /sha/,
-        /shortsha/,
-        /hex-color/,
-        /code/,
-        /gist/,
-        /language-/,
-        /markdown-/,
-        /monaco-editor/,
-        /syntax-/,
-        /highlight-/,
-        /clipboard/,
-        /progress-/,
-        /count/,
-        /size/,
-        /time/,
-        /date/,
-        /sortable/,
-        /label/,
-        /badge/,
-        /url/,
-        /email/,
-        /key/,
-        /token/,
-        /user-name/,
-        /repo-name/,
-      ];
-
-      if (skipClassPatterns.some((pattern) => pattern.test(className))) {
-        return false;
-      }
+    if (!className) {
+      return true;
     }
+    return !this.getSkipClassPatterns().some((pattern) => pattern.test(className));
+  },
 
+  checkIdRestrictions(element) {
     const id = element.id;
-    if (id) {
-      const skipIdPatterns = [
-        /\d+/,
-        /-\d+/,
-        /_\d+/,
-        /sha-/,
-        /hash-/,
-        /commit-/,
-        /issue-/,
-        /pull-/,
-        /pr-/,
-        /repo-/,
-        /user-/,
-        /file-/,
-        /blob-/,
-        /tree-/,
-        /branch-/,
-        /tag-/,
-        /release-/,
-        /gist-/,
-        /discussion-/,
-        /comment-/,
-        /review-/,
-        /workflow-/,
-        /action-/,
-        /job-/,
-        /step-/,
-        /runner-/,
-        /package-/,
-        /registry-/,
-        /marketplace-/,
-        /organization-/,
-        /team-/,
-        /project-/,
-        /milestone-/,
-        /assignee-/,
-        /reporter-/,
-        /reviewer-/,
-        /author-/,
-        /committer-/,
-        /contributor-/,
-        /sponsor-/,
-        /funding-/,
-        /donation-/,
-        /payment-/,
-        /billing-/,
-        /plan-/,
-        /subscription-/,
-        /license-/,
-        /secret-/,
-        /key-/,
-        /token-/,
-        /password-/,
-        /credential-/,
-        /certificate-/,
-        /ssh-/,
-        /git-/,
-        /clone-/,
-        /push-/,
-        /pull-/,
-        /fetch-/,
-        /merge-/,
-        /rebase-/,
-        /cherry-pick-/,
-        /reset-/,
-        /revert-/,
-        /tag-/,
-        /branch-/,
-        /commit-/,
-        /diff-/,
-        /patch-/,
-        /stash-/,
-        /ref-/,
-        /head-/,
-        /remote-/,
-        /upstream-/,
-        /origin-/,
-        /local-/,
-        /tracking-/,
-        /merge-base-/,
-        /conflict-/,
-        /resolve-/,
-        /status-/,
-        /log-/,
-        /blame-/,
-        /bisect-/,
-        /grep-/,
-        /find-/,
-        /filter-/,
-        /archive-/,
-        /submodule-/,
-        /worktree-/,
-        /lfs-/,
-        /graphql-/,
-        /rest-/,
-        /api-/,
-        /webhook-/,
-        /event-/,
-        /payload-/,
-        /callback-/,
-        /redirect-/,
-        /oauth-/,
-        /sso-/,
-        /ldap-/,
-        /saml-/,
-        /2fa-/,
-        /mfa-/,
-        /security-/,
-        /vulnerability-/,
-        /cve-/,
-        /dependency-/,
-        /alert-/,
-        /secret-scanning-/,
-        /code-scanning-/,
-        /codeql-/,
-        /actions-/,
-        /workflow-/,
-        /job-/,
-        /step-/,
-        /runner-/,
-        /artifact-/,
-        /cache-/,
-        /environment-/,
-        /deployment-/,
-        /app-/,
-        /oauth-app-/,
-        /github-app-/,
-        /integration-/,
-        /webhook-/,
-        /marketplace-/,
-        /listing-/,
-        /subscription-/,
-        /billing-/,
-        /plan-/,
-        /usage-/,
-        /limits-/,
-        /quota-/,
-        /traffic-/,
-        /analytics-/,
-        /insights-/,
-        /search-/,
-        /explore-/,
-        /trending-/,
-        /stars-/,
-        /forks-/,
-        /watchers-/,
-        /contributors-/,
-        /activity-/,
-        /events-/,
-        /notifications-/,
-        /feeds-/,
-        /dashboard-/,
-        /profile-/,
-        /settings-/,
-        /preferences-/,
-        /billing-/,
-        /organization-/,
-        /team-/,
-        /project-/,
-        /milestone-/,
-        /label-/,
-        /assignee-/,
-        /reporter-/,
-        /reviewer-/,
-        /author-/,
-        /committer-/,
-        /contributor-/,
-        /sponsor-/,
-        /funding-/,
-        /donation-/,
-        /payment-/,
-        /\b\w+[0-9]\w*\b/,
-      ];
-
-      if (skipIdPatterns.some((pattern) => pattern.test(id))) {
-        return false;
-      }
+    if (!id) {
+      return true;
     }
+    return !this.getSkipIdPatterns().some((pattern) => pattern.test(id));
+  },
 
+  checkVisibility(element) {
     const computedStyle = window.getComputedStyle(element);
-    if (
+    return !(
       computedStyle.display === 'none' ||
       computedStyle.visibility === 'hidden' ||
       computedStyle.opacity === '0' ||
       (computedStyle.position === 'absolute' && computedStyle.left === '-9999px')
-    ) {
-      return false;
-    }
+    );
+  },
 
+  checkTextContent(element) {
     const textContent = element.textContent.trim();
     if (textContent.length === 0) {
       return false;
     }
+    return !/^[0-9.,\s()[\]{}/*^$#@!~`|:;"'?>+-]+$/i.test(textContent);
+  },
 
-    if (/^[0-9.,\s()[\]{}/*^$#@!~`|:;"'?>+-]+$/i.test(textContent)) {
+  shouldTranslateElement(element) {
+    if (!this.checkBasicConditions(element)) {
       return false;
     }
-
+    if (!this.checkTagRestrictions(element)) {
+      return false;
+    }
+    if (!this.checkAttributeRestrictions(element)) {
+      return false;
+    }
+    if (!this.checkClassRestrictions(element)) {
+      return false;
+    }
+    if (!this.checkIdRestrictions(element)) {
+      return false;
+    }
+    if (!this.checkVisibility(element)) {
+      return false;
+    }
+    if (!this.checkTextContent(element)) {
+      return false;
+    }
     return true;
   },
 
-  translateElement(element) {
+  prepareElementForTranslation(element) {
     if (!element || !(element instanceof HTMLElement)) {
-      return false;
+      return { valid: false, reason: 'invalid element' };
     }
 
     if (!virtualDomManager.shouldTranslate(element)) {
-      return false;
+      return { valid: false, reason: 'virtual dom rejected' };
     }
 
     if (this.elementCache.has(element)) {
-      return false;
+      return { valid: false, reason: 'already in cache' };
     }
 
     if (element.hasAttribute('data-github-zh-translated')) {
       this.elementCache.set(element, true);
-      return false;
+      return { valid: false, reason: 'already translated' };
     }
 
     this.performanceData.elementsProcessed++;
 
     if (!this.shouldTranslateElement(element)) {
       element.setAttribute('data-github-zh-translated', 'checked');
+      return { valid: false, reason: 'should not translate' };
+    }
+
+    return { valid: true, fragment: document.createDocumentFragment() };
+  },
+
+  sanitizeControlCharacters(text) {
+    const controlChars = [
+      '\u0000', '\u0001', '\u0002', '\u0003', '\u0004', '\u0005', '\u0006', '\u0007', '\u0008',
+      '\u000B', '\u000C', '\u000E', '\u000F', '\u0010', '\u0011', '\u0012', '\u0013', '\u0014',
+      '\u0015', '\u0016', '\u0017', '\u0018', '\u0019', '\u001A', '\u001B', '\u001C', '\u001D',
+      '\u001E', '\u001F', '\u007F',
+    ];
+    let safeText = String(text);
+    controlChars.forEach((char) => {
+      safeText = safeText.split(char).join('');
+    });
+    return safeText;
+  },
+
+  processTextNode(node, fragment) {
+    const parentNode = node.parentNode;
+    parentNode.removeChild(node);
+
+    const originalText = node.nodeValue;
+    const translatedText = this.getTranslatedText(originalText);
+
+    if (translatedText && typeof translatedText === 'string' && translatedText !== originalText) {
+      try {
+        const safeTranslatedText = this.sanitizeControlCharacters(translatedText);
+        const translatedNode = document.createTextNode(safeTranslatedText);
+        fragment.appendChild(translatedNode);
+        this.performanceData.textsTranslated++;
+        return true;
+      } catch (e) {
+        if (CONFIG.debugMode) {
+          console.error('[GitHub 中文翻译] 创建翻译节点失败:', e, '翻译文本:', translatedText);
+        }
+        fragment.appendChild(node);
+        return false;
+      }
+    } else {
+      fragment.appendChild(node);
       return false;
     }
+  },
 
-    const fragment = document.createDocumentFragment();
-    let hasTranslation = false;
-
-    const childNodes = Array.from(element.childNodes);
-    const textNodesToProcess = [];
-
-    for (const node of childNodes) {
-      if (node.nodeType === Node.TEXT_NODE) {
-        const trimmedText = node.nodeValue.trim();
-        if (trimmedText && trimmedText.length >= CONFIG.performance.minTextLengthToTranslate) {
-          textNodesToProcess.push(node);
+  processChildElement(element, childElement, fragment) {
+    try {
+      element.removeChild(childElement);
+      fragment.appendChild(childElement);
+      return this.translateElement(childElement);
+    } catch (e) {
+      if (CONFIG.debugMode) {
+        console.error('[GitHub 中文翻译] 处理子元素失败:', e, '元素:', childElement);
+      }
+      try {
+        if (!childElement.parentNode) {
+          element.appendChild(childElement);
         }
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        try {
-          element.removeChild(node);
-          fragment.appendChild(node);
-          const childTranslated = this.translateElement(node);
-          hasTranslation = hasTranslation || childTranslated;
-        } catch (e) {
-          if (CONFIG.debugMode) {
-            console.error('[GitHub 中文翻译] 处理子元素失败:', e, '元素:', node);
-          }
-          try {
-            if (!node.parentNode) {
-              element.appendChild(node);
-            }
-          } catch (addBackError) {
-            if (CONFIG.debugMode) {
-              console.error('[GitHub 中文翻译] 将子元素添加回原始位置失败:', addBackError);
-            }
-          }
+      } catch (addBackError) {
+        if (CONFIG.debugMode) {
+          console.error('[GitHub 中文翻译] 将子元素添加回原始位置失败:', addBackError);
         }
       }
+      return false;
     }
+  },
 
-    textNodesToProcess.forEach((node) => {
-      const parentNode = node.parentNode;
-      parentNode.removeChild(node);
-
-      const originalText = node.nodeValue;
-      const translatedText = this.getTranslatedText(originalText);
-
-      if (translatedText && typeof translatedText === 'string' && translatedText !== originalText) {
-        try {
-          const controlChars = [
-            '\u0000',
-            '\u0001',
-            '\u0002',
-            '\u0003',
-            '\u0004',
-            '\u0005',
-            '\u0006',
-            '\u0007',
-            '\u0008',
-            '\u000B',
-            '\u000C',
-            '\u000E',
-            '\u000F',
-            '\u0010',
-            '\u0011',
-            '\u0012',
-            '\u0013',
-            '\u0014',
-            '\u0015',
-            '\u0016',
-            '\u0017',
-            '\u0018',
-            '\u0019',
-            '\u001A',
-            '\u001B',
-            '\u001C',
-            '\u001D',
-            '\u001E',
-            '\u001F',
-            '\u007F',
-          ];
-          let safeTranslatedText = String(translatedText);
-          controlChars.forEach((char) => {
-            safeTranslatedText = safeTranslatedText.split(char).join('');
-          });
-          const translatedNode = document.createTextNode(safeTranslatedText);
-          fragment.appendChild(translatedNode);
-
-          hasTranslation = true;
-          this.performanceData.textsTranslated++;
-        } catch (e) {
-          if (CONFIG.debugMode) {
-            console.error('[GitHub 中文翻译] 创建翻译节点失败:', e, '翻译文本:', translatedText);
-          }
-          fragment.appendChild(node);
-        }
-      } else {
-        fragment.appendChild(node);
-      }
-    });
-
+  mergeFragmentToElement(element, fragment) {
     try {
       if (fragment && fragment.hasChildNodes()) {
         if (element.firstChild) {
@@ -982,16 +923,49 @@ export const translationCore = {
         console.error('[GitHub 中文翻译] 添加文档片段失败:', appendError, '元素:', element);
       }
     }
+  },
 
+  finalizeTranslation(element, hasTranslation) {
     if (hasTranslation) {
       virtualDomManager.markElementAsTranslated(element);
     } else {
       element.setAttribute('data-github-zh-translated', 'checked');
     }
-
     this.elementCache.set(element, true);
-
     return hasTranslation;
+  },
+
+  translateElement(element) {
+    const prepResult = this.prepareElementForTranslation(element);
+    if (!prepResult.valid) {
+      return false;
+    }
+
+    const { fragment } = prepResult;
+    let hasTranslation = false;
+
+    const childNodes = Array.from(element.childNodes);
+    const textNodesToProcess = [];
+
+    for (const node of childNodes) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const trimmedText = node.nodeValue.trim();
+        if (trimmedText && trimmedText.length >= CONFIG.performance.minTextLengthToTranslate) {
+          textNodesToProcess.push(node);
+        }
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const childTranslated = this.processChildElement(element, node, fragment);
+        hasTranslation = hasTranslation || childTranslated;
+      }
+    }
+
+    textNodesToProcess.forEach((node) => {
+      const translated = this.processTextNode(node, fragment);
+      hasTranslation = hasTranslation || translated;
+    });
+
+    this.mergeFragmentToElement(element, fragment);
+    return this.finalizeTranslation(element, hasTranslation);
   },
 
   sanitizeText(text) {

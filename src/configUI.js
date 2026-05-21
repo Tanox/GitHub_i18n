@@ -391,10 +391,9 @@ class ConfigUI {
   }
 
   /**
-   * 获取配置界面样式文本
-   * @returns {string} 样式文本
+   * 获取容器样式
    */
-  getConfigStyles() {
+  getContainerStyles() {
     return `
       .github-i18n-config-container {
         position: fixed;
@@ -418,7 +417,14 @@ class ConfigUI {
         overflow: hidden;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
       }
-      
+    `;
+  }
+
+  /**
+   * 获取头部样式
+   */
+  getHeaderStyles() {
+    return `
       .github-i18n-config-header {
         display: flex;
         justify-content: space-between;
@@ -453,7 +459,14 @@ class ConfigUI {
       .github-i18n-config-close:hover {
         background-color: #e1e4e8;
       }
-      
+    `;
+  }
+
+  /**
+   * 获取内容区域样式
+   */
+  getContentStyles() {
+    return `
       .github-i18n-config-content {
         padding: 20px;
         max-height: calc(80vh - 120px);
@@ -486,7 +499,14 @@ class ConfigUI {
       .github-i18n-config-label input[type="checkbox"] {
         margin-right: 8px;
       }
-      
+    `;
+  }
+
+  /**
+   * 获取底部样式
+   */
+  getFooterStyles() {
+    return `
       .github-i18n-config-footer {
         display: flex;
         justify-content: flex-end;
@@ -525,8 +545,14 @@ class ConfigUI {
       .github-i18n-config-save:hover {
         background-color: #2c974b;
       }
-      
-      /* GitHub 风格按钮 */
+    `;
+  }
+
+  /**
+   * 获取切换按钮样式
+   */
+  getToggleButtonStyles() {
+    return `
       .github-i18n-toggle-btn {
         position: fixed;
         bottom: 20px;
@@ -550,6 +576,20 @@ class ConfigUI {
         background-color: #30363d;
       }
     `;
+  }
+
+  /**
+   * 获取配置界面样式文本
+   * @returns {string} 样式文本
+   */
+  getConfigStyles() {
+    return (
+      this.getContainerStyles() +
+      this.getHeaderStyles() +
+      this.getContentStyles() +
+      this.getFooterStyles() +
+      this.getToggleButtonStyles()
+    );
   }
 
   /**

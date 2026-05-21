@@ -56,293 +56,100 @@ export const elementSelector = {
     return Array.from(uniqueElements).filter((element) => element instanceof HTMLElement);
   },
 
-  shouldTranslateElement(element) {
-    if (!element || !(element instanceof HTMLElement)) {
-      return false;
-    }
+  getSkipTags() {
+    return ['script', 'style', 'code', 'pre', 'textarea', 'input', 'select', 'img', 'svg', 'canvas', 'video', 'audio'];
+  },
 
-    if (element.hasAttribute('data-github-zh-translated')) {
-      return false;
-    }
-
-    if (!element.textContent.trim()) {
-      return false;
-    }
-
-    const skipTags = [
-      'script',
-      'style',
-      'code',
-      'pre',
-      'textarea',
-      'input',
-      'select',
-      'img',
-      'svg',
-      'canvas',
-      'video',
-      'audio',
+  getSkipClassPatterns() {
+    return [
+      /language-\w+/, /highlight/, /token/, /no-translate/, /octicon/, /emoji/, /avatar/, /timestamp/,
+      /numeral/, /filename/, /hash/, /sha/, /shortsha/, /hex-color/, /code/, /gist/, /language-/,
+      /markdown-/, /monaco-editor/, /syntax-/, /highlight-/, /clipboard/, /progress-/, /count/,
+      /size/, /time/, /date/, /sortable/, /label/, /badge/, /url/, /email/, /key/, /user-name/, /repo-name/,
     ];
-    const tagName = element.tagName.toLowerCase();
-    if (skipTags.includes(tagName)) {
-      return false;
-    }
+  },
 
-    if (
+  getSkipIdPatterns() {
+    return [
+      /\d+/, /-\d+/, /_\d+/, /sha-/, /hash-/, /commit-/, /issue-/, /pull-/, /pr-/, /repo-/, /user-/,
+      /file-/, /blob-/, /tree-/, /branch-/, /tag-/, /release-/, /gist-/, /discussion-/, /comment-/,
+      /review-/, /workflow-/, /action-/, /job-/, /step-/, /runner-/, /package-/, /registry-/,
+      /marketplace-/, /organization-/, /team-/, /project-/, /milestone-/, /assignee-/, /reporter-/,
+      /reviewer-/, /author-/, /committer-/, /contributor-/, /sponsor-/, /funding-/, /donation-/,
+      /payment-/, /billing-/, /plan-/, /subscription-/, /license-/, /secret-/, /key-/, /token-/,
+      /password-/, /credential-/, /certificate-/, /ssh-/, /git-/, /clone-/, /push-/, /fetch-/,
+      /merge-/, /rebase-/, /cherry-pick-/, /reset-/, /revert-/, /diff-/, /patch-/, /stash-/,
+      /ref-/, /head-/, /remote-/, /upstream-/, /origin-/, /local-/, /tracking-/, /merge-base-/,
+      /conflict-/, /resolve-/, /status-/, /log-/, /blame-/, /bisect-/, /grep-/, /find-/, /filter-/,
+      /archive-/, /submodule-/, /worktree-/, /lfs-/, /graphql-/, /rest-/, /api-/, /webhook-/,
+      /event-/, /payload-/, /callback-/, /redirect-/, /oauth-/, /sso-/, /ldap-/, /saml-/, /2fa-/,
+      /mfa-/, /security-/, /vulnerability-/, /cve-/, /dependency-/, /alert-/, /secret-scanning-/,
+      /code-scanning-/, /codeql-/, /actions-/, /runner-/, /artifact-/, /cache-/, /environment-/,
+      /deployment-/, /app-/, /oauth-app-/, /github-app-/, /integration-/, /listing-/, /usage-/,
+      /limits-/, /quota-/, /traffic-/, /analytics-/, /insights-/, /search-/, /explore-/, /trending-/,
+      /stars-/, /forks-/, /watchers-/, /contributors-/, /activity-/, /events-/, /notifications-/,
+      /feeds-/, /dashboard-/, /profile-/, /settings-/, /preferences-/, /\b\w+[0-9]\w*\b/,
+    ];
+  },
+
+  checkBasicConditions(element) {
+    if (!element || !(element instanceof HTMLElement)) return false;
+    if (element.hasAttribute('data-github-zh-translated')) return false;
+    if (!element.textContent.trim()) return false;
+    return true;
+  },
+
+  checkTagRestrictions(element) {
+    return !this.getSkipTags().includes(element.tagName.toLowerCase());
+  },
+
+  checkAttributeRestrictions(element) {
+    return !(
       element.hasAttribute('data-no-translate') ||
       (element.hasAttribute('translate') && element.getAttribute('translate') === 'no') ||
       element.hasAttribute('aria-hidden') ||
       element.hasAttribute('hidden')
-    ) {
-      return false;
-    }
+    );
+  },
 
+  checkClassRestrictions(element) {
     const className = element.className;
-    if (className) {
-      const skipClassPatterns = [
-        /language-\w+/,
-        /highlight/,
-        /token/,
-        /no-translate/,
-        /octicon/,
-        /emoji/,
-        /avatar/,
-        /timestamp/,
-        /numeral/,
-        /filename/,
-        /hash/,
-        /sha/,
-        /shortsha/,
-        /hex-color/,
-        /code/,
-        /gist/,
-        /language-/,
-        /markdown-/,
-        /monaco-editor/,
-        /syntax-/,
-        /highlight-/,
-        /clipboard/,
-        /progress-/,
-        /count/,
-        /size/,
-        /time/,
-        /date/,
-        /sortable/,
-        /label/,
-        /badge/,
-        /url/,
-        /email/,
-        /key/,
-        /token/,
-        /user-name/,
-        /repo-name/,
-      ];
+    if (!className) return true;
+    return !this.getSkipClassPatterns().some((pattern) => pattern.test(className));
+  },
 
-      if (skipClassPatterns.some((pattern) => pattern.test(className))) {
-        return false;
-      }
-    }
-
+  checkIdRestrictions(element) {
     const id = element.id;
-    if (id) {
-      const skipIdPatterns = [
-        /\d+/,
-        /-\d+/,
-        /_\d+/,
-        /sha-/,
-        /hash-/,
-        /commit-/,
-        /issue-/,
-        /pull-/,
-        /pr-/,
-        /repo-/,
-        /user-/,
-        /file-/,
-        /blob-/,
-        /tree-/,
-        /branch-/,
-        /tag-/,
-        /release-/,
-        /gist-/,
-        /discussion-/,
-        /comment-/,
-        /review-/,
-        /workflow-/,
-        /action-/,
-        /job-/,
-        /step-/,
-        /runner-/,
-        /package-/,
-        /registry-/,
-        /marketplace-/,
-        /organization-/,
-        /team-/,
-        /project-/,
-        /milestone-/,
-        /assignee-/,
-        /reporter-/,
-        /reviewer-/,
-        /author-/,
-        /committer-/,
-        /contributor-/,
-        /sponsor-/,
-        /funding-/,
-        /donation-/,
-        /payment-/,
-        /billing-/,
-        /plan-/,
-        /subscription-/,
-        /license-/,
-        /secret-/,
-        /key-/,
-        /token-/,
-        /password-/,
-        /credential-/,
-        /certificate-/,
-        /ssh-/,
-        /git-/,
-        /clone-/,
-        /push-/,
-        /pull-/,
-        /fetch-/,
-        /merge-/,
-        /rebase-/,
-        /cherry-pick-/,
-        /reset-/,
-        /revert-/,
-        /tag-/,
-        /branch-/,
-        /commit-/,
-        /diff-/,
-        /patch-/,
-        /stash-/,
-        /ref-/,
-        /head-/,
-        /remote-/,
-        /upstream-/,
-        /origin-/,
-        /local-/,
-        /tracking-/,
-        /merge-base-/,
-        /conflict-/,
-        /resolve-/,
-        /status-/,
-        /log-/,
-        /blame-/,
-        /bisect-/,
-        /grep-/,
-        /find-/,
-        /filter-/,
-        /archive-/,
-        /submodule-/,
-        /worktree-/,
-        /lfs-/,
-        /graphql-/,
-        /rest-/,
-        /api-/,
-        /webhook-/,
-        /event-/,
-        /payload-/,
-        /callback-/,
-        /redirect-/,
-        /oauth-/,
-        /sso-/,
-        /ldap-/,
-        /saml-/,
-        /2fa-/,
-        /mfa-/,
-        /security-/,
-        /vulnerability-/,
-        /cve-/,
-        /dependency-/,
-        /alert-/,
-        /secret-scanning-/,
-        /code-scanning-/,
-        /codeql-/,
-        /actions-/,
-        /workflow-/,
-        /job-/,
-        /step-/,
-        /runner-/,
-        /artifact-/,
-        /cache-/,
-        /environment-/,
-        /deployment-/,
-        /app-/,
-        /oauth-app-/,
-        /github-app-/,
-        /integration-/,
-        /webhook-/,
-        /marketplace-/,
-        /listing-/,
-        /subscription-/,
-        /billing-/,
-        /plan-/,
-        /usage-/,
-        /limits-/,
-        /quota-/,
-        /traffic-/,
-        /analytics-/,
-        /insights-/,
-        /search-/,
-        /explore-/,
-        /trending-/,
-        /stars-/,
-        /forks-/,
-        /watchers-/,
-        /contributors-/,
-        /activity-/,
-        /events-/,
-        /notifications-/,
-        /feeds-/,
-        /dashboard-/,
-        /profile-/,
-        /settings-/,
-        /preferences-/,
-        /billing-/,
-        /organization-/,
-        /team-/,
-        /project-/,
-        /milestone-/,
-        /label-/,
-        /assignee-/,
-        /reporter-/,
-        /reviewer-/,
-        /author-/,
-        /committer-/,
-        /contributor-/,
-        /sponsor-/,
-        /funding-/,
-        /donation-/,
-        /payment-/,
-        /\b\w+[0-9]\w*\b/,
-      ];
+    if (!id) return true;
+    return !this.getSkipIdPatterns().some((pattern) => pattern.test(id));
+  },
 
-      if (skipIdPatterns.some((pattern) => pattern.test(id))) {
-        return false;
-      }
-    }
-
+  checkVisibility(element) {
     const computedStyle = window.getComputedStyle(element);
-    if (
+    return !(
       computedStyle.display === 'none' ||
       computedStyle.visibility === 'hidden' ||
       computedStyle.opacity === '0' ||
       (computedStyle.position === 'absolute' && computedStyle.left === '-9999px')
-    ) {
-      return false;
-    }
+    );
+  },
 
+  checkTextContent(element) {
     const textContent = element.textContent.trim();
-    if (textContent.length === 0) {
-      return false;
-    }
+    if (textContent.length === 0) return false;
+    return !/^[0-9.,\s()[\]{}/*^$#@!~`|:;"'?>+-]+$/i.test(textContent);
+  },
 
-    if (/^[0-9.,\s()[\]{}/*^$#@!~`|:;"'?>+-]+$/i.test(textContent)) {
-      return false;
-    }
-
-    return true;
+  shouldTranslateElement(element) {
+    return (
+      this.checkBasicConditions(element) &&
+      this.checkTagRestrictions(element) &&
+      this.checkAttributeRestrictions(element) &&
+      this.checkClassRestrictions(element) &&
+      this.checkIdRestrictions(element) &&
+      this.checkVisibility(element) &&
+      this.checkTextContent(element)
+    );
   },
 
   shouldTranslate(element) {

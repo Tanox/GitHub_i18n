@@ -67,126 +67,191 @@ async function ensureDirectoryExists(dirPath) {
 }
 
 /**
+ * 验证并标准化URL
+ * @param {string} url - 原始URL
+ * @returns {string} 标准化后的URL
+ */
+function validateAndNormalizeUrl(url) {
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(url);
+  } catch (_e) {
+    throw new Error(`URL格式无效: ${url}`);
+  }
+
+  if (parsedUrl.protocol !== 'https:') {
+    parsedUrl.protocol = 'https:';
+    url = parsedUrl.href;
+  }
+
+  return url;
+}
+
+/**
+ * 创建HTTP请求选项
+ * @param {URL} parsedUrl - 解析后的URL对象
+ * @returns {Object} 请求选项
+ */
+function createRequestOptions(parsedUrl) {
+  return {
+    hostname: parsedUrl.hostname,
+    port: parsedUrl.port || 443,
+    path: parsedUrl.pathname + parsedUrl.search,
+    headers: {
+      'User-Agent': CONFIG.userAgent,
+      Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+    },
+    timeout: CONFIG.httpTimeout,
+  };
+}
+
+/**
+ * 处理HTTP响应
+ * @param {https.IncomingMessage} res - 响应对象
+ * @param {string} url - 请求的URL
+ * @param {number} retryCount - 当前重试次数
+ * @param {Function} resolve - Promise resolve函数
+ * @param {Function} reject - Promise reject函数
+ */
+function handleResponse(res, url, retryCount, resolve, reject) {
+  if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+    const redirectUrl = new URL(res.headers.location, url).href;
+    log('info', `重定向: ${url} -> ${redirectUrl}`);
+    downloadPage(redirectUrl, retryCount).then(resolve).catch(reject);
+    return;
+  }
+
+  if (res.statusCode !== 200) {
+    handleNon200Status(res.statusCode, url, retryCount, resolve, reject);
+    return;
+  }
+
+  handleSuccessfulResponse(res, url, resolve, reject);
+}
+
+/**
+ * 处理非200状态码
+ * @param {number} statusCode - 状态码
+ * @param {string} url - 请求的URL
+ * @param {number} retryCount - 当前重试次数
+ * @param {Function} resolve - Promise resolve函数
+ * @param {Function} reject - Promise reject函数
+ */
+function handleNon200Status(statusCode, url, retryCount, resolve, reject) {
+  const error = new Error(`请求失败: ${url}, 状态码: ${statusCode}`);
+  if (retryCount < CONFIG.maxRetries) {
+    log('info', `请求失败，${CONFIG.retryDelay}ms后重试 (${retryCount + 1}/${CONFIG.maxRetries})`);
+    setTimeout(() => {
+      downloadPage(url, retryCount + 1).then(resolve).catch(reject);
+    }, CONFIG.retryDelay);
+  } else {
+    reject(error);
+  }
+}
+
+/**
+ * 处理成功的响应
+ * @param {https.IncomingMessage} res - 响应对象
+ * @param {string} url - 请求的URL
+ * @param {Function} resolve - Promise resolve函数
+ * @param {Function} reject - Promise reject函数
+ */
+function handleSuccessfulResponse(res, url, resolve, reject) {
+  const contentType = res.headers['content-type'] || '';
+  if (!contentType.includes('text/html') && !contentType.includes('application/xhtml+xml')) {
+    log('warn', `警告: ${url} 返回的 Content-Type 不是 HTML: ${contentType}`);
+  }
+
+  const chunks = [];
+  res.on('data', (chunk) => chunks.push(chunk));
+  res.on('end', () => {
+    try {
+      const data = Buffer.concat(chunks).toString('utf8');
+      if (!data.toLowerCase().includes('<html')) {
+        log('warn', `警告: ${url} 返回的内容可能不是有效的 HTML`);
+      }
+      log('info', `成功下载 ${url} (${data.length} 字节)`);
+      resolve(data);
+    } catch (encodingError) {
+      reject(new Error(`解析响应内容失败: ${encodingError.message}`));
+    }
+  });
+}
+
+/**
+ * 设置请求错误处理
+ * @param {https.ClientRequest} req - 请求对象
+ * @param {string} url - 请求的URL
+ * @param {number} retryCount - 当前重试次数
+ * @param {Function} resolve - Promise resolve函数
+ * @param {Function} reject - Promise reject函数
+ */
+function setupRequestErrorHandlers(req, url, retryCount, resolve, reject) {
+  req.on('error', (e) => {
+    handleRequestError(e, url, retryCount, resolve, reject);
+  });
+
+  req.on('timeout', () => {
+    req.destroy();
+    handleTimeoutError(url, retryCount, resolve, reject);
+  });
+}
+
+/**
+ * 处理请求错误
+ * @param {Error} e - 错误对象
+ * @param {string} url - 请求的URL
+ * @param {number} retryCount - 当前重试次数
+ * @param {Function} resolve - Promise resolve函数
+ * @param {Function} reject - Promise reject函数
+ */
+function handleRequestError(e, url, retryCount, resolve, reject) {
+  const error = new Error(`请求错误: ${url}, 错误: ${e.message}`);
+  if (retryCount < CONFIG.maxRetries) {
+    log('info', `请求错误，${CONFIG.retryDelay}ms后重试 (${retryCount + 1}/${CONFIG.maxRetries})`);
+    setTimeout(() => {
+      downloadPage(url, retryCount + 1).then(resolve).catch(reject);
+    }, CONFIG.retryDelay);
+  } else {
+    reject(error);
+  }
+}
+
+/**
+ * 处理超时错误
+ * @param {string} url - 请求的URL
+ * @param {number} retryCount - 当前重试次数
+ * @param {Function} resolve - Promise resolve函数
+ * @param {Function} reject - Promise reject函数
+ */
+function handleTimeoutError(url, retryCount, resolve, reject) {
+  const error = new Error(`请求超时: ${url} (${CONFIG.httpTimeout}ms)`);
+  if (retryCount < CONFIG.maxRetries) {
+    log('info', `请求超时，${CONFIG.retryDelay}ms后重试 (${retryCount + 1}/${CONFIG.maxRetries})`);
+    setTimeout(() => {
+      downloadPage(url, retryCount + 1).then(resolve).catch(reject);
+    }, CONFIG.retryDelay);
+  } else {
+    reject(error);
+  }
+}
+
+/**
  * 下载网页内容
  */
 function downloadPage(url, retryCount = 0) {
   try {
-    // 验证URL格式
-    let parsedUrl;
-    try {
-      parsedUrl = new URL(url);
-    } catch (_e) {
-      throw new Error(`URL格式无效: ${url}`);
-    }
-
-    // 确保使用 https 协议
-    if (parsedUrl.protocol !== 'https:') {
-      parsedUrl.protocol = 'https:';
-      url = parsedUrl.href;
-    }
+    url = validateAndNormalizeUrl(url);
+    const parsedUrl = new URL(url);
+    const options = createRequestOptions(parsedUrl);
 
     return new Promise((resolve, reject) => {
-      const options = {
-        hostname: parsedUrl.hostname,
-        port: parsedUrl.port || 443,
-        path: parsedUrl.pathname + parsedUrl.search,
-        headers: {
-          'User-Agent': CONFIG.userAgent,
-          Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-        },
-        timeout: CONFIG.httpTimeout,
-      };
-
       const req = https.request(options, (res) => {
-        // 处理重定向
-        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-          const redirectUrl = new URL(res.headers.location, url).href;
-          log('info', `重定向: ${url} -> ${redirectUrl}`);
-          req.destroy();
-          downloadPage(redirectUrl, retryCount).then(resolve).catch(reject);
-          return;
-        }
-
-        if (res.statusCode !== 200) {
-          const error = new Error(`请求失败: ${url}, 状态码: ${res.statusCode}`);
-          if (retryCount < CONFIG.maxRetries) {
-            log(
-              'info',
-              `请求失败，${CONFIG.retryDelay}ms后重试 (${retryCount + 1}/${CONFIG.maxRetries})`,
-            );
-            req.destroy();
-            setTimeout(() => {
-              downloadPage(url, retryCount + 1)
-                .then(resolve)
-                .catch(reject);
-            }, CONFIG.retryDelay);
-          } else {
-            reject(error);
-          }
-          return;
-        }
-
-        // 检查 Content-Type 是否为 HTML
-        const contentType = res.headers['content-type'] || '';
-        if (!contentType.includes('text/html') && !contentType.includes('application/xhtml+xml')) {
-          log('warn', `警告: ${url} 返回的 Content-Type 不是 HTML: ${contentType}`);
-        }
-
-        const chunks = [];
-        res.on('data', (chunk) => chunks.push(chunk));
-        res.on('end', () => {
-          try {
-            const data = Buffer.concat(chunks).toString('utf8');
-
-            // 验证内容是否为 HTML (至少包含 <html 标签)
-            if (!data.toLowerCase().includes('<html')) {
-              log('warn', `警告: ${url} 返回的内容可能不是有效的 HTML`);
-            }
-
-            log('info', `成功下载 ${url} (${data.length} 字节)`);
-            resolve(data);
-          } catch (encodingError) {
-            reject(new Error(`解析响应内容失败: ${encodingError.message}`));
-          }
-        });
+        handleResponse(res, url, retryCount, resolve, reject);
       });
 
-      req.on('error', (e) => {
-        const error = new Error(`请求错误: ${url}, 错误: ${e.message}`);
-        if (retryCount < CONFIG.maxRetries) {
-          log(
-            'info',
-            `请求错误，${CONFIG.retryDelay}ms后重试 (${retryCount + 1}/${CONFIG.maxRetries})`,
-          );
-          setTimeout(() => {
-            downloadPage(url, retryCount + 1)
-              .then(resolve)
-              .catch(reject);
-          }, CONFIG.retryDelay);
-        } else {
-          reject(error);
-        }
-      });
-
-      req.on('timeout', () => {
-        req.destroy();
-        const error = new Error(`请求超时: ${url} (${CONFIG.httpTimeout}ms)`);
-        if (retryCount < CONFIG.maxRetries) {
-          log(
-            'info',
-            `请求超时，${CONFIG.retryDelay}ms后重试 (${retryCount + 1}/${CONFIG.maxRetries})`,
-          );
-          setTimeout(() => {
-            downloadPage(url, retryCount + 1)
-              .then(resolve)
-              .catch(reject);
-          }, CONFIG.retryDelay);
-        } else {
-          reject(error);
-        }
-      });
-
+      setupRequestErrorHandlers(req, url, retryCount, resolve, reject);
       req.end();
     });
   } catch (error) {

@@ -33,97 +33,87 @@ export const elementTranslator = {
     totalMemory: 0,
   },
 
-  translateElement(element) {
+  prepareElementForTranslation(element) {
     if (!element || !(element instanceof HTMLElement)) {
-      return false;
+      return { valid: false, reason: 'invalid element' };
     }
-
     if (!elementSelector.shouldTranslate(element)) {
-      return false;
+      return { valid: false, reason: 'selector rejected' };
     }
-
     if (elementSelector.elementCache.has(element)) {
-      return false;
+      return { valid: false, reason: 'already in cache' };
     }
-
     if (element.hasAttribute('data-github-zh-translated')) {
       elementSelector.elementCache.set(element, true);
-      return false;
+      return { valid: false, reason: 'already translated' };
     }
 
     this.performanceData.elementsProcessed++;
 
     if (!elementSelector.shouldTranslateElement(element)) {
       element.setAttribute('data-github-zh-translated', 'checked');
+      return { valid: false, reason: 'should not translate' };
+    }
+
+    return { valid: true, fragment: document.createDocumentFragment() };
+  },
+
+  sanitizeControlCharacters(text) {
+    if (typeof text !== 'string') {
+      return String(text || '');
+    }
+    return [...text].filter((c) => c.charCodeAt(0) > 31 && c.charCodeAt(0) !== 127).join('');
+  },
+
+  processTextNode(node, fragment) {
+    const parentNode = node.parentNode;
+    parentNode.removeChild(node);
+
+    const originalText = node.nodeValue;
+    const translatedText = dictionaryManager.getTranslatedText(originalText);
+
+    if (translatedText && typeof translatedText === 'string' && translatedText !== originalText) {
+      try {
+        const safeTranslatedText = this.sanitizeControlCharacters(translatedText);
+        const translatedNode = document.createTextNode(safeTranslatedText);
+        fragment.appendChild(translatedNode);
+        this.performanceData.textsTranslated++;
+        return true;
+      } catch (e) {
+        if (CONFIG.debugMode) {
+          console.error('[GitHub 中文翻译] 创建翻译节点失败:', e, '翻译文本:', translatedText);
+        }
+        fragment.appendChild(node);
+        return false;
+      }
+    }
+    fragment.appendChild(node);
+    return false;
+  },
+
+  processChildElement(element, childElement, fragment) {
+    try {
+      element.removeChild(childElement);
+      fragment.appendChild(childElement);
+      return this.translateElement(childElement);
+    } catch (e) {
+      if (CONFIG.debugMode) {
+        console.error('[GitHub 中文翻译] 处理子元素失败:', e, '元素:', childElement);
+      }
+      try {
+        if (!childElement.parentNode) {
+          element.appendChild(childElement);
+        }
+      } catch (addBackError) {
+        if (CONFIG.debugMode) {
+          console.error('[GitHub 中文翻译] 将子元素添加回原始位置失败:', addBackError);
+        }
+      }
       return false;
     }
+  },
 
-    const fragment = document.createDocumentFragment();
-    let hasTranslation = false;
-
-    const childNodes = Array.from(element.childNodes);
-    const textNodesToProcess = [];
-
-    for (const node of childNodes) {
-      if (node.nodeType === Node.TEXT_NODE) {
-        const trimmedText = node.nodeValue.trim();
-        if (trimmedText && trimmedText.length >= CONFIG.performance?.minTextLengthToTranslate) {
-          textNodesToProcess.push(node);
-        }
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        try {
-          element.removeChild(node);
-          fragment.appendChild(node);
-          const childTranslated = this.translateElement(node);
-          hasTranslation = hasTranslation || childTranslated;
-        } catch (e) {
-          if (CONFIG.debugMode) {
-            console.error('[GitHub 中文翻译] 处理子元素失败:', e, '元素:', node);
-          }
-          try {
-            if (!node.parentNode) {
-              element.appendChild(node);
-            }
-          } catch (addBackError) {
-            if (CONFIG.debugMode) {
-              console.error('[GitHub 中文翻译] 将子元素添加回原始位置失败:', addBackError);
-            }
-          }
-        }
-      }
-    }
-
-    textNodesToProcess.forEach((node) => {
-      const parentNode = node.parentNode;
-      parentNode.removeChild(node);
-
-      const originalText = node.nodeValue;
-      const translatedText = dictionaryManager.getTranslatedText(originalText);
-
-      if (translatedText && typeof translatedText === 'string' && translatedText !== originalText) {
-        try {
-          const safeTranslatedText =
-            typeof translatedText === 'string'
-              ? [...translatedText]
-                .filter((c) => c.charCodeAt(0) > 31 && c.charCodeAt(0) !== 127)
-                .join('')
-              : String(translatedText || '');
-          const translatedNode = document.createTextNode(safeTranslatedText);
-          fragment.appendChild(translatedNode);
-
-          hasTranslation = true;
-          this.performanceData.textsTranslated++;
-        } catch (e) {
-          if (CONFIG.debugMode) {
-            console.error('[GitHub 中文翻译] 创建翻译节点失败:', e, '翻译文本:', translatedText);
-          }
-          fragment.appendChild(node);
-        }
-      } else {
-        fragment.appendChild(node);
-      }
-    });
-
+  mergeFragmentToElement(element, fragment) {
     try {
       if (fragment && fragment.hasChildNodes()) {
         if (element.firstChild) {
@@ -137,16 +127,49 @@ export const elementTranslator = {
         console.error('[GitHub 中文翻译] 添加文档片段失败:', appendError, '元素:', element);
       }
     }
+  },
 
+  finalizeTranslation(element, hasTranslation) {
     if (hasTranslation) {
       virtualDomManager.markElementAsTranslated(element);
     } else {
       element.setAttribute('data-github-zh-translated', 'checked');
     }
-
     elementSelector.elementCache.set(element, true);
-
     return hasTranslation;
+  },
+
+  translateElement(element) {
+    const prepResult = this.prepareElementForTranslation(element);
+    if (!prepResult.valid) {
+      return false;
+    }
+
+    const { fragment } = prepResult;
+    let hasTranslation = false;
+
+    const childNodes = Array.from(element.childNodes);
+    const textNodesToProcess = [];
+
+    for (const node of childNodes) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const trimmedText = node.nodeValue.trim();
+        if (trimmedText && trimmedText.length >= CONFIG.performance?.minTextLengthToTranslate) {
+          textNodesToProcess.push(node);
+        }
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const childTranslated = this.processChildElement(element, node, fragment);
+        hasTranslation = hasTranslation || childTranslated;
+      }
+    }
+
+    textNodesToProcess.forEach((node) => {
+      const translated = this.processTextNode(node, fragment);
+      hasTranslation = hasTranslation || translated;
+    });
+
+    this.mergeFragmentToElement(element, fragment);
+    return this.finalizeTranslation(element, hasTranslation);
   },
 
   async translateCriticalElementsOnly() {

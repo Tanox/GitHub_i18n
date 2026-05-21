@@ -249,6 +249,49 @@ export const utils = {
   },
 
   /**
+   * 获取默认跳过的标签列表
+   * @returns {string[]} 跳过的标签名数组
+   */
+  getDefaultSkipTags() {
+    return ['script', 'style', 'code', 'pre', 'textarea', 'input', 'select', 'noscript', 'template'];
+  },
+
+  /**
+   * 检查文本是否符合收集条件
+   * @param {string} text - 要检查的文本
+   * @param {number} maxLength - 最大文本长度
+   * @returns {boolean} 是否符合条件
+   */
+  isValidTextForCollection(text, maxLength) {
+    if (!text || text.length === 0 || text.length >= maxLength) {
+      return false;
+    }
+    if (/^\d+$/.test(text)) {
+      return false;
+    }
+    if (/^[\s\u0021-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E\u00A1-\u00BF\u2000-\u206F\u3000-\u303F]+$/.test(text)) {
+      return false;
+    }
+    return true;
+  },
+
+  /**
+   * 检查元素是否应该被跳过
+   * @param {HTMLElement} element - 要检查的元素
+   * @param {string[]} skipTags - 跳过的标签名数组
+   * @returns {boolean} 是否应该跳过
+   */
+  shouldSkipElement(element, skipTags) {
+    if (element.tagName && skipTags.includes(element.tagName.toLowerCase())) {
+      return true;
+    }
+    if (element.classList && element.classList.contains('sr-only')) {
+      return true;
+    }
+    return false;
+  },
+
+  /**
    * 收集DOM树中的所有文本节点内容
    * @param {HTMLElement} element - 要收集文本的起始元素
    * @param {Set<string>} resultSet - 用于存储结果的Set集合
@@ -257,54 +300,28 @@ export const utils = {
    * @param {string[]} options.skipTags - 跳过的标签名数组
    */
   collectTextNodes(element, resultSet, options = {}) {
-    if (!element || !resultSet || typeof resultSet.add !== 'function') return;
+    if (!element || !resultSet || typeof resultSet.add !== 'function') {
+      return;
+    }
 
     const {
       maxLength = 200,
-      skipTags = [
-        'script',
-        'style',
-        'code',
-        'pre',
-        'textarea',
-        'input',
-        'select',
-        'noscript',
-        'template',
-      ],
+      skipTags = this.getDefaultSkipTags(),
     } = options;
 
     try {
-      // 检查是否需要跳过此元素
-      if (element.tagName && skipTags.includes(element.tagName.toLowerCase())) {
+      if (this.shouldSkipElement(element, skipTags)) {
         return;
       }
 
-      // 检查元素是否有隐藏类或样式
-      if (element.classList && element.classList.contains('sr-only')) {
-        return;
-      }
-
-      // 遍历所有子节点
       const childNodes = Array.from(element.childNodes || []);
       for (const node of childNodes) {
         if (node.nodeType === Node.TEXT_NODE) {
           const text = node.nodeValue ? node.nodeValue.trim() : '';
-          // 只收集符合条件的文本
-          if (
-            text &&
-            text.length > 0 &&
-            text.length < maxLength &&
-            !/^\d+$/.test(text) &&
-            // 使用基础字符类替代Unicode属性转义，避免构建过程中的解析问题
-            !/^[\s\u0021-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E\u00A1-\u00BF\u2000-\u206F\u3000-\u303F]+$/.test(
-              text,
-            )
-          ) {
+          if (this.isValidTextForCollection(text, maxLength)) {
             resultSet.add(text);
           }
         } else if (node.nodeType === Node.ELEMENT_NODE) {
-          // 递归收集子元素的文本
           this.collectTextNodes(node, resultSet, options);
         }
       }

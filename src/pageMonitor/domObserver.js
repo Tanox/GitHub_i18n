@@ -216,6 +216,77 @@ export const domObserver = {
     }
   },
 
+  getPerformanceConfig() {
+    const perf = CONFIG.performance || {};
+    return {
+      importantElements: perf.importantElements || [],
+      ignoreElements: perf.ignoreElements || [],
+      importantAttributes: perf.importantAttributes || ['id', 'class', 'href', 'title'],
+      mutationThreshold: perf.mutationThreshold || 30,
+      contentChangeWeight: perf.contentChangeWeight || 1,
+      importantChangeWeight: perf.importantChangeWeight || 2,
+      translationTriggerRatio: perf.translationTriggerRatio || 0.3,
+      maxMutationProcessing: perf.maxMutationProcessing || 50,
+      minContentChangesToTrigger: perf.minContentChangesToTrigger || 3,
+      ignoreCharacterDataMutations: perf.ignoreCharacterDataMutations || false,
+      ignoreAttributeMutations: perf.ignoreAttributeMutations || false,
+      observeAttributes: perf.observeAttributes,
+    };
+  },
+
+  processSingleMutation(mutation, config, elementCheckCache, pageMode) {
+    if (config.ignoreCharacterDataMutations && mutation.type === 'characterData') {
+      return { contentChanges: 0, importantChanges: 0, shouldTrigger: false };
+    }
+    if (config.ignoreAttributeMutations && mutation.type === 'attributes') {
+      return { contentChanges: 0, importantChanges: 0, shouldTrigger: false };
+    }
+
+    if (mutation.target) {
+      let isIgnored = elementCheckCache.get(mutation.target);
+      if (isIgnored === undefined) {
+        isIgnored = this.shouldIgnoreElement(mutation.target, config.ignoreElements, elementCheckCache, pageMode);
+        elementCheckCache.set(mutation.target, isIgnored);
+      }
+      if (isIgnored) {
+        return { contentChanges: 0, importantChanges: 0, shouldTrigger: false };
+      }
+
+      let isImportant = elementCheckCache.get(`important-${mutation.target}`);
+      if (isImportant === undefined && mutation.target.nodeType === Node.ELEMENT_NODE) {
+        isImportant = this.isImportantElement(mutation.target, config.importantElements, elementCheckCache, pageMode);
+        elementCheckCache.set(`important-${mutation.target}`, isImportant);
+      }
+      if (isImportant) {
+        return { contentChanges: 0, importantChanges: 0, shouldTrigger: true };
+      }
+    }
+
+    if (mutation.type === 'attributes') {
+      if (config.observeAttributes && config.importantAttributes.includes(mutation.attributeName)) {
+        return { contentChanges: 0, importantChanges: 1, shouldTrigger: false };
+      }
+      return { contentChanges: 0, importantChanges: 0, shouldTrigger: false };
+    }
+
+    if (this.isContentRelatedMutation(mutation, pageMode)) {
+      return { contentChanges: 1, importantChanges: 0, shouldTrigger: false };
+    }
+
+    return { contentChanges: 0, importantChanges: 0, shouldTrigger: false };
+  },
+
+  shouldTriggerByRatio(contentChanges, importantChanges, maxCheckCount, config, pageMode) {
+    if (contentChanges < config.minContentChangesToTrigger) {
+      return false;
+    }
+
+    const weightedChanges = contentChanges * config.contentChangeWeight + importantChanges * config.importantChangeWeight;
+    const threshold = pageAnalyzer.getModeSpecificThreshold(pageMode) || config.translationTriggerRatio;
+
+    return weightedChanges / maxCheckCount > threshold;
+  },
+
   shouldTriggerTranslation(mutations, pageMode) {
     pageMode = pageMode || translationCore.detectPageMode();
     try {
@@ -223,103 +294,37 @@ export const domObserver = {
         return false;
       }
 
-      const {
-        importantElements = [],
-        ignoreElements = [],
-        importantAttributes = ['id', 'class', 'href', 'title'],
-        mutationThreshold = 30,
-        contentChangeWeight = 1,
-        importantChangeWeight = 2,
-        translationTriggerRatio = 0.3,
-        maxMutationProcessing = 50,
-        minContentChangesToTrigger = 3,
-      } = CONFIG.performance || {};
-
+      const config = this.getPerformanceConfig();
       const quickPathThreshold = pageAnalyzer.getQuickPathThresholdByPageMode(pageMode);
+
       if (mutations.length <= quickPathThreshold) {
         return this.detectImportantChanges(mutations, pageMode);
       }
 
       let contentChanges = 0;
       let importantChanges = 0;
-      const maxCheckCount = Math.min(
-        mutations.length,
-        Math.max(mutationThreshold, maxMutationProcessing),
-      );
+      const maxCheckCount = Math.min(mutations.length, Math.max(config.mutationThreshold, config.maxMutationProcessing));
       const elementCheckCache = new WeakMap();
 
       for (let i = 0; i < maxCheckCount; i++) {
-        const mutation = mutations[i];
+        const result = this.processSingleMutation(mutations[i], config, elementCheckCache, pageMode);
 
-        if (mutation.type === 'characterData' && CONFIG.performance?.ignoreCharacterDataMutations) {
-          continue;
-        }
-        if (mutation.type === 'attributes' && CONFIG.performance?.ignoreAttributeMutations) {
-          continue;
+        if (result.shouldTrigger) {
+          return true;
         }
 
-        if (mutation.target) {
-          let isIgnored = elementCheckCache.get(mutation.target);
-          if (isIgnored === undefined) {
-            isIgnored = this.shouldIgnoreElement(
-              mutation.target,
-              ignoreElements,
-              elementCheckCache,
-              pageMode,
-            );
-            elementCheckCache.set(mutation.target, isIgnored);
-          }
+        contentChanges += result.contentChanges;
+        importantChanges += result.importantChanges;
 
-          if (isIgnored) {
-            continue;
-          }
-
-          let isImportant = elementCheckCache.get(`important-${mutation.target}`);
-          if (isImportant === undefined && mutation.target.nodeType === Node.ELEMENT_NODE) {
-            isImportant = this.isImportantElement(
-              mutation.target,
-              importantElements,
-              elementCheckCache,
-              pageMode,
-            );
-            elementCheckCache.set(`important-${mutation.target}`, isImportant);
-          }
-
-          if (isImportant) {
-            return true;
-          }
+        if (importantChanges >= 3) {
+          return true;
         }
-
-        if (mutation.type === 'attributes') {
-          if (
-            CONFIG.performance?.observeAttributes &&
-            importantAttributes.includes(mutation.attributeName)
-          ) {
-            importantChanges++;
-            if (importantChanges >= 3) {
-              return true;
-            }
-          }
-          continue;
-        }
-
-        if (this.isContentRelatedMutation(mutation, pageMode)) {
-          contentChanges++;
-          if (contentChanges >= Math.max(5, minContentChangesToTrigger)) {
-            return true;
-          }
+        if (contentChanges >= Math.max(5, config.minContentChangesToTrigger)) {
+          return true;
         }
       }
 
-      if (contentChanges < minContentChangesToTrigger) {
-        return false;
-      }
-
-      const weightedChanges =
-        contentChanges * contentChangeWeight + importantChanges * importantChangeWeight;
-      const threshold = pageAnalyzer.getModeSpecificThreshold(pageMode) || translationTriggerRatio;
-
-      return weightedChanges / maxCheckCount > threshold;
+      return this.shouldTriggerByRatio(contentChanges, importantChanges, maxCheckCount, config, pageMode);
     } catch (error) {
       console.error('[GitHub 中文翻译] 判断翻译触发条件时出错:', error);
       return false;
