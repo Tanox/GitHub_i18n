@@ -391,11 +391,11 @@ class ConfigUI {
   }
 
   /**
-   * 添加配置界面样式
+   * 获取配置界面样式文本
+   * @returns {string} 样式文本
    */
-  addStyles() {
-    const style = document.createElement('style');
-    style.textContent = `
+  getConfigStyles() {
+    return `
       .github-i18n-config-container {
         position: fixed;
         top: 0;
@@ -550,6 +550,14 @@ class ConfigUI {
         background-color: #30363d;
       }
     `;
+  }
+
+  /**
+   * 添加配置界面样式
+   */
+  addStyles() {
+    const style = document.createElement('style');
+    style.textContent = this.getConfigStyles();
     document.head.appendChild(style);
   }
 
