@@ -18,15 +18,6 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json({ limit: '50mb' }));
-app.use(express.static(path.join(__dirname, '..')));
-
-// 全局错误处理中间件
-app.use((error, req, res, next) => {
-  console.error('API Error:', error);
-  res.status(error.status || 500).json({
-    error: error.message || '内部服务器错误',
-  });
-});
 
 const CONFIG = {
   dictionaryPath: path.resolve(__dirname, '../src/dictionaries'),
@@ -432,6 +423,15 @@ app.listen(PORT, () => {
   console.log('  GET /api/backup                 - 创建备份');
   console.log('  GET/POST /api/settings          - 设置管理');
   console.log('');
+});
+
+app.use(express.static(path.join(__dirname, '..')));
+
+app.use((error, req, res, next) => {
+  console.error('API Error:', error);
+  res.status(error.status || 500).json({
+    error: error.message || '内部服务器错误',
+  });
 });
 
 module.exports = app;
