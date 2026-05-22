@@ -29,6 +29,10 @@ const SOURCE_ORDER = [
   'pageMonitor/domObserver.js',
   'pageMonitor/translationTrigger.js',
   'pageMonitor/index.js',
+  'dictionaries/common.js',
+  'dictionaries/codespaces.js',
+  'dictionaries/explore.js',
+  'dictionaries/index.js',
   'translationCore/dictionaryManager.js',
   'translationCore/pageModeDetector.js',
   'translationCore/elementSelector.js',
@@ -40,10 +44,6 @@ const SOURCE_ORDER = [
   'versionChecker.js',
   'virtualDom.js',
   'i18n.js',
-  'dictionaries/index.js',
-  'dictionaries/common.js',
-  'dictionaries/codespaces.js',
-  'dictionaries/explore.js',
   'main.js',
 ];
 
