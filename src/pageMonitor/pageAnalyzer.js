@@ -1,8 +1,8 @@
 /**
  * 页面分析模块
  * @file pageMonitor/pageAnalyzer.js
- * @version 1.9.15
- * @date 2026-05-01
+ * @version 1.9.16
+ * @date 2026-05-22
  * @author Sut
  * @description 分析页面类型和关键区域
  */

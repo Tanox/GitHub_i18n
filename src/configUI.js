@@ -1,8 +1,8 @@
 /**
  * GitHub 中文翻译配置界面模块
  * @file configUI.js
- * @version 1.9.15
- * @date 2026-05-01
+ * @version 1.9.16
+ * @date 2026-05-22
  * @author Sut
  * @description 提供用户友好的配置界面，允许用户调整插件参数
  */

@@ -1,8 +1,8 @@
 /**
  * 翻译核心主模块
  * @file translationCore/index.js
- * @version 1.9.15
- * @date 2026-05-01
+ * @version 1.9.16
+ * @date 2026-05-22
  * @author Sut
  * @description 翻译核心主入口，整合所有子模块
  */
