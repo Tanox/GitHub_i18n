@@ -427,7 +427,7 @@ app.listen(PORT, () => {
 
 app.use(express.static(path.join(__dirname, '..')));
 
-app.use((error, req, res, next) => {
+app.use((error, req, res, _next) => {
   console.error('API Error:', error);
   res.status(error.status || 500).json({
     error: error.message || '内部服务器错误',
