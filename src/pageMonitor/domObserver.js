@@ -8,7 +8,7 @@
  */
 import { CONFIG } from '../config.js';
 import { utils } from '../utils.js';
-import { translationCore } from '../translationCore.js';
+import { translationCore } from '../translationCore/index.js';
 import { pageAnalyzer } from './pageAnalyzer.js';
 import { pageMonitorCache } from './cacheManager.js';
 

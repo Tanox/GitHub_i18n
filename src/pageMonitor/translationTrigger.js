@@ -7,7 +7,7 @@
  * @description 管理翻译触发和节流
  */
 import { CONFIG } from '../config.js';
-import { translationCore } from '../translationCore.js';
+import { translationCore } from '../translationCore/index.js';
 import { pageAnalyzer } from './pageAnalyzer.js';
 
 export const translationTrigger = {

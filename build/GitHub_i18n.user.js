@@ -1183,11 +1183,12 @@ const pageMonitorCache = {
   },
   addEventListener(listener) {
     this.eventListeners.push(listener);
+    listener.target.addEventListener(listener.type, listener.handler);
   },
   cleanupEventListeners() {
     this.eventListeners.forEach((listener) => {
       try {
-        window.removeEventListener(listener.type, listener.handler);
+        listener.target.removeEventListener(listener.type, listener.handler);
       } catch (error) {
         console.warn('[GitHub 中文翻译] 移除事件监听器失败:', error);
       }
@@ -1997,16 +1998,21 @@ const pageMonitor = {
       pageMonitorCache.isPageUnloading = true;
       this.cleanup();
     };
-    window.addEventListener('beforeunload', unloadHandler);
-    window.addEventListener('unload', unloadHandler);
-    window.addEventListener('pagehide', unloadHandler);
     pageMonitorCache.addEventListener({
       target: window,
       type: 'beforeunload',
       handler: unloadHandler,
     });
-    pageMonitorCache.addEventListener({ target: window, type: 'unload', handler: unloadHandler });
-    pageMonitorCache.addEventListener({ target: window, type: 'pagehide', handler: unloadHandler });
+    pageMonitorCache.addEventListener({
+      target: window,
+      type: 'unload',
+      handler: unloadHandler,
+    });
+    pageMonitorCache.addEventListener({
+      target: window,
+      type: 'pagehide',
+      handler: unloadHandler,
+    });
   },
   translateWithThrottle() {
     return translationTrigger.translateWithThrottle();
