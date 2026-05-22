@@ -33,7 +33,7 @@ GitHub_i18n/
 
 ## 项目信息
 - **项目名称**: GitHub 中文翻译插件
-- **项目 URL**: https://github.com/sutchan/GitHub_i18n
+- **项目 URL**: https://github.com/Tanox/GitHub_i18n
 - **主语言**: JavaScript
 - **目标平台**: 浏览器用户脚本
 - **默认署名**: Sut

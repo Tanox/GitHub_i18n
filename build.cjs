@@ -29,6 +29,10 @@ const SOURCE_ORDER = [
   'pageMonitor/domObserver.js',
   'pageMonitor/translationTrigger.js',
   'pageMonitor/index.js',
+  'dictionaries/common.js',
+  'dictionaries/codespaces.js',
+  'dictionaries/explore.js',
+  'dictionaries/index.js',
   'translationCore/dictionaryManager.js',
   'translationCore/pageModeDetector.js',
   'translationCore/elementSelector.js',
@@ -40,16 +44,12 @@ const SOURCE_ORDER = [
   'versionChecker.js',
   'virtualDom.js',
   'i18n.js',
-  'dictionaries/index.js',
-  'dictionaries/common.js',
-  'dictionaries/codespaces.js',
-  'dictionaries/explore.js',
   'main.js',
 ];
 
 const USER_SCRIPT_HEADER = `// ==UserScript==
 // @name         GitHub 中文翻译
-// @namespace    https://github.com/sutchan/GitHub_i18n
+// @namespace    https://github.com/Tanox/GitHub_i18n
 // @version      {VERSION}
 // @description  GitHub页面自动翻译为中文
 // @author       Sut
@@ -65,10 +65,10 @@ const USER_SCRIPT_HEADER = `// ==UserScript==
 // @connect      github.com
 // @run-at       document-idle
 // @noframes
-// @updateURL    https://raw.githubusercontent.com/sutchan/GitHub_i18n/main/build/GitHub_i18n.user.js
-// @downloadURL  https://raw.githubusercontent.com/sutchan/GitHub_i18n/main/build/GitHub_i18n.user.js
+// @updateURL    https://raw.githubusercontent.com/Tanox/GitHub_i18n/main/build/GitHub_i18n.user.js
+// @downloadURL  https://raw.githubusercontent.com/Tanox/GitHub_i18n/main/build/GitHub_i18n.user.js
 // @license      MIT
-// @homepage     https://github.com/sutchan/GitHub_i18n
+// @homepage     https://github.com/Tanox/GitHub_i18n
 // ==/UserScript==
 
 (function() {
