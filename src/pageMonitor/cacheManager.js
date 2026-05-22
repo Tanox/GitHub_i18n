@@ -66,7 +66,7 @@ export const pageMonitorCache = {
   cleanupEventListeners() {
     this.eventListeners.forEach((listener) => {
       try {
-        window.removeEventListener(listener.type, listener.handler);
+        listener.target.removeEventListener(listener.type, listener.handler);
       } catch (error) {
         console.warn('[GitHub 中文翻译] 移除事件监听器失败:', error);
       }
