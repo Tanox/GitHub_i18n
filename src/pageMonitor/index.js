@@ -45,17 +45,21 @@ export const pageMonitor = {
       this.cleanup();
     };
 
-    window.addEventListener('beforeunload', unloadHandler);
-    window.addEventListener('unload', unloadHandler);
-    window.addEventListener('pagehide', unloadHandler);
-
     pageMonitorCache.addEventListener({
       target: window,
       type: 'beforeunload',
       handler: unloadHandler,
     });
-    pageMonitorCache.addEventListener({ target: window, type: 'unload', handler: unloadHandler });
-    pageMonitorCache.addEventListener({ target: window, type: 'pagehide', handler: unloadHandler });
+    pageMonitorCache.addEventListener({
+      target: window,
+      type: 'unload',
+      handler: unloadHandler,
+    });
+    pageMonitorCache.addEventListener({
+      target: window,
+      type: 'pagehide',
+      handler: unloadHandler,
+    });
   },
 
   translateWithThrottle() {

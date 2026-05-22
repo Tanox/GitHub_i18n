@@ -60,6 +60,7 @@ export const pageMonitorCache = {
 
   addEventListener(listener) {
     this.eventListeners.push(listener);
+    listener.target.addEventListener(listener.type, listener.handler);
   },
 
   cleanupEventListeners() {
