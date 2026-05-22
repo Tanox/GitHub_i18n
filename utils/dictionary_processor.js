@@ -28,11 +28,10 @@ const CONFIG = { ...DEFAULT_CONFIG };
  */
 function log(level, message, details = null) {
   const logLevels = { error: 0, warn: 1, info: 2, debug: 3 };
-  const currentLevel = logLevels[CONFIG.logLevel] || logLevels.info;
-  const messageLevel = logLevels[level] || logLevels.info;
+  const currentLevel = logLevels[CONFIG.logLevel] ?? logLevels.info;
+  const messageLevel = logLevels[level] ?? logLevels.info;
 
-  // 只输出级别大于等于当前设置的日志
-  if (messageLevel <= currentLevel) {
+  if (messageLevel < currentLevel) {
     let logMessage = `[${level.toUpperCase()}] ${message}`;
 
     if (details) {

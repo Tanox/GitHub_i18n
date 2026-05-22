@@ -9,6 +9,73 @@
 import { CONFIG } from '../config.js';
 import virtualDomManager from '../virtualDom.js';
 
+const SKIP_TAGS = ['script', 'style', 'code', 'pre', 'textarea', 'input', 'select', 'img', 'svg', 'canvas', 'video', 'audio'];
+
+const SKIP_CLASS_PATTERNS = [
+  /language-\w+/, /highlight/, /token/, /no-translate/, /octicon/, /emoji/, /avatar/,
+  /timestamp/, /numeral/, /filename/, /hash/, /sha/, /shortsha/, /hex-color/, /code/,
+  /gist/, /language-/, /markdown-/, /monaco-editor/, /syntax-/, /highlight-/,
+  /clipboard/, /progress-/, /count/, /size/, /time/, /date/, /sortable/, /label/,
+  /badge/, /url/, /email/, /key/, /token/, /user-name/, /repo-name/,
+];
+
+const SKIP_ID_PATTERNS = [
+  /\d+/, /-\d+/, /_\d+/, /sha-/, /hash-/, /commit-/, /issue-/, /pull-/, /pr-/,
+  /repo-/, /user-/, /file-/, /blob-/, /tree-/, /branch-/, /tag-/, /release-/,
+  /gist-/, /discussion-/, /comment-/, /review-/, /workflow-/, /action-/,
+  /job-/, /step-/, /runner-/, /package-/, /registry-/, /marketplace-/,
+  /organization-/, /team-/, /project-/, /milestone-/, /assignee-/, /reporter-/,
+  /reviewer-/, /author-/, /committer-/, /contributor-/, /sponsor-/, /funding-/,
+  /donation-/, /payment-/, /billing-/, /plan-/, /subscription-/, /license-/,
+  /secret-/, /key-/, /token-/, /password-/, /credential-/, /certificate-/,
+  /ssh-/, /git-/, /clone-/, /push-/, /pull-/, /fetch-/, /merge-/, /rebase-/,
+  /cherry-pick-/, /reset-/, /revert-/, /tag-/, /branch-/, /commit-/,
+  /diff-/, /patch-/, /stash-/, /ref-/, /head-/, /remote-/, /upstream-/,
+  /origin-/, /local-/, /tracking-/, /merge-base-/, /conflict-/, /resolve-/,
+  /status-/, /log-/, /blame-/, /bisect-/, /grep-/, /find-/, /filter-/,
+  /archive-/, /submodule-/, /worktree-/, /lfs-/, /graphql-/, /rest-/,
+  /api-/, /webhook-/, /event-/, /payload-/, /callback-/, /redirect-/,
+  /oauth-/, /sso-/, /ldap-/, /saml-/, /2fa-/, /mfa-/, /security-/,
+  /vulnerability-/, /cve-/, /dependency-/, /alert-/, /secret-scanning-/,
+  /code-scanning-/, /codeql-/, /actions-/, /workflow-/, /job-/, /step-/,
+  /runner-/, /artifact-/, /cache-/, /environment-/, /deployment-/, /app-/,
+  /oauth-app-/, /github-app-/, /integration-/, /webhook-/, /marketplace-/,
+  /listing-/, /subscription-/, /billing-/, /plan-/, /usage-/, /limits-/,
+  /quota-/, /traffic-/, /analytics-/, /insights-/, /search-/, /explore-/,
+  /trending-/, /stars-/, /forks-/, /watchers-/, /contributors-/, /activity-/,
+  /events-/, /notifications-/, /feeds-/, /dashboard-/, /profile-/,
+  /settings-/, /preferences-/, /organization-/, /team-/, /project-/,
+  /milestone-/, /label-/, /\b\w+[0-9]\w*\b/,
+];
+
+function isSkipTag(tagName) {
+  return SKIP_TAGS.includes(tagName.toLowerCase());
+}
+
+function hasSkipClass(className) {
+  if (!className) return false;
+  return SKIP_CLASS_PATTERNS.some((pattern) => pattern.test(className));
+}
+
+function hasSkipId(id) {
+  if (!id) return false;
+  return SKIP_ID_PATTERNS.some((pattern) => pattern.test(id));
+}
+
+function isHiddenElement(element) {
+  const computedStyle = window.getComputedStyle(element);
+  return (
+    computedStyle.display === 'none' ||
+    computedStyle.visibility === 'hidden' ||
+    computedStyle.opacity === '0' ||
+    (computedStyle.position === 'absolute' && computedStyle.left === '-9999px')
+  );
+}
+
+function isNumericOrSpecialOnly(text) {
+  return /^[0-9.,\s()[\]{}/*^$#@!~`|:;"'?>+-]+$/i.test(text);
+}
+
 export const elementSelector = {
   elementCache: new WeakMap(),
 
@@ -69,22 +136,7 @@ export const elementSelector = {
       return false;
     }
 
-    const skipTags = [
-      'script',
-      'style',
-      'code',
-      'pre',
-      'textarea',
-      'input',
-      'select',
-      'img',
-      'svg',
-      'canvas',
-      'video',
-      'audio',
-    ];
-    const tagName = element.tagName.toLowerCase();
-    if (skipTags.includes(tagName)) {
+    if (isSkipTag(element.tagName)) {
       return false;
     }
 
@@ -97,248 +149,20 @@ export const elementSelector = {
       return false;
     }
 
-    const className = element.className;
-    if (className) {
-      const skipClassPatterns = [
-        /language-\w+/,
-        /highlight/,
-        /token/,
-        /no-translate/,
-        /octicon/,
-        /emoji/,
-        /avatar/,
-        /timestamp/,
-        /numeral/,
-        /filename/,
-        /hash/,
-        /sha/,
-        /shortsha/,
-        /hex-color/,
-        /code/,
-        /gist/,
-        /language-/,
-        /markdown-/,
-        /monaco-editor/,
-        /syntax-/,
-        /highlight-/,
-        /clipboard/,
-        /progress-/,
-        /count/,
-        /size/,
-        /time/,
-        /date/,
-        /sortable/,
-        /label/,
-        /badge/,
-        /url/,
-        /email/,
-        /key/,
-        /token/,
-        /user-name/,
-        /repo-name/,
-      ];
-
-      if (skipClassPatterns.some((pattern) => pattern.test(className))) {
-        return false;
-      }
+    if (hasSkipClass(element.className)) {
+      return false;
     }
 
-    const id = element.id;
-    if (id) {
-      const skipIdPatterns = [
-        /\d+/,
-        /-\d+/,
-        /_\d+/,
-        /sha-/,
-        /hash-/,
-        /commit-/,
-        /issue-/,
-        /pull-/,
-        /pr-/,
-        /repo-/,
-        /user-/,
-        /file-/,
-        /blob-/,
-        /tree-/,
-        /branch-/,
-        /tag-/,
-        /release-/,
-        /gist-/,
-        /discussion-/,
-        /comment-/,
-        /review-/,
-        /workflow-/,
-        /action-/,
-        /job-/,
-        /step-/,
-        /runner-/,
-        /package-/,
-        /registry-/,
-        /marketplace-/,
-        /organization-/,
-        /team-/,
-        /project-/,
-        /milestone-/,
-        /assignee-/,
-        /reporter-/,
-        /reviewer-/,
-        /author-/,
-        /committer-/,
-        /contributor-/,
-        /sponsor-/,
-        /funding-/,
-        /donation-/,
-        /payment-/,
-        /billing-/,
-        /plan-/,
-        /subscription-/,
-        /license-/,
-        /secret-/,
-        /key-/,
-        /token-/,
-        /password-/,
-        /credential-/,
-        /certificate-/,
-        /ssh-/,
-        /git-/,
-        /clone-/,
-        /push-/,
-        /pull-/,
-        /fetch-/,
-        /merge-/,
-        /rebase-/,
-        /cherry-pick-/,
-        /reset-/,
-        /revert-/,
-        /tag-/,
-        /branch-/,
-        /commit-/,
-        /diff-/,
-        /patch-/,
-        /stash-/,
-        /ref-/,
-        /head-/,
-        /remote-/,
-        /upstream-/,
-        /origin-/,
-        /local-/,
-        /tracking-/,
-        /merge-base-/,
-        /conflict-/,
-        /resolve-/,
-        /status-/,
-        /log-/,
-        /blame-/,
-        /bisect-/,
-        /grep-/,
-        /find-/,
-        /filter-/,
-        /archive-/,
-        /submodule-/,
-        /worktree-/,
-        /lfs-/,
-        /graphql-/,
-        /rest-/,
-        /api-/,
-        /webhook-/,
-        /event-/,
-        /payload-/,
-        /callback-/,
-        /redirect-/,
-        /oauth-/,
-        /sso-/,
-        /ldap-/,
-        /saml-/,
-        /2fa-/,
-        /mfa-/,
-        /security-/,
-        /vulnerability-/,
-        /cve-/,
-        /dependency-/,
-        /alert-/,
-        /secret-scanning-/,
-        /code-scanning-/,
-        /codeql-/,
-        /actions-/,
-        /workflow-/,
-        /job-/,
-        /step-/,
-        /runner-/,
-        /artifact-/,
-        /cache-/,
-        /environment-/,
-        /deployment-/,
-        /app-/,
-        /oauth-app-/,
-        /github-app-/,
-        /integration-/,
-        /webhook-/,
-        /marketplace-/,
-        /listing-/,
-        /subscription-/,
-        /billing-/,
-        /plan-/,
-        /usage-/,
-        /limits-/,
-        /quota-/,
-        /traffic-/,
-        /analytics-/,
-        /insights-/,
-        /search-/,
-        /explore-/,
-        /trending-/,
-        /stars-/,
-        /forks-/,
-        /watchers-/,
-        /contributors-/,
-        /activity-/,
-        /events-/,
-        /notifications-/,
-        /feeds-/,
-        /dashboard-/,
-        /profile-/,
-        /settings-/,
-        /preferences-/,
-        /billing-/,
-        /organization-/,
-        /team-/,
-        /project-/,
-        /milestone-/,
-        /label-/,
-        /assignee-/,
-        /reporter-/,
-        /reviewer-/,
-        /author-/,
-        /committer-/,
-        /contributor-/,
-        /sponsor-/,
-        /funding-/,
-        /donation-/,
-        /payment-/,
-        /\b\w+[0-9]\w*\b/,
-      ];
-
-      if (skipIdPatterns.some((pattern) => pattern.test(id))) {
-        return false;
-      }
+    if (hasSkipId(element.id)) {
+      return false;
     }
 
-    const computedStyle = window.getComputedStyle(element);
-    if (
-      computedStyle.display === 'none' ||
-      computedStyle.visibility === 'hidden' ||
-      computedStyle.opacity === '0' ||
-      (computedStyle.position === 'absolute' && computedStyle.left === '-9999px')
-    ) {
+    if (isHiddenElement(element)) {
       return false;
     }
 
     const textContent = element.textContent.trim();
-    if (textContent.length === 0) {
-      return false;
-    }
-
-    if (/^[0-9.,\s()[\]{}/*^$#@!~`|:;"'?>+-]+$/i.test(textContent)) {
+    if (!textContent || isNumericOrSpecialOnly(textContent)) {
       return false;
     }
 

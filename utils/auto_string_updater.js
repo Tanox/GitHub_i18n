@@ -194,8 +194,9 @@ app.post('/api/collect', async (req, res) => {
     });
 
     const results = await StringCollector.collectStringsFromPages(pages, (progress) => {
+      const stringCount = progress?.result?.strings?.length ?? 0;
       console.log(
-        `[${progress.current}/${progress.total}] ${progress.page.name}: ${progress.result?.strings?.length || 0} strings`,
+        `[${progress?.current ?? 0}/${progress?.total ?? 0}] ${progress?.page?.name ?? 'unknown'}: ${stringCount} strings`,
       );
     });
 
