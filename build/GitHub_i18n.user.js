@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GitHub 中文翻译
-// @namespace    https://github.com/sutchan/GitHub_i18n
+// @namespace    https://github.com/Tanox/GitHub_i18n
 // @version      1.9.15
 // @description  GitHub页面自动翻译为中文
 // @author       Sut
@@ -16,10 +16,10 @@
 // @connect      github.com
 // @run-at       document-idle
 // @noframes
-// @updateURL    https://raw.githubusercontent.com/sutchan/GitHub_i18n/main/build/GitHub_i18n.user.js
-// @downloadURL  https://raw.githubusercontent.com/sutchan/GitHub_i18n/main/build/GitHub_i18n.user.js
+// @updateURL    https://raw.githubusercontent.com/Tanox/GitHub_i18n/main/build/GitHub_i18n.user.js
+// @downloadURL  https://raw.githubusercontent.com/Tanox/GitHub_i18n/main/build/GitHub_i18n.user.js
 // @license      MIT
-// @homepage     https://github.com/sutchan/GitHub_i18n
+// @homepage     https://github.com/Tanox/GitHub_i18n
 // ==/UserScript==
 (function() {
 'use strict';
@@ -77,7 +77,7 @@ const CONFIG = {
   updateCheck: {
     enabled: true,
     intervalHours: 24,
-    scriptUrl: 'https://github.com/sutchan/GitHub_i18n/raw/main/dist/GitHub_zh-CN.user.js',
+    scriptUrl: 'https://github.com/Tanox/GitHub_i18n/raw/main/dist/GitHub_zh-CN.user.js',
     autoUpdateVersion: true,
   },
   externalTranslation: {

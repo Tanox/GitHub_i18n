@@ -2,9 +2,9 @@
 
 > 🌐 为 GitHub 全站 UI 提供精准中文翻译 + 自动化字符串更新工具
 
-[![GitHub license](https://img.shields.io/github/license/sutchan/GitHub_i18n?color=blue)](LICENSE)
-[![GitHub release](https://img.shields.io/github/v/release/sutchan/GitHub_i18n?display_name=tag&color=green)](https://github.com/sutchan/GitHub_i18n/releases)
-[![Userscript](https://img.shields.io/badge/Install-Tampermonkey-green?logo=tampermonkey)](https://github.com/sutchan/GitHub_i18n/raw/main/build/GitHub_i18n.user.js)
+[![GitHub license](https://img.shields.io/github/license/Tanox/GitHub_i18n?color=blue)](LICENSE)
+[![GitHub release](https://img.shields.io/github/v/release/Tanox/GitHub_i18n?display_name=tag&color=green)](https://github.com/Tanox/GitHub_i18n/releases)
+[![Userscript](https://img.shields.io/badge/Install-Tampermonkey-green?logo=tampermonkey)](https://github.com/Tanox/GitHub_i18n/raw/main/build/GitHub_i18n.user.js)
 
 ## 项目组件
 
@@ -49,7 +49,7 @@
 ### 用户脚本
 
 1. 安装 [Tampermonkey](https://www.tampermonkey.net/)
-2. 点击 [安装脚本](https://github.com/sutchan/GitHub_i18n/raw/refs/heads/main/build/GitHub_i18n.user.js)
+2. 点击 [安装脚本](https://github.com/Tanox/GitHub_i18n/raw/refs/heads/main/build/GitHub_i18n.user.js)
 3. 刷新 GitHub 页面即可看到中文界面
 
 ### 自动化工具
@@ -104,14 +104,14 @@ A：直接修改 `src/dictionaries/` 下的相应词典文件，提交 PR 即可
 
 欢迎提交 Issue 和 PR！
 
-- 漏翻/误翻反馈：[问题反馈](https://github.com/sutchan/GitHub_i18n/issues)
+- 漏翻/误翻反馈：[问题反馈](https://github.com/Tanox/GitHub_i18n/issues)
 - 新增术语：直接修改 `src/dictionaries/` 下的词典文件提交 PR
 
 ### 开发环境设置
 
 ```bash
 # 克隆仓库
-git clone https://github.com/sutchan/GitHub_i18n.git
+git clone https://github.com/Tanox/GitHub_i18n.git
 cd GitHub_i18n
 
 # 安装依赖
@@ -149,4 +149,4 @@ npm run build
 
 ---
 
-Made with ❤️ by [Sut](https://github.com/sutchan)
+Made with ❤️ by [Sut](https://github.com/Tanox)
