@@ -6,7 +6,7 @@
  * @author Sut
  * @description 使用Trie树进行部分匹配翻译
  */
-import { utils } from '../utils.js';
+import { utils } from '../utils/utils.js';
 import { dictionaryManager } from './dictionaryManager.js';
 
 export const partialTranslator = {

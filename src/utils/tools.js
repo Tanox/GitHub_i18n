@@ -8,7 +8,7 @@
  */
 // 删除未使用的CONFIG导入
 import { utils } from './utils.js';
-import { translationModule } from './dictionaries/index.js';
+import { translationModule } from '../dictionaries/index.js';
 
 /**
  * 字符串提取器对象

@@ -7,8 +7,8 @@
  * @description 观察DOM变化并触发翻译
  */
 import { CONFIG } from '../config.js';
-import { utils } from '../utils.js';
-import { translationCore } from '../translationCore/index.js';
+import { utils } from '../utils/utils.js';
+import { translationCore } from '../translation-core/index.js';
 import { pageAnalyzer } from './pageAnalyzer.js';
 import { pageMonitorCache } from './cacheManager.js';
 

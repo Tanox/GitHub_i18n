@@ -7,7 +7,7 @@
  * @description 选择需要翻译的DOM元素
  */
 import { CONFIG } from '../config.js';
-import virtualDomManager from '../virtualDom.js';
+import virtualDomManager from '../core/virtualDom.js';
 
 export const elementSelector = {
   elementCache: new WeakMap(),
