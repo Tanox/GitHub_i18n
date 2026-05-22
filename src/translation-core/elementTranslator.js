@@ -7,8 +7,8 @@
  * @description 实际翻译DOM元素的模块
  */
 import { CONFIG } from '../config.js';
-import virtualDomManager from '../virtualDom.js';
-import { ErrorHandler } from '../errorHandler.js';
+import virtualDomManager from '../core/virtualDom.js';
+import { ErrorHandler } from '../core/errorHandler.js';
 import { dictionaryManager } from './dictionaryManager.js';
 import { elementSelector } from './elementSelector.js';
 

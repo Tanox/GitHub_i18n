@@ -7,8 +7,8 @@
  * @description 翻译核心主入口，整合所有子模块
  */
 import { CONFIG } from '../config.js';
-import { ErrorHandler } from '../errorHandler.js';
-import virtualDomManager from '../virtualDom.js';
+import { ErrorHandler } from '../core/errorHandler.js';
+import virtualDomManager from '../core/virtualDom.js';
 import { dictionaryManager } from './dictionaryManager.js';
 import { pageModeDetector } from './pageModeDetector.js';
 import { elementSelector } from './elementSelector.js';

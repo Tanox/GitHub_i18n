@@ -6,7 +6,7 @@
  * @author Sut
  * @description 用于跟踪已翻译元素的状态，避免重复翻译和不必要的DOM操作
  */
-import { CONFIG } from './config.js';
+import { CONFIG } from '../config.js';
 
 /**
  * 虚拟DOM节点类

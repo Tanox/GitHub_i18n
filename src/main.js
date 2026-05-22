@@ -10,9 +10,9 @@
 // 导入核心模块
 import { CONFIG } from './config.js';
 import { versionChecker } from './versionChecker.js';
-import { translationCore } from './translationCore/index.js';
-import { pageMonitor } from './pageMonitor/index.js';
-import { configUI } from './configUI.js';
+import { translationCore } from './translation-core/index.js';
+import { pageMonitor } from './page-monitor/index.js';
+import { configUI } from './ui/configUI.js';
 
 /**
  * 清理资源

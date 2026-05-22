@@ -8,8 +8,8 @@
  */
 import { CONFIG } from '../config.js';
 import { mergeAllDictionaries } from '../dictionaries/index.js';
-import { Trie } from '../trie.js';
-import { CacheManager } from '../cacheManager.js';
+import { Trie } from '../core/trie.js';
+import { CacheManager } from '../core/cacheManager.js';
 
 export const dictionaryManager = {
   dictionary: {},
