@@ -4609,24 +4609,32 @@ class ConfigUI {
         position: fixed;
         bottom: 20px;
         right: 20px;
-        background-color: #24292e;
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        font-size: 20px;
-        cursor: pointer;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        z-index: 999998;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        background-color: #24292e !important;
+        color: white !important;
+        border: 2px solid #30363d !important;
+        border-radius: 50% !important;
+        width: 56px !important;
+        height: 56px !important;
+        font-size: 16px !important;
+        font-weight: bold !important;
+        cursor: pointer !important;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35) !important;
+        z-index: 2147483647 !important; /* 使用最大 z-index 值 */
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        transition: all 0.2s ease !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
       }
       .github-i18n-toggle-btn:hover {
-        background-color: #30363d;
+        background-color: #30363d !important;
+        transform: scale(1.1) !important;
       }
-    `;
+      .github-i18n-toggle-btn:active {
+        transform: scale(0.95) !important;
+      }`;
     document.head.appendChild(style);
   }
   /**
@@ -4814,14 +4822,30 @@ class ConfigUI {
   createToggleButton() {
     // 检查页面是否正在卸载
     if (this.isPageUnloading) return;
-    const toggleBtn = document.createElement('button');
-    toggleBtn.className = 'github-i18n-toggle-btn';
-    toggleBtn.textContent = '设置';
-    toggleBtn.title = 'GitHub 中文翻译配置';
-    this.addTrackedEventListener(toggleBtn, 'click', () => {
-      this.open();
-    });
-    document.body.appendChild(toggleBtn);
+    // 检查是否已经存在按钮，避免重复创建
+    const existingBtn = document.querySelector('.github-i18n-toggle-btn');
+    if (existingBtn) {
+      if (CONFIG.debugMode) {
+        console.log('[GitHub 中文翻译] 按钮已存在，跳过创建');
+      }
+      return;
+    }
+    try {
+      const toggleBtn = document.createElement('button');
+      toggleBtn.className = 'github-i18n-toggle-btn';
+      toggleBtn.textContent = '设置';
+      toggleBtn.title = 'GitHub 中文翻译配置';
+      toggleBtn.style.display = 'flex'; // 确保按钮始终可见
+      this.addTrackedEventListener(toggleBtn, 'click', () => {
+        this.open();
+      });
+      document.body.appendChild(toggleBtn);
+      if (CONFIG.debugMode) {
+        console.log('[GitHub 中文翻译] 切换按钮已创建');
+      }
+    } catch (error) {
+      console.error('[GitHub 中文翻译] 创建切换按钮失败:', error);
+    }
   }
   /**
    * 初始化配置界面
@@ -4831,14 +4855,55 @@ class ConfigUI {
     if (this.isPageUnloading) return;
     // 合并用户配置
     this.mergeUserConfig();
+    // 注册用户脚本菜单命令（如果可用）
+    this.registerMenuCommands();
     // 创建切换按钮
-    if (document.body) {
-      this.createToggleButton();
-    } else {
-      // 如果body还没加载完成，等DOM加载完成后再创建
+    this.ensureToggleButton();
+  }
+  /**
+   * 确保切换按钮存在
+   */
+  ensureToggleButton() {
+    if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
         this.createToggleButton();
-      });
+      }, { once: true });
+    } else if (document.body) {
+      this.createToggleButton();
+    } else {
+      // 如果body还不存在，尝试轮询直到它可用
+      const checkBodyInterval = setInterval(() => {
+        if (document.body) {
+          clearInterval(checkBodyInterval);
+          this.createToggleButton();
+        }
+      }, 100);
+      // 10秒后停止轮询，避免无限等待
+      setTimeout(() => clearInterval(checkBodyInterval), 10000);
+    }
+  }
+  /**
+   * 注册用户脚本菜单命令
+   */
+  registerMenuCommands() {
+    if (typeof GM_registerMenuCommand !== 'undefined') {
+      try {
+        GM_registerMenuCommand('打开配置', () => {
+          this.open();
+        });
+        GM_registerMenuCommand('立即翻译页面', () => {
+          if (window.translationCore && typeof window.translationCore.translate === 'function') {
+            window.translationCore.translate();
+          }
+        });
+        if (CONFIG.debugMode) {
+          console.log('[GitHub 中文翻译] 菜单命令已注册');
+        }
+      } catch (error) {
+        console.error('[GitHub 中文翻译] 注册菜单命令失败:', error);
+      }
+    } else if (CONFIG.debugMode) {
+      console.log('[GitHub 中文翻译] GM_registerMenuCommand 不可用');
     }
   }
 }
