@@ -849,7 +849,7 @@ class ConfigUI {
           this.createToggleButton();
         }
       }, 100);
-      
+
       // 10秒后停止轮询，避免无限等待
       setTimeout(() => clearInterval(checkBodyInterval), 10000);
     }
@@ -864,13 +864,13 @@ class ConfigUI {
         GM_registerMenuCommand('打开配置', () => {
           this.open();
         });
-        
+
         GM_registerMenuCommand('立即翻译页面', () => {
           if (window.translationCore && typeof window.translationCore.translate === 'function') {
             window.translationCore.translate();
           }
         });
-        
+
         if (CONFIG.debugMode) {
           console.log('[GitHub 中文翻译] 菜单命令已注册');
         }
