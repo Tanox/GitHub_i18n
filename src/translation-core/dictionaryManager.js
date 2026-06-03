@@ -20,8 +20,9 @@ export const dictionaryManager = {
 
   init() {
     try {
+      let startTime;
       if (CONFIG.debugMode) {
-        console.time('[GitHub 中文翻译] 词典初始化');
+        startTime = Date.now();
       }
 
       this.cacheManager = new CacheManager(CONFIG.performance?.maxDictSize || 2000);
@@ -42,7 +43,7 @@ export const dictionaryManager = {
       });
 
       if (CONFIG.debugMode) {
-        console.timeEnd('[GitHub 中文翻译] 词典初始化');
+        console.log(`[GitHub 中文翻译] 词典初始化耗时: ${Date.now() - startTime}ms`);
         console.log(`[GitHub 中文翻译] 词典条目数量: ${Object.keys(this.dictionary).length}`);
         console.log(`[GitHub 中文翻译] 哈希表条目数量: ${this.dictionaryHash.size}`);
         console.log(`[GitHub 中文翻译] Trie树条目数量: ${this.dictionaryTrie.getSize()}`);

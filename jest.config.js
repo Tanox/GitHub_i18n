@@ -7,6 +7,7 @@
 export default {
   testEnvironment: 'jsdom',
   testMatch: ['**/__tests__/**/*.js', '**/?(*.)+(spec|test).js'],
+  passWithNoTests: true,
   testPathIgnorePatterns: ['/node_modules/', '/build/', '/dist/'],
   transform: {
     '^.+\\.js$': 'babel-jest',
