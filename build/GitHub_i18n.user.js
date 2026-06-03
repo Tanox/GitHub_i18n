@@ -18,7 +18,7 @@
 // @noframes
 // @updateURL    https://raw.githubusercontent.com/Tanox/GitHub_i18n/main/build/GitHub_i18n.user.js
 // @downloadURL  https://raw.githubusercontent.com/Tanox/GitHub_i18n/main/build/GitHub_i18n.user.js
-// @license      MIT
+// @license      GPL-2.0
 // @homepage     https://github.com/Tanox/GitHub_i18n
 // ==/UserScript==
 (function() {
