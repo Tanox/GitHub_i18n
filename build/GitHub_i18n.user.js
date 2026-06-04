@@ -1811,11 +1811,26 @@ const domObserver = {
       if (!mutations || mutations.length === 0) {
         return false;
       }
+<<<<<<< HEAD
       const { mutationThreshold = 30, maxMutationProcessing = 50 } = CONFIG.performance || {};
+=======
+      const {
+        importantElements = [],
+        ignoreElements = [],
+        importantAttributes = ['id', 'class', 'href', 'title'],
+        mutationThreshold = 30,
+        contentChangeWeight = 1,
+        importantChangeWeight = 2,
+        translationTriggerRatio = 0.3,
+        maxMutationProcessing = 50,
+        minContentChangesToTrigger = 3,
+      } = CONFIG.performance || {};
+>>>>>>> origin/main
       const quickPathThreshold = pageAnalyzer.getQuickPathThresholdByPageMode(pageMode);
       if (mutations.length <= quickPathThreshold) {
         return this.detectImportantChanges(mutations, pageMode);
       }
+<<<<<<< HEAD
       const maxCheckCount = Math.min(mutations.length, Math.max(mutationThreshold, maxMutationProcessing));
       const batchResult = processMutationBatch(mutations.slice(0, maxCheckCount), maxCheckCount, pageMode);
       if (batchResult.shouldTrigger) {
@@ -1827,6 +1842,77 @@ const domObserver = {
         maxCheckCount,
         pageMode,
       );
+=======
+      let contentChanges = 0;
+      let importantChanges = 0;
+      const maxCheckCount = Math.min(
+        mutations.length,
+        Math.max(mutationThreshold, maxMutationProcessing),
+      );
+      const elementCheckCache = new WeakMap();
+      for (let i = 0; i < maxCheckCount; i++) {
+        const mutation = mutations[i];
+        if (mutation.type === 'characterData' && CONFIG.performance?.ignoreCharacterDataMutations) {
+          continue;
+        }
+        if (mutation.type === 'attributes' && CONFIG.performance?.ignoreAttributeMutations) {
+          continue;
+        }
+        if (mutation.target) {
+          let isIgnored = elementCheckCache.get(mutation.target);
+          if (isIgnored === undefined) {
+            isIgnored = this.shouldIgnoreElement(
+              mutation.target,
+              ignoreElements,
+              elementCheckCache,
+              pageMode,
+            );
+            elementCheckCache.set(mutation.target, isIgnored);
+          }
+          if (isIgnored) {
+            continue;
+          }
+          let isImportant = elementCheckCache.get(`important-${mutation.target}`);
+          if (isImportant === undefined && mutation.target.nodeType === Node.ELEMENT_NODE) {
+            isImportant = this.isImportantElement(
+              mutation.target,
+              importantElements,
+              elementCheckCache,
+              pageMode,
+            );
+            elementCheckCache.set(`important-${mutation.target}`, isImportant);
+          }
+          if (isImportant) {
+            return true;
+          }
+        }
+        if (mutation.type === 'attributes') {
+          if (
+            CONFIG.performance?.observeAttributes &&
+            importantAttributes.includes(mutation.attributeName)
+          ) {
+            importantChanges++;
+            if (importantChanges >= 3) {
+              return true;
+            }
+          }
+          continue;
+        }
+        if (this.isContentRelatedMutation(mutation, pageMode)) {
+          contentChanges++;
+          if (contentChanges >= Math.max(5, minContentChangesToTrigger)) {
+            return true;
+          }
+        }
+      }
+      if (contentChanges < minContentChangesToTrigger) {
+        return false;
+      }
+      const weightedChanges =
+        contentChanges * contentChangeWeight + importantChanges * importantChangeWeight;
+      const threshold = pageAnalyzer.getModeSpecificThreshold(pageMode) || translationTriggerRatio;
+      return weightedChanges / maxCheckCount > threshold;
+>>>>>>> origin/main
     } catch (error) {
       console.error('[GitHub 中文翻译] 判断翻译触发条件时出错:', error);
       return false;
@@ -3297,6 +3383,7 @@ const pageModeDetector = {
  * @author Sut
  * @description 选择需要翻译的DOM元素
  */
+<<<<<<< HEAD
 const SKIP_TAGS = ['script', 'style', 'code', 'pre', 'textarea', 'input', 'select', 'img', 'svg', 'canvas', 'video', 'audio'];
 const SKIP_CLASS_PATTERNS = [
   /language-\w+/, /highlight/, /token/, /no-translate/, /octicon/, /emoji/, /avatar/,
@@ -3356,6 +3443,8 @@ function isHiddenElement(element) {
 function isNumericOrSpecialOnly(text) {
   return /^[0-9.,\s()[\]{}/*^$#@!~`|:;"'?>+-]+$/i.test(text);
 }
+=======
+>>>>>>> origin/main
 const elementSelector = {
   elementCache: new WeakMap(),
   getElementsToTranslate() {
@@ -3408,7 +3497,26 @@ const elementSelector = {
     if (!element.textContent.trim()) {
       return false;
     }
+<<<<<<< HEAD
     if (isSkipTag(element.tagName)) {
+=======
+    const skipTags = [
+      'script',
+      'style',
+      'code',
+      'pre',
+      'textarea',
+      'input',
+      'select',
+      'img',
+      'svg',
+      'canvas',
+      'video',
+      'audio',
+    ];
+    const tagName = element.tagName.toLowerCase();
+    if (skipTags.includes(tagName)) {
+>>>>>>> origin/main
       return false;
     }
     if (
@@ -3419,6 +3527,7 @@ const elementSelector = {
     ) {
       return false;
     }
+<<<<<<< HEAD
     if (hasSkipClass(element.className)) {
       return false;
     }
@@ -3430,6 +3539,244 @@ const elementSelector = {
     }
     const textContent = element.textContent.trim();
     if (!textContent || isNumericOrSpecialOnly(textContent)) {
+=======
+    const className = element.className;
+    if (className) {
+      const skipClassPatterns = [
+        /language-\w+/,
+        /highlight/,
+        /token/,
+        /no-translate/,
+        /octicon/,
+        /emoji/,
+        /avatar/,
+        /timestamp/,
+        /numeral/,
+        /filename/,
+        /hash/,
+        /sha/,
+        /shortsha/,
+        /hex-color/,
+        /code/,
+        /gist/,
+        /language-/,
+        /markdown-/,
+        /monaco-editor/,
+        /syntax-/,
+        /highlight-/,
+        /clipboard/,
+        /progress-/,
+        /count/,
+        /size/,
+        /time/,
+        /date/,
+        /sortable/,
+        /label/,
+        /badge/,
+        /url/,
+        /email/,
+        /key/,
+        /token/,
+        /user-name/,
+        /repo-name/,
+      ];
+      if (skipClassPatterns.some((pattern) => pattern.test(className))) {
+        return false;
+      }
+    }
+    const id = element.id;
+    if (id) {
+      const skipIdPatterns = [
+        /\d+/,
+        /-\d+/,
+        /_\d+/,
+        /sha-/,
+        /hash-/,
+        /commit-/,
+        /issue-/,
+        /pull-/,
+        /pr-/,
+        /repo-/,
+        /user-/,
+        /file-/,
+        /blob-/,
+        /tree-/,
+        /branch-/,
+        /tag-/,
+        /release-/,
+        /gist-/,
+        /discussion-/,
+        /comment-/,
+        /review-/,
+        /workflow-/,
+        /action-/,
+        /job-/,
+        /step-/,
+        /runner-/,
+        /package-/,
+        /registry-/,
+        /marketplace-/,
+        /organization-/,
+        /team-/,
+        /project-/,
+        /milestone-/,
+        /assignee-/,
+        /reporter-/,
+        /reviewer-/,
+        /author-/,
+        /committer-/,
+        /contributor-/,
+        /sponsor-/,
+        /funding-/,
+        /donation-/,
+        /payment-/,
+        /billing-/,
+        /plan-/,
+        /subscription-/,
+        /license-/,
+        /secret-/,
+        /key-/,
+        /token-/,
+        /password-/,
+        /credential-/,
+        /certificate-/,
+        /ssh-/,
+        /git-/,
+        /clone-/,
+        /push-/,
+        /pull-/,
+        /fetch-/,
+        /merge-/,
+        /rebase-/,
+        /cherry-pick-/,
+        /reset-/,
+        /revert-/,
+        /tag-/,
+        /branch-/,
+        /commit-/,
+        /diff-/,
+        /patch-/,
+        /stash-/,
+        /ref-/,
+        /head-/,
+        /remote-/,
+        /upstream-/,
+        /origin-/,
+        /local-/,
+        /tracking-/,
+        /merge-base-/,
+        /conflict-/,
+        /resolve-/,
+        /status-/,
+        /log-/,
+        /blame-/,
+        /bisect-/,
+        /grep-/,
+        /find-/,
+        /filter-/,
+        /archive-/,
+        /submodule-/,
+        /worktree-/,
+        /lfs-/,
+        /graphql-/,
+        /rest-/,
+        /api-/,
+        /webhook-/,
+        /event-/,
+        /payload-/,
+        /callback-/,
+        /redirect-/,
+        /oauth-/,
+        /sso-/,
+        /ldap-/,
+        /saml-/,
+        /2fa-/,
+        /mfa-/,
+        /security-/,
+        /vulnerability-/,
+        /cve-/,
+        /dependency-/,
+        /alert-/,
+        /secret-scanning-/,
+        /code-scanning-/,
+        /codeql-/,
+        /actions-/,
+        /workflow-/,
+        /job-/,
+        /step-/,
+        /runner-/,
+        /artifact-/,
+        /cache-/,
+        /environment-/,
+        /deployment-/,
+        /app-/,
+        /oauth-app-/,
+        /github-app-/,
+        /integration-/,
+        /webhook-/,
+        /marketplace-/,
+        /listing-/,
+        /subscription-/,
+        /billing-/,
+        /plan-/,
+        /usage-/,
+        /limits-/,
+        /quota-/,
+        /traffic-/,
+        /analytics-/,
+        /insights-/,
+        /search-/,
+        /explore-/,
+        /trending-/,
+        /stars-/,
+        /forks-/,
+        /watchers-/,
+        /contributors-/,
+        /activity-/,
+        /events-/,
+        /notifications-/,
+        /feeds-/,
+        /dashboard-/,
+        /profile-/,
+        /settings-/,
+        /preferences-/,
+        /billing-/,
+        /organization-/,
+        /team-/,
+        /project-/,
+        /milestone-/,
+        /label-/,
+        /assignee-/,
+        /reporter-/,
+        /reviewer-/,
+        /author-/,
+        /committer-/,
+        /contributor-/,
+        /sponsor-/,
+        /funding-/,
+        /donation-/,
+        /payment-/,
+        /\b\w+[0-9]\w*\b/,
+      ];
+      if (skipIdPatterns.some((pattern) => pattern.test(id))) {
+        return false;
+      }
+    }
+    const computedStyle = window.getComputedStyle(element);
+    if (
+      computedStyle.display === 'none' ||
+      computedStyle.visibility === 'hidden' ||
+      computedStyle.opacity === '0' ||
+      (computedStyle.position === 'absolute' && computedStyle.left === '-9999px')
+    ) {
+      return false;
+    }
+    const textContent = element.textContent.trim();
+    if (textContent.length === 0) {
+      return false;
+    }
+    if (/^[0-9.,\s()[\]{}/*^$#@!~`|:;"'?>+-]+$/i.test(textContent)) {
+>>>>>>> origin/main
       return false;
     }
     return true;
@@ -4588,6 +4935,7 @@ class ConfigUI {
         position: fixed;
         bottom: 20px;
         right: 20px;
+<<<<<<< HEAD
         background-color: #24292e;
         color: white;
         border: none;
@@ -4606,6 +4954,34 @@ class ConfigUI {
         background-color: #30363d;
       }
     `;
+=======
+        background-color: #24292e !important;
+        color: white !important;
+        border: 2px solid #30363d !important;
+        border-radius: 50% !important;
+        width: 56px !important;
+        height: 56px !important;
+        font-size: 16px !important;
+        font-weight: bold !important;
+        cursor: pointer !important;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35) !important;
+        z-index: 2147483647 !important; /* 使用最大 z-index 值 */
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        transition: all 0.2s ease !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+      }
+      .github-i18n-toggle-btn:hover {
+        background-color: #30363d !important;
+        transform: scale(1.1) !important;
+      }
+      .github-i18n-toggle-btn:active {
+        transform: scale(0.95) !important;
+      }`;
+>>>>>>> origin/main
     document.head.appendChild(style);
   }
   /**
@@ -4793,6 +5169,7 @@ class ConfigUI {
   createToggleButton() {
     // 检查页面是否正在卸载
     if (this.isPageUnloading) return;
+<<<<<<< HEAD
     const toggleBtn = document.createElement('button');
     toggleBtn.className = 'github-i18n-toggle-btn';
     toggleBtn.textContent = '设置';
@@ -4801,6 +5178,32 @@ class ConfigUI {
       this.open();
     });
     document.body.appendChild(toggleBtn);
+=======
+    // 检查是否已经存在按钮，避免重复创建
+    const existingBtn = document.querySelector('.github-i18n-toggle-btn');
+    if (existingBtn) {
+      if (CONFIG.debugMode) {
+        console.log('[GitHub 中文翻译] 按钮已存在，跳过创建');
+      }
+      return;
+    }
+    try {
+      const toggleBtn = document.createElement('button');
+      toggleBtn.className = 'github-i18n-toggle-btn';
+      toggleBtn.textContent = '设置';
+      toggleBtn.title = 'GitHub 中文翻译配置';
+      toggleBtn.style.display = 'flex'; // 确保按钮始终可见
+      this.addTrackedEventListener(toggleBtn, 'click', () => {
+        this.open();
+      });
+      document.body.appendChild(toggleBtn);
+      if (CONFIG.debugMode) {
+        console.log('[GitHub 中文翻译] 切换按钮已创建');
+      }
+    } catch (error) {
+      console.error('[GitHub 中文翻译] 创建切换按钮失败:', error);
+    }
+>>>>>>> origin/main
   }
   /**
    * 初始化配置界面
@@ -4810,6 +5213,7 @@ class ConfigUI {
     if (this.isPageUnloading) return;
     // 合并用户配置
     this.mergeUserConfig();
+<<<<<<< HEAD
     // 创建切换按钮
     if (document.body) {
       this.createToggleButton();
@@ -4818,6 +5222,57 @@ class ConfigUI {
       document.addEventListener('DOMContentLoaded', () => {
         this.createToggleButton();
       });
+=======
+    // 注册用户脚本菜单命令（如果可用）
+    this.registerMenuCommands();
+    // 创建切换按钮
+    this.ensureToggleButton();
+  }
+  /**
+   * 确保切换按钮存在
+   */
+  ensureToggleButton() {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        this.createToggleButton();
+      }, { once: true });
+    } else if (document.body) {
+      this.createToggleButton();
+    } else {
+      // 如果body还不存在，尝试轮询直到它可用
+      const checkBodyInterval = setInterval(() => {
+        if (document.body) {
+          clearInterval(checkBodyInterval);
+          this.createToggleButton();
+        }
+      }, 100);
+      // 10秒后停止轮询，避免无限等待
+      setTimeout(() => clearInterval(checkBodyInterval), 10000);
+    }
+  }
+  /**
+   * 注册用户脚本菜单命令
+   */
+  registerMenuCommands() {
+    if (typeof GM_registerMenuCommand !== 'undefined') {
+      try {
+        GM_registerMenuCommand('打开配置', () => {
+          this.open();
+        });
+        GM_registerMenuCommand('立即翻译页面', () => {
+          if (window.translationCore && typeof window.translationCore.translate === 'function') {
+            window.translationCore.translate();
+          }
+        });
+        if (CONFIG.debugMode) {
+          console.log('[GitHub 中文翻译] 菜单命令已注册');
+        }
+      } catch (error) {
+        console.error('[GitHub 中文翻译] 注册菜单命令失败:', error);
+      }
+    } else if (CONFIG.debugMode) {
+      console.log('[GitHub 中文翻译] GM_registerMenuCommand 不可用');
+>>>>>>> origin/main
     }
   }
 }

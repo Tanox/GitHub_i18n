@@ -24,10 +24,9 @@ const CONFIG = {
  * 统一日志处理函数
  */
 function log(level, message, details = null) {
+  // 根据日志级别过滤
   const levels = ['debug', 'info', 'warn', 'error'];
-  const currentLevelIndex = levels.indexOf(CONFIG.logLevel);
-  const messageLevelIndex = levels.indexOf(level);
-  if (messageLevelIndex < currentLevelIndex) {
+  if (levels.indexOf(level) < levels.indexOf(CONFIG.logLevel)) {
     return;
   }
 

@@ -7,7 +7,7 @@
  * @description 负责检查和处理脚本更新
  */
 import { CONFIG } from './config.js';
-import { utils } from './utils.js';
+import { utils } from './utils/utils.js';
 
 /**
  * 版本检查器对象
