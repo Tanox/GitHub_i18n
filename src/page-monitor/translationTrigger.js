@@ -55,6 +55,7 @@ export const translationTrigger = {
       this.lastTranslateTimestamp = Date.now();
 
       const keyAreas = pageAnalyzer.identifyKeyTranslationAreas();
+
       let startTime;
 
       if (CONFIG.debugMode && CONFIG.performance?.logTiming) {
