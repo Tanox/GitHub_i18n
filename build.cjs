@@ -1,7 +1,7 @@
 /**
  * GitHub 中文翻译插件构建脚本
- * @file build.js
- * @version 1.9.15
+ * @file build.cjs
+ * @version 1.9.16
  * @description 简化的单文件构建脚本
  */
 
@@ -67,7 +67,7 @@ const USER_SCRIPT_HEADER = `// ==UserScript==
 // @noframes
 // @updateURL    https://raw.githubusercontent.com/Tanox/GitHub_i18n/main/build/GitHub_i18n.user.js
 // @downloadURL  https://raw.githubusercontent.com/Tanox/GitHub_i18n/main/build/GitHub_i18n.user.js
-// @license      MIT
+// @license      GPL-2.0
 // @homepage     https://github.com/Tanox/GitHub_i18n
 // ==/UserScript==
 
@@ -90,15 +90,17 @@ function mergeSourceFiles() {
 
   for (const file of SOURCE_ORDER) {
     const filePath = path.join(SRC_DIR, file);
-    if (fs.existsSync(filePath)) {
-      let content = fs.readFileSync(filePath, 'utf-8');
-      content = content.replace(/^import\s+.*from\s+['"].+['"];?\s*$/gm, '');
-      content = content.replace(/^export\s+default\s+(\w+);?\s*$/gm, '$1;');
-      content = content.replace(/^export\s+default\s+/gm, '');
-      content = content.replace(/^export\s+{\s*([^}]+)\s*};?\s*$/gm, '');
-      content = content.replace(/^export\s+/gm, '');
-      mergedParts.push(content.trim());
+    if (!fs.existsSync(filePath)) {
+      console.warn(`⚠️  源文件不存在，跳过: ${file}`);
+      continue;
     }
+    let content = fs.readFileSync(filePath, 'utf-8');
+    content = content.replace(/^import\s+.*from\s+['"].+['"];?\s*$/gm, '');
+    content = content.replace(/^export\s+default\s+(\w+);?\s*$/gm, '$1;');
+    content = content.replace(/^export\s+default\s+/gm, '');
+    content = content.replace(/^export\s+{\s*([^}]+)\s*};?\s*$/gm, '');
+    content = content.replace(/^export\s+/gm, '');
+    mergedParts.push(content.trim());
   }
 
   return mergedParts.join('\n\n');
@@ -123,8 +125,7 @@ function buildUserScript(version) {
 
   const mergedCode = mergeSourceFiles();
   let scriptContent = USER_SCRIPT_HEADER.replace('{VERSION}', version) + mergedCode + USER_SCRIPT_FOOTER;
-  
-  scriptContent = scriptContent.replace(/export\s+const\s+VERSION\s+=/g, 'const VERSION =');
+
   scriptContent = scriptContent.replace(/\n{3,}/g, '\n\n');
   scriptContent = scriptContent.replace(/\s+\n/g, '\n');
 
