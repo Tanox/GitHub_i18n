@@ -161,8 +161,10 @@ const versionChecker = {
   extractVersion(content) {
     // 尝试多种版本号格式
     const patterns = [
-      // UserScript格式
+      // UserScript多行注释格式
       /\/\*\s*@version\s+(\d+\.\d+\.\d+)\s*\*\//i,
+      // UserScript单行注释格式
+      /\/\/\s*@version\s+(\d+\.\d+\.\d+)/i,
       // JavaScript注释格式
       /\/\/\s*version\s*:\s*(\d+\.\d+\.\d+)/i,
       // 变量赋值格式

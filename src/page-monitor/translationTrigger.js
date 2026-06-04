@@ -55,9 +55,10 @@ export const translationTrigger = {
       this.lastTranslateTimestamp = Date.now();
 
       const keyAreas = pageAnalyzer.identifyKeyTranslationAreas();
+      let startTime;
 
       if (CONFIG.debugMode && CONFIG.performance?.logTiming) {
-        console.time('[GitHub 中文翻译] 翻译耗时');
+        startTime = Date.now();
       }
 
       if (keyAreas.length > 0) {
@@ -73,7 +74,7 @@ export const translationTrigger = {
       }
 
       if (CONFIG.debugMode && CONFIG.performance?.logTiming) {
-        console.timeEnd('[GitHub 中文翻译] 翻译耗时');
+        console.log(`[GitHub 中文翻译] 翻译耗时: ${Date.now() - startTime}ms`);
       }
     } catch (error) {
       this.handleTranslationError(error);

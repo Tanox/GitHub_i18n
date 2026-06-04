@@ -44,7 +44,7 @@ export const CONFIG = {
   updateCheck: {
     enabled: true,
     intervalHours: 24,
-    scriptUrl: 'https://github.com/Tanox/GitHub_i18n/raw/main/dist/GitHub_zh-CN.user.js',
+    scriptUrl: 'https://github.com/Tanox/GitHub_i18n/raw/main/build/GitHub_i18n.user.js',
     autoUpdateVersion: true,
   },
   externalTranslation: {

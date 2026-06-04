@@ -18,7 +18,7 @@
 // @noframes
 // @updateURL    https://raw.githubusercontent.com/Tanox/GitHub_i18n/main/build/GitHub_i18n.user.js
 // @downloadURL  https://raw.githubusercontent.com/Tanox/GitHub_i18n/main/build/GitHub_i18n.user.js
-// @license      MIT
+// @license      GPL-2.0
 // @homepage     https://github.com/Tanox/GitHub_i18n
 // ==/UserScript==
 (function() {
@@ -77,7 +77,7 @@ const CONFIG = {
   updateCheck: {
     enabled: true,
     intervalHours: 24,
-    scriptUrl: 'https://github.com/Tanox/GitHub_i18n/raw/main/dist/GitHub_zh-CN.user.js',
+    scriptUrl: 'https://github.com/Tanox/GitHub_i18n/raw/main/build/GitHub_i18n.user.js',
     autoUpdateVersion: true,
   },
   externalTranslation: {
@@ -1922,8 +1922,9 @@ const translationTrigger = {
     try {
       this.lastTranslateTimestamp = Date.now();
       const keyAreas = pageAnalyzer.identifyKeyTranslationAreas();
+      let startTime;
       if (CONFIG.debugMode && CONFIG.performance?.logTiming) {
-        console.time('[GitHub 中文翻译] 翻译耗时');
+        startTime = Date.now();
       }
       if (keyAreas.length > 0) {
         await this.processElementsInBatches(keyAreas);
@@ -1937,7 +1938,7 @@ const translationTrigger = {
         }
       }
       if (CONFIG.debugMode && CONFIG.performance?.logTiming) {
-        console.timeEnd('[GitHub 中文翻译] 翻译耗时');
+        console.log(`[GitHub 中文翻译] 翻译耗时: ${Date.now() - startTime}ms`);
       }
     } catch (error) {
       this.handleTranslationError(error);
@@ -2958,8 +2959,9 @@ const dictionaryManager = {
   cacheManager: null,
   init() {
     try {
+      let startTime;
       if (CONFIG.debugMode) {
-        console.time('[GitHub 中文翻译] 词典初始化');
+        startTime = Date.now();
       }
       this.cacheManager = new CacheManager(CONFIG.performance?.maxDictSize || 2000);
       this.dictionary = mergeAllDictionaries();
@@ -2977,7 +2979,7 @@ const dictionaryManager = {
         }
       });
       if (CONFIG.debugMode) {
-        console.timeEnd('[GitHub 中文翻译] 词典初始化');
+        console.log(`[GitHub 中文翻译] 词典初始化耗时: ${Date.now() - startTime}ms`);
         console.log(`[GitHub 中文翻译] 词典条目数量: ${Object.keys(this.dictionary).length}`);
         console.log(`[GitHub 中文翻译] 哈希表条目数量: ${this.dictionaryHash.size}`);
         console.log(`[GitHub 中文翻译] Trie树条目数量: ${this.dictionaryTrie.getSize()}`);
@@ -5044,8 +5046,10 @@ const versionChecker = {
   extractVersion(content) {
     // 尝试多种版本号格式
     const patterns = [
-      // UserScript格式
+      // UserScript多行注释格式
       /\/\*\s*@version\s+(\d+\.\d+\.\d+)\s*\*\//i,
+      // UserScript单行注释格式
+      /\/\/\s*@version\s+(\d+\.\d+\.\d+)/i,
       // JavaScript注释格式
       /\/\/\s*version\s*:\s*(\d+\.\d+\.\d+)/i,
       // 变量赋值格式
