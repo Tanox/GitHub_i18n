@@ -1392,234 +1392,6 @@ const pathListener = {
  * @author Sut
  * @description 观察DOM变化并触发翻译
  */
-const PAGE_MODE_THRESHOLDS = {
-  issues: { contentWeight: 1, importantWeight: 2, minContent: 3 },
-  pullRequests: { contentWeight: 1, importantWeight: 2, minContent: 3 },
-  wiki: { contentWeight: 1, importantWeight: 2, minContent: 4 },
-  search: { contentWeight: 1, importantWeight: 2, minContent: 3 },
-  codespaces: { contentWeight: 1, importantWeight: 2, minContent: 2 },
-};
-function isElementIgnored(target, ignoreElements, elementCheckCache, pageMode) {
-  if (target.nodeType !== Node.ELEMENT_NODE) {
-    return false;
-  }
-  const element = target;
-  if (elementCheckCache && elementCheckCache.has(element)) {
-    return elementCheckCache.get(element);
-  }
-  let shouldIgnore = ignoreElements.some((selector) => {
-    try {
-      return element.matches(selector);
-    } catch (_e) {
-      return false;
-    }
-  });
-  if (!shouldIgnore && pageMode) {
-    switch (pageMode) {
-      case 'codespaces':
-        shouldIgnore =
-          element.classList.contains('terminal') ||
-          element.tagName === 'PRE' ||
-          element.classList.contains('command-input');
-        break;
-      case 'wiki':
-        if (element.tagName === 'PRE' && element.classList.contains('codehilite')) {
-          shouldIgnore = true;
-        }
-        break;
-      case 'search':
-        if (element.tagName === 'CODE' && !element.classList.contains('search-match')) {
-          shouldIgnore = true;
-        }
-        break;
-    }
-  }
-  if (elementCheckCache) {
-    elementCheckCache.set(element, shouldIgnore);
-  }
-  return shouldIgnore;
-}
-function isElementImportant(target, importantElements, elementCheckCache, pageMode) {
-  if (pageMode && pageAnalyzer.shouldSkipElementByPageMode(target, pageMode)) {
-    return false;
-  }
-  if (elementCheckCache && elementCheckCache.has(target)) {
-    return elementCheckCache.get(target);
-  }
-  let isImportant = importantElements.some((selector) => {
-    try {
-      return target.matches(selector);
-    } catch (_e) {
-      return false;
-    }
-  });
-  if (!isImportant && pageMode) {
-    switch (pageMode) {
-      case 'issues':
-      case 'pullRequests':
-        isImportant =
-          target.classList.contains('comment-body') ||
-          target.classList.contains('timeline-comment-header');
-        break;
-      case 'wiki':
-        isImportant =
-          target.classList.contains('markdown-body') ||
-          target.tagName === 'H1' ||
-          target.tagName === 'H2';
-        break;
-      case 'search':
-        isImportant = target.classList.contains('search-match') || target.classList.contains('f4');
-        break;
-      case 'codespaces':
-        isImportant = target.classList.contains('codespace-status');
-        break;
-    }
-  }
-  if (elementCheckCache) {
-    elementCheckCache.set(target, isImportant);
-  }
-  return isImportant;
-}
-function isMutationContentRelated(mutation, pageMode) {
-  try {
-    if (mutation.type === 'characterData' && mutation.target.nodeType === Node.TEXT_NODE) {
-      const oldValue = mutation.oldValue || '';
-      const newValue = mutation.target.textContent || '';
-      if (oldValue.trim() === newValue.trim()) {
-        return false;
-      }
-      const minLength = pageAnalyzer.getMinTextLengthByPageMode(pageMode);
-      return (
-        oldValue !== newValue &&
-        (newValue.length >= minLength ||
-          oldValue.length >= minLength ||
-          Math.abs(newValue.length - oldValue.length) >= 3)
-      );
-    }
-    if (
-      mutation.type === 'childList' &&
-      (mutation.addedNodes.length > 0 || mutation.removedNodes.length > 0)
-    ) {
-      return Array.from(mutation.addedNodes).some((node) => {
-        if (node.nodeType === Node.ELEMENT_NODE) {
-          const element = node;
-          if (
-            element.tagName === 'SCRIPT' ||
-            element.tagName === 'STYLE' ||
-            element.tagName === 'META'
-          ) {
-            return false;
-          }
-          if (pageMode) {
-            switch (pageMode) {
-              case 'issues':
-              case 'pullRequests':
-                return (
-                  element.classList.contains('comment-body') ||
-                  element.classList.contains('timeline-comment') ||
-                  element.classList.contains('js-issue-title')
-                );
-              case 'wiki':
-                return (
-                  element.classList.contains('markdown-body') || /^H[1-6]$/.test(element.tagName)
-                );
-              case 'codespaces':
-                if (
-                  element.classList.contains('terminal') ||
-                  element.classList.contains('command-input')
-                ) {
-                  return false;
-                }
-                break;
-              case 'search':
-                return (
-                  element.classList.contains('search-result') ||
-                  element.classList.contains('search-match')
-                );
-            }
-          }
-          return true;
-        }
-        return node.nodeType === Node.TEXT_NODE;
-      });
-    }
-    return false;
-  } catch (_error) {
-    return false;
-  }
-}
-function calculateMutationWeights(mutation, pageMode, elementCheckCache) {
-  const config = PAGE_MODE_THRESHOLDS[pageMode] || PAGE_MODE_THRESHOLDS.search;
-  let contentChanges = 0;
-  let importantChanges = 0;
-  let shouldTrigger = false;
-  if (mutation.target) {
-    const isIgnored = isElementIgnored(
-      mutation.target,
-      [],
-      elementCheckCache,
-      pageMode,
-    );
-    if (!isIgnored) {
-      const isImportant = isElementImportant(
-        mutation.target,
-        [],
-        elementCheckCache,
-        pageMode,
-      );
-      if (isImportant) {
-        shouldTrigger = true;
-      }
-    }
-    if (mutation.type === 'attributes') {
-      const importantAttributes = ['id', 'class', 'href', 'title'];
-      if (importantAttributes.includes(mutation.attributeName)) {
-        importantChanges++;
-        if (importantChanges >= 3) {
-          shouldTrigger = true;
-        }
-      }
-    }
-    if (isMutationContentRelated(mutation, pageMode)) {
-      contentChanges++;
-      if (contentChanges >= Math.max(5, config.minContent)) {
-        shouldTrigger = true;
-      }
-    }
-  }
-  return { shouldTrigger, contentChanges, importantChanges };
-}
-function processMutationBatch(mutations, maxCheckCount, pageMode) {
-  const elementCheckCache = new WeakMap();
-  let totalContentChanges = 0;
-  let totalImportantChanges = 0;
-  for (let i = 0; i < maxCheckCount; i++) {
-    const mutation = mutations[i];
-    if (mutation.type === 'characterData' && CONFIG.performance?.ignoreCharacterDataMutations) {
-      continue;
-    }
-    if (mutation.type === 'attributes' && CONFIG.performance?.ignoreAttributeMutations) {
-      continue;
-    }
-    const result = calculateMutationWeights(mutation, pageMode, elementCheckCache);
-    totalContentChanges += result.contentChanges;
-    totalImportantChanges += result.importantChanges;
-    if (result.shouldTrigger) {
-      return { shouldTrigger: true, contentChanges: totalContentChanges, importantChanges: totalImportantChanges };
-    }
-  }
-  return { shouldTrigger: false, contentChanges: totalContentChanges, importantChanges: totalImportantChanges };
-}
-function checkWeightedThreshold(contentChanges, importantChanges, maxCheckCount, pageMode) {
-  const config = PAGE_MODE_THRESHOLDS[pageMode] || PAGE_MODE_THRESHOLDS.search;
-  const minContentChanges = config.minContent;
-  if (contentChanges < minContentChanges) {
-    return false;
-  }
-  const weightedChanges = contentChanges * config.contentWeight + importantChanges * config.importantWeight;
-  const threshold = pageAnalyzer.getModeSpecificThreshold(pageMode) || 0.3;
-  return weightedChanges / maxCheckCount > threshold;
-}
 const domObserver = {
   observer: null,
   onTranslationTrigger: null,
@@ -1811,9 +1583,6 @@ const domObserver = {
       if (!mutations || mutations.length === 0) {
         return false;
       }
-<<<<<<< HEAD
-      const { mutationThreshold = 30, maxMutationProcessing = 50 } = CONFIG.performance || {};
-=======
       const {
         importantElements = [],
         ignoreElements = [],
@@ -1825,24 +1594,10 @@ const domObserver = {
         maxMutationProcessing = 50,
         minContentChangesToTrigger = 3,
       } = CONFIG.performance || {};
->>>>>>> origin/main
       const quickPathThreshold = pageAnalyzer.getQuickPathThresholdByPageMode(pageMode);
       if (mutations.length <= quickPathThreshold) {
         return this.detectImportantChanges(mutations, pageMode);
       }
-<<<<<<< HEAD
-      const maxCheckCount = Math.min(mutations.length, Math.max(mutationThreshold, maxMutationProcessing));
-      const batchResult = processMutationBatch(mutations.slice(0, maxCheckCount), maxCheckCount, pageMode);
-      if (batchResult.shouldTrigger) {
-        return true;
-      }
-      return checkWeightedThreshold(
-        batchResult.contentChanges,
-        batchResult.importantChanges,
-        maxCheckCount,
-        pageMode,
-      );
-=======
       let contentChanges = 0;
       let importantChanges = 0;
       const maxCheckCount = Math.min(
@@ -1912,7 +1667,6 @@ const domObserver = {
         contentChanges * contentChangeWeight + importantChanges * importantChangeWeight;
       const threshold = pageAnalyzer.getModeSpecificThreshold(pageMode) || translationTriggerRatio;
       return weightedChanges / maxCheckCount > threshold;
->>>>>>> origin/main
     } catch (error) {
       console.error('[GitHub 中文翻译] 判断翻译触发条件时出错:', error);
       return false;
@@ -3383,68 +3137,6 @@ const pageModeDetector = {
  * @author Sut
  * @description 选择需要翻译的DOM元素
  */
-<<<<<<< HEAD
-const SKIP_TAGS = ['script', 'style', 'code', 'pre', 'textarea', 'input', 'select', 'img', 'svg', 'canvas', 'video', 'audio'];
-const SKIP_CLASS_PATTERNS = [
-  /language-\w+/, /highlight/, /token/, /no-translate/, /octicon/, /emoji/, /avatar/,
-  /timestamp/, /numeral/, /filename/, /hash/, /sha/, /shortsha/, /hex-color/, /code/,
-  /gist/, /language-/, /markdown-/, /monaco-editor/, /syntax-/, /highlight-/,
-  /clipboard/, /progress-/, /count/, /size/, /time/, /date/, /sortable/, /label/,
-  /badge/, /url/, /email/, /key/, /token/, /user-name/, /repo-name/,
-];
-const SKIP_ID_PATTERNS = [
-  /\d+/, /-\d+/, /_\d+/, /sha-/, /hash-/, /commit-/, /issue-/, /pull-/, /pr-/,
-  /repo-/, /user-/, /file-/, /blob-/, /tree-/, /branch-/, /tag-/, /release-/,
-  /gist-/, /discussion-/, /comment-/, /review-/, /workflow-/, /action-/,
-  /job-/, /step-/, /runner-/, /package-/, /registry-/, /marketplace-/,
-  /organization-/, /team-/, /project-/, /milestone-/, /assignee-/, /reporter-/,
-  /reviewer-/, /author-/, /committer-/, /contributor-/, /sponsor-/, /funding-/,
-  /donation-/, /payment-/, /billing-/, /plan-/, /subscription-/, /license-/,
-  /secret-/, /key-/, /token-/, /password-/, /credential-/, /certificate-/,
-  /ssh-/, /git-/, /clone-/, /push-/, /pull-/, /fetch-/, /merge-/, /rebase-/,
-  /cherry-pick-/, /reset-/, /revert-/, /tag-/, /branch-/, /commit-/,
-  /diff-/, /patch-/, /stash-/, /ref-/, /head-/, /remote-/, /upstream-/,
-  /origin-/, /local-/, /tracking-/, /merge-base-/, /conflict-/, /resolve-/,
-  /status-/, /log-/, /blame-/, /bisect-/, /grep-/, /find-/, /filter-/,
-  /archive-/, /submodule-/, /worktree-/, /lfs-/, /graphql-/, /rest-/,
-  /api-/, /webhook-/, /event-/, /payload-/, /callback-/, /redirect-/,
-  /oauth-/, /sso-/, /ldap-/, /saml-/, /2fa-/, /mfa-/, /security-/,
-  /vulnerability-/, /cve-/, /dependency-/, /alert-/, /secret-scanning-/,
-  /code-scanning-/, /codeql-/, /actions-/, /workflow-/, /job-/, /step-/,
-  /runner-/, /artifact-/, /cache-/, /environment-/, /deployment-/, /app-/,
-  /oauth-app-/, /github-app-/, /integration-/, /webhook-/, /marketplace-/,
-  /listing-/, /subscription-/, /billing-/, /plan-/, /usage-/, /limits-/,
-  /quota-/, /traffic-/, /analytics-/, /insights-/, /search-/, /explore-/,
-  /trending-/, /stars-/, /forks-/, /watchers-/, /contributors-/, /activity-/,
-  /events-/, /notifications-/, /feeds-/, /dashboard-/, /profile-/,
-  /settings-/, /preferences-/, /organization-/, /team-/, /project-/,
-  /milestone-/, /label-/, /\b\w+[0-9]\w*\b/,
-];
-function isSkipTag(tagName) {
-  return SKIP_TAGS.includes(tagName.toLowerCase());
-}
-function hasSkipClass(className) {
-  if (!className) return false;
-  return SKIP_CLASS_PATTERNS.some((pattern) => pattern.test(className));
-}
-function hasSkipId(id) {
-  if (!id) return false;
-  return SKIP_ID_PATTERNS.some((pattern) => pattern.test(id));
-}
-function isHiddenElement(element) {
-  const computedStyle = window.getComputedStyle(element);
-  return (
-    computedStyle.display === 'none' ||
-    computedStyle.visibility === 'hidden' ||
-    computedStyle.opacity === '0' ||
-    (computedStyle.position === 'absolute' && computedStyle.left === '-9999px')
-  );
-}
-function isNumericOrSpecialOnly(text) {
-  return /^[0-9.,\s()[\]{}/*^$#@!~`|:;"'?>+-]+$/i.test(text);
-}
-=======
->>>>>>> origin/main
 const elementSelector = {
   elementCache: new WeakMap(),
   getElementsToTranslate() {
@@ -3497,9 +3189,6 @@ const elementSelector = {
     if (!element.textContent.trim()) {
       return false;
     }
-<<<<<<< HEAD
-    if (isSkipTag(element.tagName)) {
-=======
     const skipTags = [
       'script',
       'style',
@@ -3516,7 +3205,6 @@ const elementSelector = {
     ];
     const tagName = element.tagName.toLowerCase();
     if (skipTags.includes(tagName)) {
->>>>>>> origin/main
       return false;
     }
     if (
@@ -3527,19 +3215,6 @@ const elementSelector = {
     ) {
       return false;
     }
-<<<<<<< HEAD
-    if (hasSkipClass(element.className)) {
-      return false;
-    }
-    if (hasSkipId(element.id)) {
-      return false;
-    }
-    if (isHiddenElement(element)) {
-      return false;
-    }
-    const textContent = element.textContent.trim();
-    if (!textContent || isNumericOrSpecialOnly(textContent)) {
-=======
     const className = element.className;
     if (className) {
       const skipClassPatterns = [
@@ -3776,7 +3451,6 @@ const elementSelector = {
       return false;
     }
     if (/^[0-9.,\s()[\]{}/*^$#@!~`|:;"'?>+-]+$/i.test(textContent)) {
->>>>>>> origin/main
       return false;
     }
     return true;
@@ -4935,26 +4609,6 @@ class ConfigUI {
         position: fixed;
         bottom: 20px;
         right: 20px;
-<<<<<<< HEAD
-        background-color: #24292e;
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        font-size: 20px;
-        cursor: pointer;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        z-index: 999998;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .github-i18n-toggle-btn:hover {
-        background-color: #30363d;
-      }
-    `;
-=======
         background-color: #24292e !important;
         color: white !important;
         border: 2px solid #30363d !important;
@@ -4981,7 +4635,6 @@ class ConfigUI {
       .github-i18n-toggle-btn:active {
         transform: scale(0.95) !important;
       }`;
->>>>>>> origin/main
     document.head.appendChild(style);
   }
   /**
@@ -5169,16 +4822,6 @@ class ConfigUI {
   createToggleButton() {
     // 检查页面是否正在卸载
     if (this.isPageUnloading) return;
-<<<<<<< HEAD
-    const toggleBtn = document.createElement('button');
-    toggleBtn.className = 'github-i18n-toggle-btn';
-    toggleBtn.textContent = '设置';
-    toggleBtn.title = 'GitHub 中文翻译配置';
-    this.addTrackedEventListener(toggleBtn, 'click', () => {
-      this.open();
-    });
-    document.body.appendChild(toggleBtn);
-=======
     // 检查是否已经存在按钮，避免重复创建
     const existingBtn = document.querySelector('.github-i18n-toggle-btn');
     if (existingBtn) {
@@ -5203,7 +4846,6 @@ class ConfigUI {
     } catch (error) {
       console.error('[GitHub 中文翻译] 创建切换按钮失败:', error);
     }
->>>>>>> origin/main
   }
   /**
    * 初始化配置界面
@@ -5213,16 +4855,6 @@ class ConfigUI {
     if (this.isPageUnloading) return;
     // 合并用户配置
     this.mergeUserConfig();
-<<<<<<< HEAD
-    // 创建切换按钮
-    if (document.body) {
-      this.createToggleButton();
-    } else {
-      // 如果body还没加载完成，等DOM加载完成后再创建
-      document.addEventListener('DOMContentLoaded', () => {
-        this.createToggleButton();
-      });
-=======
     // 注册用户脚本菜单命令（如果可用）
     this.registerMenuCommands();
     // 创建切换按钮
@@ -5272,7 +4904,6 @@ class ConfigUI {
       }
     } else if (CONFIG.debugMode) {
       console.log('[GitHub 中文翻译] GM_registerMenuCommand 不可用');
->>>>>>> origin/main
     }
   }
 }
