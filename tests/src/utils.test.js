@@ -2,7 +2,7 @@
  * 工具函数模块测试
  */
 
-import { utils } from '../utils/utils';
+import { utils } from '../../src/utils/utils';
 
 describe('utils', () => {
   describe('safeJSONParse', () => {

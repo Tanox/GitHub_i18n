@@ -2,7 +2,7 @@
  * 版本检查模块测试
  */
 
-import { versionChecker } from '../versionChecker';
+import { versionChecker } from '../../src/versionChecker';
 
 describe('versionChecker', () => {
   beforeEach(() => {
