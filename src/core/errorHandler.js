@@ -7,7 +7,7 @@
  * @description 负责统一管理所有错误处理和恢复机制
  */
 
-import { CONFIG } from './config.js';
+import { CONFIG } from '../config.js';
 
 export const ErrorHandler = {
   // 错误计数器
