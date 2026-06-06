@@ -1,13 +1,13 @@
 /**
  * 错误处理模块
  * @file errorHandler.js
- * @version 1.9.16
+ * @version 1.9.17
  * @date 2026-05-22
  * @author Sut
  * @description 负责统一管理所有错误处理和恢复机制
  */
 
-import { CONFIG } from './config.js';
+import { CONFIG } from '../config.js';
 
 export const ErrorHandler = {
   // 错误计数器
