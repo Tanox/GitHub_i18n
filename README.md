@@ -11,8 +11,9 @@
 | 组件                      | 说明                                    |
 | ------------------------- | --------------------------------------- |
 | **GitHub_i18n.user.js**   | 油猴用户脚本，翻译 GitHub 高频 UI 文本  |
-| **utils/**                | 自动化工具，抓取并更新翻译词典          |
-| **src/dictionaries/**     | 翻译词典模块（common、codespaces、explore） |
+| **src/dictionaries/**      | 翻译词典模块（common、codespaces、explore） |
+| **src/page-monitor/**     | 页面监控模块（DOM 观察器、路径监听等）   |
+| **src/translation-core/** | 翻译核心模块（词典管理、元素翻译等）    |
 
 ## 功能特性
 
@@ -52,38 +53,34 @@
 2. 点击 [安装脚本](https://github.com/Tanox/GitHub_i18n/raw/refs/heads/main/build/GitHub_i18n.user.js)
 3. 刷新 GitHub 页面即可看到中文界面
 
-### 自动化工具
-
-```bash
-cd utils
-npm install
-npm run server   # Web 界面（推荐）
-# 或
-npm start        # 命令行模式
-```
-
-访问 http://localhost:3000 即可使用 Web 界面。
-
 ## 项目结构
 
 ```
-src/
-├── dictionaries/           # 翻译词典
-│   ├── index.js            # 词典合并
-│   ├── common.js           # 通用词典
-│   ├── codespaces.js       # Codespaces 词典
-│   └── explore.js          # Explore 词典
-├── pageMonitor/            # 页面监控
-│   ├── domObserver.js       # DOM 观察器
-│   ├── pathListener.js      # 路径监听
-│   └── ...
-├── translationCore/         # 翻译核心
-│   ├── elementSelector.js    # 元素选择器
-│   ├── elementTranslator.js  # 元素翻译器
-│   └── ...
-├── config.js               # 配置文件
-├── i18n.js                 # 国际化框架
-└── main.js                 # 主入口
+GitHub_i18n/
+├── build/                    # 构建产物
+│   └── GitHub_i18n.user.js   # 油猴用户脚本
+├── src/                      # 源代码
+│   ├── core/                 # 核心模块（Trie树、缓存、错误处理等）
+│   ├── dictionaries/         # 翻译词典
+│   │   ├── index.js         # 词典合并
+│   │   ├── common.js        # 通用词典
+│   │   ├── codespaces.js    # Codespaces 词典
+│   │   └── explore.js       # Explore 词典
+│   ├── page-monitor/         # 页面监控
+│   │   ├── domObserver.js   # DOM 观察器
+│   │   ├── pathListener.js  # 路径监听
+│   │   └── ...
+│   ├── translation-core/     # 翻译核心
+│   │   ├── elementSelector.js    # 元素选择器
+│   │   ├── elementTranslator.js  # 元素翻译器
+│   │   └── ...
+│   ├── ui/                   # 用户界面
+│   ├── utils/                # 工具函数
+│   ├── config.js            # 配置文件
+│   ├── i18n.js              # 国际化框架
+│   └── main.js              # 主入口
+├── docs/                     # 项目文档
+└── build.cjs                 # 构建脚本
 ```
 
 ## 常见问题
@@ -93,9 +90,6 @@ A：仅翻译高频 UI 文本，不翻译用户内容（标题、代码、评论
 
 **Q：布局错乱？**
 A：确保使用最新版，且未同时启用其他翻译插件。
-
-**Q：如何添加新的抓取页面？**
-A：在 Web 界面点击"添加页面"，输入 URL 和模块信息即可。
 
 **Q：如何贡献新的翻译词条？**
 A：直接修改 `src/dictionaries/` 下的相应词典文件，提交 PR 即可。
@@ -141,7 +135,7 @@ npm run build
 
 ### 项目规范
 
-详细的项目规范请参考 [openspec/project.md](openspec/project.md)。
+详细的项目规范请参考 [docs/project.md](docs/project.md)。
 
 ## 许可证
 

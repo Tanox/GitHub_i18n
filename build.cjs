@@ -11,9 +11,7 @@ const path = require('path');
 const PROJECT_ROOT = path.resolve(__dirname);
 const SRC_DIR = path.join(PROJECT_ROOT, 'src');
 const BUILD_DIR = path.join(PROJECT_ROOT, 'build');
-const DIST_DIR = path.join(PROJECT_ROOT, 'dist');
 const OUTPUT_FILE = path.join(BUILD_DIR, 'GitHub_i18n.user.js');
-const DIST_OUTPUT = path.join(DIST_DIR, 'GitHub_i18n.user.js');
 
 const SOURCE_ORDER = [
   'version.js',
@@ -110,14 +108,10 @@ function cleanProject() {
   if (fs.existsSync(BUILD_DIR)) {
     fs.rmSync(BUILD_DIR, { recursive: true });
   }
-  if (fs.existsSync(DIST_DIR)) {
-    fs.rmSync(DIST_DIR, { recursive: true });
-  }
 }
 
 function createBuildDir() {
   fs.mkdirSync(BUILD_DIR, { recursive: true });
-  fs.mkdirSync(DIST_DIR, { recursive: true });
 }
 
 function buildUserScript(version) {
@@ -146,7 +140,6 @@ function build() {
 
   console.log('🔨 开始构建...');
   buildUserScript(version);
-  fs.copyFileSync(OUTPUT_FILE, DIST_OUTPUT);
 
   const fileSize = (fs.readFileSync(OUTPUT_FILE, 'utf-8').length / 1024).toFixed(2);
   
