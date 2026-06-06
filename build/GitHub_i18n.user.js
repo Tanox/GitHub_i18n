@@ -1811,11 +1811,26 @@ const domObserver = {
       if (!mutations || mutations.length === 0) {
         return false;
       }
+<<<<<<< HEAD
       const { mutationThreshold = 30, maxMutationProcessing = 50 } = CONFIG.performance || {};
+=======
+      const {
+        importantElements = [],
+        ignoreElements = [],
+        importantAttributes = ['id', 'class', 'href', 'title'],
+        mutationThreshold = 30,
+        contentChangeWeight = 1,
+        importantChangeWeight = 2,
+        translationTriggerRatio = 0.3,
+        maxMutationProcessing = 50,
+        minContentChangesToTrigger = 3,
+      } = CONFIG.performance || {};
+>>>>>>> origin/main
       const quickPathThreshold = pageAnalyzer.getQuickPathThresholdByPageMode(pageMode);
       if (mutations.length <= quickPathThreshold) {
         return this.detectImportantChanges(mutations, pageMode);
       }
+<<<<<<< HEAD
       const maxCheckCount = Math.min(mutations.length, Math.max(mutationThreshold, maxMutationProcessing));
       const batchResult = processMutationBatch(mutations.slice(0, maxCheckCount), maxCheckCount, pageMode);
       if (batchResult.shouldTrigger) {
@@ -1827,6 +1842,77 @@ const domObserver = {
         maxCheckCount,
         pageMode,
       );
+=======
+      let contentChanges = 0;
+      let importantChanges = 0;
+      const maxCheckCount = Math.min(
+        mutations.length,
+        Math.max(mutationThreshold, maxMutationProcessing),
+      );
+      const elementCheckCache = new WeakMap();
+      for (let i = 0; i < maxCheckCount; i++) {
+        const mutation = mutations[i];
+        if (mutation.type === 'characterData' && CONFIG.performance?.ignoreCharacterDataMutations) {
+          continue;
+        }
+        if (mutation.type === 'attributes' && CONFIG.performance?.ignoreAttributeMutations) {
+          continue;
+        }
+        if (mutation.target) {
+          let isIgnored = elementCheckCache.get(mutation.target);
+          if (isIgnored === undefined) {
+            isIgnored = this.shouldIgnoreElement(
+              mutation.target,
+              ignoreElements,
+              elementCheckCache,
+              pageMode,
+            );
+            elementCheckCache.set(mutation.target, isIgnored);
+          }
+          if (isIgnored) {
+            continue;
+          }
+          let isImportant = elementCheckCache.get(`important-${mutation.target}`);
+          if (isImportant === undefined && mutation.target.nodeType === Node.ELEMENT_NODE) {
+            isImportant = this.isImportantElement(
+              mutation.target,
+              importantElements,
+              elementCheckCache,
+              pageMode,
+            );
+            elementCheckCache.set(`important-${mutation.target}`, isImportant);
+          }
+          if (isImportant) {
+            return true;
+          }
+        }
+        if (mutation.type === 'attributes') {
+          if (
+            CONFIG.performance?.observeAttributes &&
+            importantAttributes.includes(mutation.attributeName)
+          ) {
+            importantChanges++;
+            if (importantChanges >= 3) {
+              return true;
+            }
+          }
+          continue;
+        }
+        if (this.isContentRelatedMutation(mutation, pageMode)) {
+          contentChanges++;
+          if (contentChanges >= Math.max(5, minContentChangesToTrigger)) {
+            return true;
+          }
+        }
+      }
+      if (contentChanges < minContentChangesToTrigger) {
+        return false;
+      }
+      const weightedChanges =
+        contentChanges * contentChangeWeight + importantChanges * importantChangeWeight;
+      const threshold = pageAnalyzer.getModeSpecificThreshold(pageMode) || translationTriggerRatio;
+      return weightedChanges / maxCheckCount > threshold;
+>>>>>>> origin/main
     } catch (error) {
       console.error('[GitHub 中文翻译] 判断翻译触发条件时出错:', error);
       return false;
@@ -3299,6 +3385,7 @@ const pageModeDetector = {
  * @author Sut
  * @description 选择需要翻译的DOM元素
  */
+<<<<<<< HEAD
 const SKIP_TAGS = ['script', 'style', 'code', 'pre', 'textarea', 'input', 'select', 'img', 'svg', 'canvas', 'video', 'audio'];
 const SKIP_CLASS_PATTERNS = [
   /language-\w+/, /highlight/, /token/, /no-translate/, /octicon/, /emoji/, /avatar/,
@@ -3358,6 +3445,8 @@ function isHiddenElement(element) {
 function isNumericOrSpecialOnly(text) {
   return /^[0-9.,\s()[\]{}/*^$#@!~`|:;"'?>+-]+$/i.test(text);
 }
+=======
+>>>>>>> origin/main
 const elementSelector = {
   elementCache: new WeakMap(),
   getElementsToTranslate() {
@@ -3410,7 +3499,26 @@ const elementSelector = {
     if (!element.textContent.trim()) {
       return false;
     }
+<<<<<<< HEAD
     if (isSkipTag(element.tagName)) {
+=======
+    const skipTags = [
+      'script',
+      'style',
+      'code',
+      'pre',
+      'textarea',
+      'input',
+      'select',
+      'img',
+      'svg',
+      'canvas',
+      'video',
+      'audio',
+    ];
+    const tagName = element.tagName.toLowerCase();
+    if (skipTags.includes(tagName)) {
+>>>>>>> origin/main
       return false;
     }
     if (
@@ -3421,6 +3529,7 @@ const elementSelector = {
     ) {
       return false;
     }
+<<<<<<< HEAD
     if (hasSkipClass(element.className)) {
       return false;
     }
@@ -3432,6 +3541,244 @@ const elementSelector = {
     }
     const textContent = element.textContent.trim();
     if (!textContent || isNumericOrSpecialOnly(textContent)) {
+=======
+    const className = element.className;
+    if (className) {
+      const skipClassPatterns = [
+        /language-\w+/,
+        /highlight/,
+        /token/,
+        /no-translate/,
+        /octicon/,
+        /emoji/,
+        /avatar/,
+        /timestamp/,
+        /numeral/,
+        /filename/,
+        /hash/,
+        /sha/,
+        /shortsha/,
+        /hex-color/,
+        /code/,
+        /gist/,
+        /language-/,
+        /markdown-/,
+        /monaco-editor/,
+        /syntax-/,
+        /highlight-/,
+        /clipboard/,
+        /progress-/,
+        /count/,
+        /size/,
+        /time/,
+        /date/,
+        /sortable/,
+        /label/,
+        /badge/,
+        /url/,
+        /email/,
+        /key/,
+        /token/,
+        /user-name/,
+        /repo-name/,
+      ];
+      if (skipClassPatterns.some((pattern) => pattern.test(className))) {
+        return false;
+      }
+    }
+    const id = element.id;
+    if (id) {
+      const skipIdPatterns = [
+        /\d+/,
+        /-\d+/,
+        /_\d+/,
+        /sha-/,
+        /hash-/,
+        /commit-/,
+        /issue-/,
+        /pull-/,
+        /pr-/,
+        /repo-/,
+        /user-/,
+        /file-/,
+        /blob-/,
+        /tree-/,
+        /branch-/,
+        /tag-/,
+        /release-/,
+        /gist-/,
+        /discussion-/,
+        /comment-/,
+        /review-/,
+        /workflow-/,
+        /action-/,
+        /job-/,
+        /step-/,
+        /runner-/,
+        /package-/,
+        /registry-/,
+        /marketplace-/,
+        /organization-/,
+        /team-/,
+        /project-/,
+        /milestone-/,
+        /assignee-/,
+        /reporter-/,
+        /reviewer-/,
+        /author-/,
+        /committer-/,
+        /contributor-/,
+        /sponsor-/,
+        /funding-/,
+        /donation-/,
+        /payment-/,
+        /billing-/,
+        /plan-/,
+        /subscription-/,
+        /license-/,
+        /secret-/,
+        /key-/,
+        /token-/,
+        /password-/,
+        /credential-/,
+        /certificate-/,
+        /ssh-/,
+        /git-/,
+        /clone-/,
+        /push-/,
+        /pull-/,
+        /fetch-/,
+        /merge-/,
+        /rebase-/,
+        /cherry-pick-/,
+        /reset-/,
+        /revert-/,
+        /tag-/,
+        /branch-/,
+        /commit-/,
+        /diff-/,
+        /patch-/,
+        /stash-/,
+        /ref-/,
+        /head-/,
+        /remote-/,
+        /upstream-/,
+        /origin-/,
+        /local-/,
+        /tracking-/,
+        /merge-base-/,
+        /conflict-/,
+        /resolve-/,
+        /status-/,
+        /log-/,
+        /blame-/,
+        /bisect-/,
+        /grep-/,
+        /find-/,
+        /filter-/,
+        /archive-/,
+        /submodule-/,
+        /worktree-/,
+        /lfs-/,
+        /graphql-/,
+        /rest-/,
+        /api-/,
+        /webhook-/,
+        /event-/,
+        /payload-/,
+        /callback-/,
+        /redirect-/,
+        /oauth-/,
+        /sso-/,
+        /ldap-/,
+        /saml-/,
+        /2fa-/,
+        /mfa-/,
+        /security-/,
+        /vulnerability-/,
+        /cve-/,
+        /dependency-/,
+        /alert-/,
+        /secret-scanning-/,
+        /code-scanning-/,
+        /codeql-/,
+        /actions-/,
+        /workflow-/,
+        /job-/,
+        /step-/,
+        /runner-/,
+        /artifact-/,
+        /cache-/,
+        /environment-/,
+        /deployment-/,
+        /app-/,
+        /oauth-app-/,
+        /github-app-/,
+        /integration-/,
+        /webhook-/,
+        /marketplace-/,
+        /listing-/,
+        /subscription-/,
+        /billing-/,
+        /plan-/,
+        /usage-/,
+        /limits-/,
+        /quota-/,
+        /traffic-/,
+        /analytics-/,
+        /insights-/,
+        /search-/,
+        /explore-/,
+        /trending-/,
+        /stars-/,
+        /forks-/,
+        /watchers-/,
+        /contributors-/,
+        /activity-/,
+        /events-/,
+        /notifications-/,
+        /feeds-/,
+        /dashboard-/,
+        /profile-/,
+        /settings-/,
+        /preferences-/,
+        /billing-/,
+        /organization-/,
+        /team-/,
+        /project-/,
+        /milestone-/,
+        /label-/,
+        /assignee-/,
+        /reporter-/,
+        /reviewer-/,
+        /author-/,
+        /committer-/,
+        /contributor-/,
+        /sponsor-/,
+        /funding-/,
+        /donation-/,
+        /payment-/,
+        /\b\w+[0-9]\w*\b/,
+      ];
+      if (skipIdPatterns.some((pattern) => pattern.test(id))) {
+        return false;
+      }
+    }
+    const computedStyle = window.getComputedStyle(element);
+    if (
+      computedStyle.display === 'none' ||
+      computedStyle.visibility === 'hidden' ||
+      computedStyle.opacity === '0' ||
+      (computedStyle.position === 'absolute' && computedStyle.left === '-9999px')
+    ) {
+      return false;
+    }
+    const textContent = element.textContent.trim();
+    if (textContent.length === 0) {
+      return false;
+    }
+    if (/^[0-9.,\s()[\]{}/*^$#@!~`|:;"'?>+-]+$/i.test(textContent)) {
+>>>>>>> origin/main
       return false;
     }
     return true;
