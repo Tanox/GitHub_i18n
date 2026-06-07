@@ -60,6 +60,7 @@ export const elementTranslator = {
 
     const fragment = document.createDocumentFragment();
     let hasTranslation = false;
+    let hasTranslatableContent = false;
 
     const childNodes = Array.from(element.childNodes);
     const textNodesToProcess = [];
@@ -68,14 +69,19 @@ export const elementTranslator = {
       if (node.nodeType === Node.TEXT_NODE) {
         const trimmedText = node.nodeValue.trim();
         if (trimmedText && trimmedText.length >= CONFIG.performance?.minTextLengthToTranslate) {
-          textNodesToProcess.push(node);
+          // 预先检查是否有对应的翻译
+          const translatedText = dictionaryManager.getTranslatedText(trimmedText);
+          if (translatedText && translatedText !== trimmedText) {
+            textNodesToProcess.push({ node, originalText: node.nodeValue });
+            hasTranslatableContent = true;
+          }
         }
       } else if (node.nodeType === Node.ELEMENT_NODE) {
         try {
           element.removeChild(node);
           fragment.appendChild(node);
           const childTranslated = this.translateElement(node);
-          hasTranslation = hasTranslation || childTranslated;
+          hasTranslatableContent = hasTranslatableContent || childTranslated;
         } catch (e) {
           if (CONFIG.debugMode) {
             console.error('[GitHub 中文翻译] 处理子元素失败:', e, '元素:', node);
@@ -93,14 +99,21 @@ export const elementTranslator = {
       }
     }
 
-    textNodesToProcess.forEach((node) => {
+    // 如果没有任何可翻译的内容，直接返回false，不修改DOM
+    if (!hasTranslatableContent) {
+      return false;
+    }
+
+    // 只有在有可翻译内容时才进行文本节点处理
+    textNodesToProcess.forEach(({ node, originalText }) => {
       const parentNode = node.parentNode;
-      parentNode.removeChild(node);
+      if (parentNode) {
+        parentNode.removeChild(node);
+      }
 
-      const originalText = node.nodeValue;
-      const translatedText = dictionaryManager.getTranslatedText(originalText);
+      const translatedText = dictionaryManager.getTranslatedText(originalText.trim());
 
-      if (translatedText && typeof translatedText === 'string' && translatedText !== originalText) {
+      if (translatedText && typeof translatedText === 'string' && translatedText !== originalText.trim()) {
         try {
           const safeTranslatedText =
             typeof translatedText === 'string'
@@ -140,8 +153,6 @@ export const elementTranslator = {
 
     if (hasTranslation) {
       virtualDomManager.markElementAsTranslated(element);
-    } else {
-      element.setAttribute('data-github-zh-translated', 'checked');
     }
 
     elementSelector.elementCache.set(element, true);
