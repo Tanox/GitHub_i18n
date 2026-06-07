@@ -1,141 +1,83 @@
-# GitHub 中文本地化解决方案
+# GitHub 中文翻译插件
 
-> 🌐 为 GitHub 全站 UI 提供精准中文翻译 + 自动化字符串更新工具
+让 GitHub 界面变成中文，提升使用体验！
 
 [![GitHub license](https://img.shields.io/github/license/Tanox/GitHub_i18n?color=blue)](LICENSE)
 [![GitHub release](https://img.shields.io/github/v/release/Tanox/GitHub_i18n?display_name=tag&color=green)](https://github.com/Tanox/GitHub_i18n/releases)
 [![Userscript](https://img.shields.io/badge/Install-Tampermonkey-green?logo=tampermonkey)](https://github.com/Tanox/GitHub_i18n/raw/main/build/GitHub_i18n.user.js)
 
-## 项目组件
+## 功能特点
 
-| 组件                      | 说明                                    |
-| ------------------------- | --------------------------------------- |
-| **GitHub_i18n.user.js**   | 油猴用户脚本，翻译 GitHub 高频 UI 文本  |
-| **src/dictionaries/**      | 翻译词典模块（common、codespaces、explore） |
-| **src/page-monitor/**     | 页面监控模块（DOM 观察器、路径监听等）   |
-| **src/translation-core/** | 翻译核心模块（词典管理、元素翻译等）    |
+- ✅ **全站翻译**：仓库、仪表盘、设置、通知、Codespaces、Explore 等页面都能翻译
+- ✅ **布局稳定**：只翻译文字，不会破坏页面布局
+- ✅ **快速响应**：本地词典，无需联网，瞬间生效
+- ✅ **动态适配**：支持页面跳转、加载更多、下拉菜单等动态内容
+- ✅ **自动更新**：Tampermonkey 会自动检测并更新新版本
+- ✅ **性能友好**：智能优化，不会拖慢页面速度
 
-## 功能特性
+## 安装使用
 
-### 用户脚本核心功能
+### 第一步：安装 Tampermonkey
 
-- ✅ **全站覆盖**：仓库、仪表盘、设置、通知、Codespaces、Explore 等
-- ✅ **布局安全**：仅替换文本节点，绝不修改 DOM 结构
-- ✅ **零延迟**：本地词典即时生效，无网络请求
-- ✅ **动态兼容**：支持 SPA 路由、AJAX、下拉菜单、懒加载
-- ✅ **自动更新**：Tampermonkey 自动检测新版本
-- ✅ **性能监控**：内置监控面板，实时显示翻译性能
-- ✅ **多语言支持**：国际化框架，支持中英文切换
+首先需要在浏览器中安装 [Tampermonkey](https://www.tampermonkey.net/) 扩展程序，支持 Chrome、Edge、Firefox 等主流浏览器。
 
-### 翻译引擎特性
+### 第二步：安装脚本
 
-- 🔍 **智能页面检测**：自动识别仓库、Issue、PR、Wiki 等页面类型
-- 📊 **性能优化**：
-  - Trie 树数据结构高效字符串匹配
-  - LRU 缓存策略减少重复翻译
-  - 批量处理优化大数据量场景
-  - 智能节流机制避免过度翻译
-- 🎯 **虚拟 DOM 优化**：减少不必要的 DOM 操作
-- 🔧 **错误恢复**：完善的错误处理和恢复机制
+点击 [一键安装](https://github.com/Tanox/GitHub_i18n/raw/refs/heads/main/build/GitHub_i18n.user.js)，Tampermonkey 会自动弹出安装确认页面，点击「安装」即可。
 
-### 自动化工具
+### 第三步：开始使用
 
-- 🤖 自动抓取 GitHub 页面文本字符串
-- 🔢 智能分类到相应翻译模块
-- 💾 自动备份原始文件
-- 🎛️ Web 界面操作（配置管理、实时日志、统计）
-
-## 安装
-
-### 用户脚本
-
-1. 安装 [Tampermonkey](https://www.tampermonkey.net/)
-2. 点击 [安装脚本](https://github.com/Tanox/GitHub_i18n/raw/refs/heads/main/build/GitHub_i18n.user.js)
-3. 刷新 GitHub 页面即可看到中文界面
-
-## 项目结构
-
-```
-GitHub_i18n/
-├── build/                    # 构建产物
-│   └── GitHub_i18n.user.js   # 油猴用户脚本
-├── src/                      # 源代码
-│   ├── core/                 # 核心模块（Trie树、缓存、错误处理等）
-│   ├── dictionaries/         # 翻译词典
-│   │   ├── index.js         # 词典合并
-│   │   ├── common.js        # 通用词典
-│   │   ├── codespaces.js    # Codespaces 词典
-│   │   └── explore.js       # Explore 词典
-│   ├── page-monitor/         # 页面监控
-│   │   ├── domObserver.js   # DOM 观察器
-│   │   ├── pathListener.js  # 路径监听
-│   │   └── ...
-│   ├── translation-core/     # 翻译核心
-│   │   ├── elementSelector.js    # 元素选择器
-│   │   ├── elementTranslator.js  # 元素翻译器
-│   │   └── ...
-│   ├── ui/                   # 用户界面
-│   ├── utils/                # 工具函数
-│   ├── config.js            # 配置文件
-│   ├── i18n.js              # 国际化框架
-│   └── main.js              # 主入口
-├── docs/                     # 项目文档
-└── build.cjs                 # 构建脚本
-```
+刷新 GitHub 页面，你会看到界面已经变成中文了！
 
 ## 常见问题
 
 **Q：有些文字没翻译？**
-A：仅翻译高频 UI 文本，不翻译用户内容（标题、代码、评论等）。
 
-**Q：布局错乱？**
-A：确保使用最新版，且未同时启用其他翻译插件。
+A：本插件主要翻译界面文字，不会翻译用户内容（如仓库标题、代码、评论等）。如果有漏翻的界面文字，欢迎反馈。
 
-**Q：如何贡献新的翻译词条？**
-A：直接修改 `src/dictionaries/` 下的相应词典文件，提交 PR 即可。
+**Q：页面布局乱了？**
 
-## 开发与贡献
+A：请确保使用最新版本，并避免同时启用其他翻译插件。如果还有问题，请提交 Issue。
 
-欢迎提交 Issue 和 PR！
+**Q：如何关闭插件？**
 
-- 漏翻/误翻反馈：[问题反馈](https://github.com/Tanox/GitHub_i18n/issues)
-- 新增术语：直接修改 `src/dictionaries/` 下的词典文件提交 PR
+A：点击浏览器工具栏的 Tampermonkey 图标，在菜单中取消勾选「GitHub 中文翻译插件」即可。
 
-### 开发环境设置
+**Q：如何贡献翻译？**
+
+A：欢迎提交 PR！直接修改 `src/dictionaries/` 目录下的词典文件即可。
+
+## 项目说明
+
+这是一个开源项目，使用以下技术构建：
+
+- 翻译数据存储在 `src/dictionaries/` 目录
+- 核心代码位于 `src/` 目录
+- 构建产物在 `build/GitHub_i18n.user.js`
+
+### 开发指南
+
+如果你想参与开发：
 
 ```bash
-# 克隆仓库
+# 克隆项目
 git clone https://github.com/Tanox/GitHub_i18n.git
 cd GitHub_i18n
 
 # 安装依赖
 npm install
 
+# 构建脚本
+npm run build
+
 # 运行测试
 npm run test
 
 # 代码检查
 npm run lint
-
-# 代码格式化
-npm run format
-
-# 构建用户脚本
-npm run build
 ```
 
-### 项目质量保障
-
-项目使用以下工具保证代码质量：
-
-- **ESLint**: 代码规范检查
-- **Prettier**: 代码格式化
-- **Jest**: 单元测试框架（97 个测试用例）
-- **Husky + lint-staged**: Git 提交前自动检查
-
-### 项目规范
-
-详细的项目规范请参考 [docs/project.md](docs/project.md)。
+更多开发细节请查看 [docs/development.md](docs/development.md)。
 
 ## 许可证
 
