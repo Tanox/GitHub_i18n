@@ -836,9 +836,13 @@ class ConfigUI {
    */
   ensureToggleButton() {
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        this.createToggleButton();
-      }, { once: true });
+      document.addEventListener(
+        'DOMContentLoaded',
+        () => {
+          this.createToggleButton();
+        },
+        { once: true },
+      );
     } else if (document.body) {
       this.createToggleButton();
     } else {

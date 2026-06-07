@@ -1,0 +1,26 @@
+schema: spec-driven
+
+# Project context
+context: |
+  技术栈: JavaScript, Node.js
+  使用语义化提交
+  领域: GitHub中文本地化插件
+  规范文档: spec/ 目录存放正式规范文档
+
+# Per-artifact rules
+rules:
+  proposal:
+    - 保持提案在500字以内
+    - 始终包含'非目标'部分
+
+# Specification directories
+specDirectories:
+  - path: ../spec
+    purpose: 存放正式规范文档
+    description: |
+      包含项目架构、开发指南、代码风格等正式规范文档。
+      主要文档：
+      - architecture.md: 系统架构文档
+      - development.md: 开发流程指南
+      - coding-style.md: 代码风格规范
+

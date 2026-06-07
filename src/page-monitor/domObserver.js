@@ -194,20 +194,10 @@ function calculateMutationWeights(mutation, pageMode, elementCheckCache) {
   let shouldTrigger = false;
 
   if (mutation.target) {
-    const isIgnored = isElementIgnored(
-      mutation.target,
-      [],
-      elementCheckCache,
-      pageMode,
-    );
+    const isIgnored = isElementIgnored(mutation.target, [], elementCheckCache, pageMode);
 
     if (!isIgnored) {
-      const isImportant = isElementImportant(
-        mutation.target,
-        [],
-        elementCheckCache,
-        pageMode,
-      );
+      const isImportant = isElementImportant(mutation.target, [], elementCheckCache, pageMode);
 
       if (isImportant) {
         shouldTrigger = true;
@@ -255,11 +245,19 @@ function processMutationBatch(mutations, maxCheckCount, pageMode) {
     totalImportantChanges += result.importantChanges;
 
     if (result.shouldTrigger) {
-      return { shouldTrigger: true, contentChanges: totalContentChanges, importantChanges: totalImportantChanges };
+      return {
+        shouldTrigger: true,
+        contentChanges: totalContentChanges,
+        importantChanges: totalImportantChanges,
+      };
     }
   }
 
-  return { shouldTrigger: false, contentChanges: totalContentChanges, importantChanges: totalImportantChanges };
+  return {
+    shouldTrigger: false,
+    contentChanges: totalContentChanges,
+    importantChanges: totalImportantChanges,
+  };
 }
 
 function checkWeightedThreshold(contentChanges, importantChanges, maxCheckCount, pageMode) {
@@ -270,7 +268,8 @@ function checkWeightedThreshold(contentChanges, importantChanges, maxCheckCount,
     return false;
   }
 
-  const weightedChanges = contentChanges * config.contentWeight + importantChanges * config.importantWeight;
+  const weightedChanges =
+    contentChanges * config.contentWeight + importantChanges * config.importantWeight;
   const threshold = pageAnalyzer.getModeSpecificThreshold(pageMode) || 0.3;
 
   return weightedChanges / maxCheckCount > threshold;
@@ -494,9 +493,16 @@ export const domObserver = {
         return this.detectImportantChanges(mutations, pageMode);
       }
 
-      const maxCheckCount = Math.min(mutations.length, Math.max(mutationThreshold, maxMutationProcessing));
+      const maxCheckCount = Math.min(
+        mutations.length,
+        Math.max(mutationThreshold, maxMutationProcessing),
+      );
 
-      const batchResult = processMutationBatch(mutations.slice(0, maxCheckCount), maxCheckCount, pageMode);
+      const batchResult = processMutationBatch(
+        mutations.slice(0, maxCheckCount),
+        maxCheckCount,
+        pageMode,
+      );
 
       if (batchResult.shouldTrigger) {
         return true;

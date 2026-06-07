@@ -118,7 +118,8 @@ function buildUserScript(version) {
   createBuildDir();
 
   const mergedCode = mergeSourceFiles();
-  let scriptContent = USER_SCRIPT_HEADER.replace('{VERSION}', version) + mergedCode + USER_SCRIPT_FOOTER;
+  let scriptContent =
+    USER_SCRIPT_HEADER.replace('{VERSION}', version) + mergedCode + USER_SCRIPT_FOOTER;
 
   scriptContent = scriptContent.replace(/\n{3,}/g, '\n\n');
   scriptContent = scriptContent.replace(/\s+\n/g, '\n');
@@ -142,7 +143,7 @@ function build() {
   buildUserScript(version);
 
   const fileSize = (fs.readFileSync(OUTPUT_FILE, 'utf-8').length / 1024).toFixed(2);
-  
+
   console.log('\n========================================');
   console.log('  🎉 构建完成!');
   console.log(`  📦 构建产物: ${OUTPUT_FILE}`);

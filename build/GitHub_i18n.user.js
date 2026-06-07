@@ -1554,19 +1554,9 @@ function calculateMutationWeights(mutation, pageMode, elementCheckCache) {
   let importantChanges = 0;
   let shouldTrigger = false;
   if (mutation.target) {
-    const isIgnored = isElementIgnored(
-      mutation.target,
-      [],
-      elementCheckCache,
-      pageMode,
-    );
+    const isIgnored = isElementIgnored(mutation.target, [], elementCheckCache, pageMode);
     if (!isIgnored) {
-      const isImportant = isElementImportant(
-        mutation.target,
-        [],
-        elementCheckCache,
-        pageMode,
-      );
+      const isImportant = isElementImportant(mutation.target, [], elementCheckCache, pageMode);
       if (isImportant) {
         shouldTrigger = true;
       }
@@ -1605,10 +1595,18 @@ function processMutationBatch(mutations, maxCheckCount, pageMode) {
     totalContentChanges += result.contentChanges;
     totalImportantChanges += result.importantChanges;
     if (result.shouldTrigger) {
-      return { shouldTrigger: true, contentChanges: totalContentChanges, importantChanges: totalImportantChanges };
+      return {
+        shouldTrigger: true,
+        contentChanges: totalContentChanges,
+        importantChanges: totalImportantChanges,
+      };
     }
   }
-  return { shouldTrigger: false, contentChanges: totalContentChanges, importantChanges: totalImportantChanges };
+  return {
+    shouldTrigger: false,
+    contentChanges: totalContentChanges,
+    importantChanges: totalImportantChanges,
+  };
 }
 function checkWeightedThreshold(contentChanges, importantChanges, maxCheckCount, pageMode) {
   const config = PAGE_MODE_THRESHOLDS[pageMode] || PAGE_MODE_THRESHOLDS.search;
@@ -1616,7 +1614,8 @@ function checkWeightedThreshold(contentChanges, importantChanges, maxCheckCount,
   if (contentChanges < minContentChanges) {
     return false;
   }
-  const weightedChanges = contentChanges * config.contentWeight + importantChanges * config.importantWeight;
+  const weightedChanges =
+    contentChanges * config.contentWeight + importantChanges * config.importantWeight;
   const threshold = pageAnalyzer.getModeSpecificThreshold(pageMode) || 0.3;
   return weightedChanges / maxCheckCount > threshold;
 }
@@ -1816,8 +1815,15 @@ const domObserver = {
       if (mutations.length <= quickPathThreshold) {
         return this.detectImportantChanges(mutations, pageMode);
       }
-      const maxCheckCount = Math.min(mutations.length, Math.max(mutationThreshold, maxMutationProcessing));
-      const batchResult = processMutationBatch(mutations.slice(0, maxCheckCount), maxCheckCount, pageMode);
+      const maxCheckCount = Math.min(
+        mutations.length,
+        Math.max(mutationThreshold, maxMutationProcessing),
+      );
+      const batchResult = processMutationBatch(
+        mutations.slice(0, maxCheckCount),
+        maxCheckCount,
+        pageMode,
+      );
       if (batchResult.shouldTrigger) {
         return true;
       }
@@ -2890,12 +2896,13 @@ const commonDictionary = {
   'Generate new repository': '生成新仓库',
   'Use this template to create a new repository': '使用此模板创建新仓库',
   'Include all branches': '包含所有分支',
-  'Owner': '所有者',
+  Owner: '所有者',
   'Repository name': '仓库名称',
   'Description (optional)': '描述（可选）',
-  'Public': '公开',
-  'Anyone on the internet can see this repository. You choose who can commit.': '互联网上的任何人都可以看到此仓库。您选择谁可以提交。',
-  'Private': '私有',
+  Public: '公开',
+  'Anyone on the internet can see this repository. You choose who can commit.':
+    '互联网上的任何人都可以看到此仓库。您选择谁可以提交。',
+  Private: '私有',
   'You choose who can see and commit to this repository.': '您选择谁可以查看和提交到此仓库。',
   'Create repository': '创建仓库',
   'Import a repository': '导入仓库',
@@ -2909,48 +2916,51 @@ const commonDictionary = {
   'Your gists': '您的代码片段',
   'Sign out': '登出',
   'Set status': '设置状态',
-  'Available': '有空',
-  'Busy': '忙碌',
+  Available: '有空',
+  Busy: '忙碌',
   'Do not disturb': '请勿打扰',
   'In a meeting': '会议中',
-  'Commuting': '通勤中',
-  'Sick': '生病',
-  'Vacationing': '休假中',
+  Commuting: '通勤中',
+  Sick: '生病',
+  Vacationing: '休假中',
   'Working remotely': '远程工作中',
-  'Focusing': '专注中',
-  'Presenting': '演示中',
+  Focusing: '专注中',
+  Presenting: '演示中',
   'Custom status': '自定义状态',
   'What’s on your mind?': '你在想什么？',
   'Clear status': '清除状态',
   'Set status message': '设置状态消息',
   'Set status emoji': '设置状态表情',
   'Set status until': '设置状态至',
-  'Never': '从不',
-  'Today': '今天',
+  Never: '从不',
+  Today: '今天',
   'This week': '本周',
   'Custom date': '自定义日期',
-  'Save': '保存',
-  'Cancel': '取消',
+  Save: '保存',
+  Cancel: '取消',
   'Quick setup — if you’ve done this kind of thing before': '快速设置 — 如果您之前做过这种事',
-  'Get started by creating a new file or uploading an existing file. We recommend every repository include a README, LICENSE, and .gitignore.': '通过创建新文件或上传现有文件开始。我们建议每个仓库都包含 README、LICENSE 和 .gitignore。',
+  'Get started by creating a new file or uploading an existing file. We recommend every repository include a README, LICENSE, and .gitignore.':
+    '通过创建新文件或上传现有文件开始。我们建议每个仓库都包含 README、LICENSE 和 .gitignore。',
   '…or create a new repository on the command line': '…或在命令行上创建新仓库',
   '…or push an existing repository from the command line': '…或从命令行推送现有仓库',
   '…or import code from another repository': '…或从另一个仓库导入代码',
-  'You can initialize this repository with code from a Subversion, Mercurial, or TFS project.': '您可以使用 Subversion、Mercurial 或 TFS 项目的代码初始化此仓库。',
+  'You can initialize this repository with code from a Subversion, Mercurial, or TFS project.':
+    '您可以使用 Subversion、Mercurial 或 TFS 项目的代码初始化此仓库。',
   'Import code': '导入代码',
   'Create new file': '创建新文件',
   'Upload files': '上传文件',
   'Find file': '查找文件',
   'Go to file': '前往文件',
-  'Preview': '预览',
-  'Code': '代码',
+  Preview: '预览',
+  Code: '代码',
   'Preview changes': '预览更改',
   'No changes': '无更改',
   'Edit new file': '编辑新文件',
-  'Cancel': '取消',
+  Cancel: '取消',
   'Commit changes': '提交更改',
   'Commit directly to the main branch.': '直接提交到 main 分支。',
-  'Create a new branch for this commit and start a pull request.': '为此提交创建一个新分支并开始拉取请求。',
+  'Create a new branch for this commit and start a pull request.':
+    '为此提交创建一个新分支并开始拉取请求。',
   'Learn more about pull requests.': '了解更多关于拉取请求的信息。',
   'Propose new file': '提议新文件',
   'Propose changes': '提议更改',
@@ -3173,8 +3183,10 @@ const commonDictionary = {
   'The repository has been disabled for Tag Protection Rules.': '仓库已禁用标签保护规则。',
   'The repository has been enabled for Required Status Checks.': '仓库已启用必需状态检查。',
   'The repository has been disabled for Required Status Checks.': '仓库已禁用必需状态检查。',
-  'The repository has been enabled for Required Pull Request Reviews.': '仓库已启用必需拉取请求审查。',
-  'The repository has been disabled for Required Pull Request Reviews.': '仓库已禁用必需拉取请求审查。',
+  'The repository has been enabled for Required Pull Request Reviews.':
+    '仓库已启用必需拉取请求审查。',
+  'The repository has been disabled for Required Pull Request Reviews.':
+    '仓库已禁用必需拉取请求审查。',
   'The repository has been enabled for Required Signatures.': '仓库已启用必需签名。',
   'The repository has been disabled for Required Signatures.': '仓库已禁用必需签名。',
   'The repository has been enabled for Linear History.': '仓库已启用线性历史。',
@@ -3193,61 +3205,87 @@ const commonDictionary = {
   'The repository has been disabled for Allow Rebase Merging.': '仓库已禁用允许变基合并。',
   'The repository has been enabled for Allow Auto-Merge.': '仓库已启用允许自动合并。',
   'The repository has been disabled for Allow Auto-Merge.': '仓库已禁用允许自动合并。',
-  'The repository has been enabled for Automatically Delete Head Branches.': '仓库已启用自动删除头部分支。',
-  'The repository has been disabled for Automatically Delete Head Branches.': '仓库已禁用自动删除头部分支。',
+  'The repository has been enabled for Automatically Delete Head Branches.':
+    '仓库已启用自动删除头部分支。',
+  'The repository has been disabled for Automatically Delete Head Branches.':
+    '仓库已禁用自动删除头部分支。',
   // GitHub 首页 / Landing Page
   'The future of building happens together': '共同构建未来',
-  'Tools and trends evolve, but collaboration endures. With GitHub, developers, agents, and code come together on one platform.': '工具和趋势在演变，但协作永存。在 GitHub，开发者、AI Agent 和代码汇聚于同一个平台。',
+  'Tools and trends evolve, but collaboration endures. With GitHub, developers, agents, and code come together on one platform.':
+    '工具和趋势在演变，但协作永存。在 GitHub，开发者、AI Agent 和代码汇聚于同一个平台。',
   'Try GitHub Copilot': '尝试 GitHub Copilot',
   'GitHub features': 'GitHub 功能',
-  'Write, test, and fix code quickly with GitHub Copilot, from simple boilerplate to complex features.': '使用 GitHub Copilot 快速编写、测试和修复代码，从简单模板到复杂功能。',
+  'Write, test, and fix code quickly with GitHub Copilot, from simple boilerplate to complex features.':
+    '使用 GitHub Copilot 快速编写、测试和修复代码，从简单模板到复杂功能。',
   'GitHub customers': 'GitHub 客户',
   'Accelerate your entire workflow': '加速您的工作流程',
-  'From your first line of code to final deployment, GitHub provides AI and automation tools to help you build and ship better software faster.': '从第一行代码到最终部署，GitHub 提供 AI 和自动化工具，帮助您更快地构建和发布更好的软件。',
-  'Your AI partner everywhere. Copilot is ready to work with you at each step of the software development lifecycle.': '您的 AI 伙伴无处不在。Copilot 准备好在软件开发生命周期的每一步与您合作。',
-  'Duolingo boosts developer speed by 25% with GitHub Copilot': 'Duolingo 使用 GitHub Copilot 将开发者速度提升了 25%',
+  'From your first line of code to final deployment, GitHub provides AI and automation tools to help you build and ship better software faster.':
+    '从第一行代码到最终部署，GitHub 提供 AI 和自动化工具，帮助您更快地构建和发布更好的软件。',
+  'Your AI partner everywhere. Copilot is ready to work with you at each step of the software development lifecycle.':
+    '您的 AI 伙伴无处不在。Copilot 准备好在软件开发生命周期的每一步与您合作。',
+  'Duolingo boosts developer speed by 25% with GitHub Copilot':
+    'Duolingo 使用 GitHub Copilot 将开发者速度提升了 25%',
   '2025 Gartner Magic Quadrant for AI Code Assistants': '2025年 Gartner AI 代码助手魔力象限',
   'Automate your path to production': '自动化您的生产之路',
   'Ship faster with secure, reliable CI/CD.': '使用安全、可靠的 CI/CD 更快地发布。',
   'Code instantly from anywhere': '随时随地即时编写代码',
-  'Launch a full, cloud-based development environment in seconds.': '在几秒钟内启动完整的云开发环境。',
+  'Launch a full, cloud-based development environment in seconds.':
+    '在几秒钟内启动完整的云开发环境。',
   'Keep momentum on the go': '随时保持动力',
-  'Manage projects and assign tasks to Copilot, all from your mobile device.': '使用移动设备管理项目和分配任务给 Copilot。',
+  'Manage projects and assign tasks to Copilot, all from your mobile device.':
+    '使用移动设备管理项目和分配任务给 Copilot。',
   'Shape your toolchain': '塑造您的工具链',
-  'Extend your stack with apps, actions, and AI models.': '使用应用、Action 和 AI 模型扩展您的技术栈。',
+  'Extend your stack with apps, actions, and AI models.':
+    '使用应用、Action 和 AI 模型扩展您的技术栈。',
   'Built-in application security where found means fixed': '内置应用安全，发现即修复',
-  'Use AI to find and fix vulnerabilities so your team can ship more secure software faster.': '使用 AI 发现并修复漏洞，让您的团队更快地发布更安全的软件。',
-  'Apply fixes in seconds. Spend less time debugging and more time building features with Copilot Autofix.': '几秒钟内应用修复。使用 Copilot Autofix 减少调试时间，更多时间构建功能。',
-  'Security debt, solved. Leverage security campaigns and Copilot Autofix to reduce application vulnerabilities.': '安全债务，解决。利用安全活动和 Copilot Autofix 减少应用漏洞。',
-  'Dependencies you can depend on. Update vulnerable dependencies with supported fixes for breaking changes.': '值得依赖的依赖项。使用支持的修复更新有漏洞的依赖项，同时处理破坏性变更。',
-  'Your secrets, your business. Detect, prevent, and remediate leaked secrets across your organization.': '您的密钥，您的业务。在整个组织中检测、预防和修复泄露的密钥。',
+  'Use AI to find and fix vulnerabilities so your team can ship more secure software faster.':
+    '使用 AI 发现并修复漏洞，让您的团队更快地发布更安全的软件。',
+  'Apply fixes in seconds. Spend less time debugging and more time building features with Copilot Autofix.':
+    '几秒钟内应用修复。使用 Copilot Autofix 减少调试时间，更多时间构建功能。',
+  'Security debt, solved. Leverage security campaigns and Copilot Autofix to reduce application vulnerabilities.':
+    '安全债务，解决。利用安全活动和 Copilot Autofix 减少应用漏洞。',
+  'Dependencies you can depend on. Update vulnerable dependencies with supported fixes for breaking changes.':
+    '值得依赖的依赖项。使用支持的修复更新有漏洞的依赖项，同时处理破坏性变更。',
+  'Your secrets, your business. Detect, prevent, and remediate leaked secrets across your organization.':
+    '您的密钥，您的业务。在整个组织中检测、预防和修复泄露的密钥。',
   'MTTR reduction with Copilot Autofix': '使用 Copilot Autofix 减少平均修复时间',
-  'secret leaks stopped in the past 12 months with push protection': '过去 12 个月通过推送保护阻止的密钥泄露',
+  'secret leaks stopped in the past 12 months with push protection':
+    '过去 12 个月通过推送保护阻止的密钥泄露',
   'Work together, achieve more': '协作共进',
-  'From planning and discussion to code review, GitHub keeps your team\'s conversation and context next to your code.': '从计划到讨论再到代码审查，GitHub 将团队的对话和上下文保留在您的代码旁边。',
-  'Plan with clarity. Organize everything from high-level roadmaps to everyday tasks.': '清晰规划。将所有内容从高级路线图到日常任务进行组织。',
+  "From planning and discussion to code review, GitHub keeps your team's conversation and context next to your code.":
+    '从计划到讨论再到代码审查，GitHub 将团队的对话和上下文保留在您的代码旁边。',
+  'Plan with clarity. Organize everything from high-level roadmaps to everyday tasks.':
+    '清晰规划。将所有内容从高级路线图到日常任务进行组织。',
   'Keep track of your tasks': '跟踪您的任务',
-  'Create issues and manage projects with tools that adapt to your code.': '使用适应您代码的工具创建问题和管理项目。',
+  'Create issues and manage projects with tools that adapt to your code.':
+    '使用适应您代码的工具创建问题和管理项目。',
   'Share ideas and ask questions': '分享想法和提问',
-  'Create space for open-ended conversations alongside your project.': '在项目旁创建开放性对话的空间。',
+  'Create space for open-ended conversations alongside your project.':
+    '在项目旁创建开放性对话的空间。',
   'Review code changes together': '共同审查代码变更',
-  'Assign initial reviews to Copilot for greater speed and quality.': '将初步审查分配给 Copilot，以获得更高的速度和质量。',
+  'Assign initial reviews to Copilot for greater speed and quality.':
+    '将初步审查分配给 Copilot，以获得更高的速度和质量。',
   'Fund open source projects': '资助开源项目',
-  'Become an open source partner and support the tools and libraries that power your work.': '成为开源合作伙伴，支持为您的工作提供动力的工具和库。',
-  'From startups to enterprises, GitHub scales with teams of any size in any industry.': '从初创公司到企业，GitHub 随各种规模和行业的团队一起成长。',
-  'Technology': '科技',
-  'Automotive': '汽车',
+  'Become an open source partner and support the tools and libraries that power your work.':
+    '成为开源合作伙伴，支持为您的工作提供动力的工具和库。',
+  'From startups to enterprises, GitHub scales with teams of any size in any industry.':
+    '从初创公司到企业，GitHub 随各种规模和行业的团队一起成长。',
+  Technology: '科技',
+  Automotive: '汽车',
   'Figma streamlines development and strengthens security': 'Figma 简化开发并加强安全',
-  'Mercedes-Benz standardizes source code and automates onboarding': '梅赛德斯-奔驰标准化源代码并自动化入职流程',
+  'Mercedes-Benz standardizes source code and automates onboarding':
+    '梅赛德斯-奔驰标准化源代码并自动化入职流程',
   'Mercado Libre cuts coding time by 50%': 'Mercado Libre 将编码时间缩短 50%',
   'Millions of developers and businesses call GitHub home': '数百万开发者和企业选择 GitHub',
-  'Whether you\'re scaling your development process or just learning how to code, GitHub is where you belong.': '无论您是在扩展开发流程还是刚刚学习编程，GitHub 都是您的归属地。',
-  'Join the world\'s most widely adopted developer platform to build the technologies that shape what\'s next.': '加入全球最广泛采用的开发者平台，构建塑造未来的技术。',
+  "Whether you're scaling your development process or just learning how to code, GitHub is where you belong.":
+    '无论您是在扩展开发流程还是刚刚学习编程，GitHub 都是您的归属地。',
+  "Join the world's most widely adopted developer platform to build the technologies that shape what's next.":
+    '加入全球最广泛采用的开发者平台，构建塑造未来的技术。',
   'GitHub internal customer data': 'GitHub 内部客户数据',
   // 个人资料页面
-  'Overview': '概览',
-  'Pinned': '置顶',
-  'Achievements': '成就',
+  Overview: '概览',
+  Pinned: '置顶',
+  Achievements: '成就',
   'same time': '同一时区',
   'I may be slow to respond.': '我可能回复较慢。',
   'a designer.': '一名设计师。',
@@ -3664,41 +3702,218 @@ const pageModeDetector = {
  * @author Sut
  * @description 选择需要翻译的DOM元素
  */
-const SKIP_TAGS = ['script', 'style', 'code', 'pre', 'textarea', 'input', 'select', 'img', 'svg', 'canvas', 'video', 'audio'];
+const SKIP_TAGS = [
+  'script',
+  'style',
+  'code',
+  'pre',
+  'textarea',
+  'input',
+  'select',
+  'img',
+  'svg',
+  'canvas',
+  'video',
+  'audio',
+];
 const SKIP_CLASS_PATTERNS = [
-  /language-\w+/, /highlight/, /token/, /no-translate/, /octicon/, /emoji/, /avatar/,
-  /timestamp/, /numeral/, /filename/, /hash/, /sha/, /shortsha/, /hex-color/, /code/,
-  /gist/, /language-/, /markdown-/, /monaco-editor/, /syntax-/, /highlight-/,
-  /clipboard/, /progress-/, /count/, /size/, /time/, /date/, /sortable/, /label/,
-  /badge/, /url/, /email/, /key/, /token/, /user-name/, /repo-name/,
+  /language-\w+/,
+  /highlight/,
+  /token/,
+  /no-translate/,
+  /octicon/,
+  /emoji/,
+  /avatar/,
+  /timestamp/,
+  /numeral/,
+  /filename/,
+  /hash/,
+  /sha/,
+  /shortsha/,
+  /hex-color/,
+  /code/,
+  /gist/,
+  /language-/,
+  /markdown-/,
+  /monaco-editor/,
+  /syntax-/,
+  /highlight-/,
+  /clipboard/,
+  /progress-/,
+  /count/,
+  /size/,
+  /time/,
+  /date/,
+  /sortable/,
+  /label/,
+  /badge/,
+  /url/,
+  /email/,
+  /key/,
+  /token/,
+  /user-name/,
+  /repo-name/,
 ];
 const SKIP_ID_PATTERNS = [
-  /\d+/, /-\d+/, /_\d+/, /sha-/, /hash-/, /commit-/, /issue-/, /pull-/, /pr-/,
-  /repo-/, /user-/, /file-/, /blob-/, /tree-/, /branch-/, /tag-/, /release-/,
-  /gist-/, /discussion-/, /comment-/, /review-/, /workflow-/, /action-/,
-  /job-/, /step-/, /runner-/, /package-/, /registry-/, /marketplace-/,
-  /organization-/, /team-/, /project-/, /milestone-/, /assignee-/, /reporter-/,
-  /reviewer-/, /author-/, /committer-/, /contributor-/, /sponsor-/, /funding-/,
-  /donation-/, /payment-/, /billing-/, /plan-/, /subscription-/, /license-/,
-  /secret-/, /key-/, /token-/, /password-/, /credential-/, /certificate-/,
-  /ssh-/, /git-/, /clone-/, /push-/, /pull-/, /fetch-/, /merge-/, /rebase-/,
-  /cherry-pick-/, /reset-/, /revert-/, /tag-/, /branch-/, /commit-/,
-  /diff-/, /patch-/, /stash-/, /ref-/, /head-/, /remote-/, /upstream-/,
-  /origin-/, /local-/, /tracking-/, /merge-base-/, /conflict-/, /resolve-/,
-  /status-/, /log-/, /blame-/, /bisect-/, /grep-/, /find-/, /filter-/,
-  /archive-/, /submodule-/, /worktree-/, /lfs-/, /graphql-/, /rest-/,
-  /api-/, /webhook-/, /event-/, /payload-/, /callback-/, /redirect-/,
-  /oauth-/, /sso-/, /ldap-/, /saml-/, /2fa-/, /mfa-/, /security-/,
-  /vulnerability-/, /cve-/, /dependency-/, /alert-/, /secret-scanning-/,
-  /code-scanning-/, /codeql-/, /actions-/, /workflow-/, /job-/, /step-/,
-  /runner-/, /artifact-/, /cache-/, /environment-/, /deployment-/, /app-/,
-  /oauth-app-/, /github-app-/, /integration-/, /webhook-/, /marketplace-/,
-  /listing-/, /subscription-/, /billing-/, /plan-/, /usage-/, /limits-/,
-  /quota-/, /traffic-/, /analytics-/, /insights-/, /search-/, /explore-/,
-  /trending-/, /stars-/, /forks-/, /watchers-/, /contributors-/, /activity-/,
-  /events-/, /notifications-/, /feeds-/, /dashboard-/, /profile-/,
-  /settings-/, /preferences-/, /organization-/, /team-/, /project-/,
-  /milestone-/, /label-/, /\b\w+[0-9]\w*\b/,
+  /\d+/,
+  /-\d+/,
+  /_\d+/,
+  /sha-/,
+  /hash-/,
+  /commit-/,
+  /issue-/,
+  /pull-/,
+  /pr-/,
+  /repo-/,
+  /user-/,
+  /file-/,
+  /blob-/,
+  /tree-/,
+  /branch-/,
+  /tag-/,
+  /release-/,
+  /gist-/,
+  /discussion-/,
+  /comment-/,
+  /review-/,
+  /workflow-/,
+  /action-/,
+  /job-/,
+  /step-/,
+  /runner-/,
+  /package-/,
+  /registry-/,
+  /marketplace-/,
+  /organization-/,
+  /team-/,
+  /project-/,
+  /milestone-/,
+  /assignee-/,
+  /reporter-/,
+  /reviewer-/,
+  /author-/,
+  /committer-/,
+  /contributor-/,
+  /sponsor-/,
+  /funding-/,
+  /donation-/,
+  /payment-/,
+  /billing-/,
+  /plan-/,
+  /subscription-/,
+  /license-/,
+  /secret-/,
+  /key-/,
+  /token-/,
+  /password-/,
+  /credential-/,
+  /certificate-/,
+  /ssh-/,
+  /git-/,
+  /clone-/,
+  /push-/,
+  /pull-/,
+  /fetch-/,
+  /merge-/,
+  /rebase-/,
+  /cherry-pick-/,
+  /reset-/,
+  /revert-/,
+  /tag-/,
+  /branch-/,
+  /commit-/,
+  /diff-/,
+  /patch-/,
+  /stash-/,
+  /ref-/,
+  /head-/,
+  /remote-/,
+  /upstream-/,
+  /origin-/,
+  /local-/,
+  /tracking-/,
+  /merge-base-/,
+  /conflict-/,
+  /resolve-/,
+  /status-/,
+  /log-/,
+  /blame-/,
+  /bisect-/,
+  /grep-/,
+  /find-/,
+  /filter-/,
+  /archive-/,
+  /submodule-/,
+  /worktree-/,
+  /lfs-/,
+  /graphql-/,
+  /rest-/,
+  /api-/,
+  /webhook-/,
+  /event-/,
+  /payload-/,
+  /callback-/,
+  /redirect-/,
+  /oauth-/,
+  /sso-/,
+  /ldap-/,
+  /saml-/,
+  /2fa-/,
+  /mfa-/,
+  /security-/,
+  /vulnerability-/,
+  /cve-/,
+  /dependency-/,
+  /alert-/,
+  /secret-scanning-/,
+  /code-scanning-/,
+  /codeql-/,
+  /actions-/,
+  /workflow-/,
+  /job-/,
+  /step-/,
+  /runner-/,
+  /artifact-/,
+  /cache-/,
+  /environment-/,
+  /deployment-/,
+  /app-/,
+  /oauth-app-/,
+  /github-app-/,
+  /integration-/,
+  /webhook-/,
+  /marketplace-/,
+  /listing-/,
+  /subscription-/,
+  /billing-/,
+  /plan-/,
+  /usage-/,
+  /limits-/,
+  /quota-/,
+  /traffic-/,
+  /analytics-/,
+  /insights-/,
+  /search-/,
+  /explore-/,
+  /trending-/,
+  /stars-/,
+  /forks-/,
+  /watchers-/,
+  /contributors-/,
+  /activity-/,
+  /events-/,
+  /notifications-/,
+  /feeds-/,
+  /dashboard-/,
+  /profile-/,
+  /settings-/,
+  /preferences-/,
+  /organization-/,
+  /team-/,
+  /project-/,
+  /milestone-/,
+  /label-/,
+  /\b\w+[0-9]\w*\b/,
 ];
 function isSkipTag(tagName) {
   return SKIP_TAGS.includes(tagName.toLowerCase());
@@ -3894,8 +4109,8 @@ const elementTranslator = {
           const safeTranslatedText =
             typeof translatedText === 'string'
               ? [...translatedText]
-                .filter((c) => c.charCodeAt(0) > 31 && c.charCodeAt(0) !== 127)
-                .join('')
+                  .filter((c) => c.charCodeAt(0) > 31 && c.charCodeAt(0) !== 127)
+                  .join('')
               : String(translatedText || '');
           const translatedNode = document.createTextNode(safeTranslatedText);
           fragment.appendChild(translatedNode);
@@ -5211,9 +5426,13 @@ class ConfigUI {
    */
   ensureToggleButton() {
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        this.createToggleButton();
-      }, { once: true });
+      document.addEventListener(
+        'DOMContentLoaded',
+        () => {
+          this.createToggleButton();
+        },
+        { once: true },
+      );
     } else if (document.body) {
       this.createToggleButton();
     } else {
