@@ -1,8 +1,8 @@
 /**
  * 翻译词典管理模块
  * @file translationCore/dictionaryManager.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 管理翻译词典的加载和查询
  */

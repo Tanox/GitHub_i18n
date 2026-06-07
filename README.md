@@ -6,78 +6,76 @@
 [![GitHub release](https://img.shields.io/github/v/release/Tanox/GitHub_i18n?display_name=tag&color=green)](https://github.com/Tanox/GitHub_i18n/releases)
 [![Userscript](https://img.shields.io/badge/Install-Tampermonkey-green?logo=tampermonkey)](https://github.com/Tanox/GitHub_i18n/raw/main/build/GitHub_i18n.user.js)
 
-## 功能特点
+## 功能介绍
 
-- ✅ **全站翻译**：仓库、仪表盘、设置、通知、Codespaces、Explore 等页面都能翻译
-- ✅ **布局稳定**：只翻译文字，不会破坏页面布局
-- ✅ **快速响应**：本地词典，无需联网，瞬间生效
-- ✅ **动态适配**：支持页面跳转、加载更多、下拉菜单等动态内容
-- ✅ **自动更新**：Tampermonkey 会自动检测并更新新版本
-- ✅ **性能友好**：智能优化，不会拖慢页面速度
+- 🚀 **快速翻译**：本地词典，无需联网，瞬间生效
+- 📦 **覆盖全面**：仓库、Issues、PR、设置、通知、Codespaces、Explore 等页面
+- 🎯 **不破坏布局**：只翻译文字内容，保持页面原有样式
+- 🔄 **实时更新**：支持动态加载的内容翻译
+- ⚡ **性能优化**：智能缓存，不会拖慢页面速度
+- 🔔 **自动升级**：Tampermonkey 自动检测新版本
 
-## 安装使用
+## 安装说明
 
-### 第一步：安装 Tampermonkey
+### 1. 安装浏览器扩展
 
-首先需要在浏览器中安装 [Tampermonkey](https://www.tampermonkey.net/) 扩展程序，支持 Chrome、Edge、Firefox 等主流浏览器。
+- Chrome/Edge: 安装 [Tampermonkey](https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)
+- Firefox: 安装 [Tampermonkey](https://addons.mozilla.org/firefox/addon/tampermonkey/)
+- Safari: 安装 [Tampermonkey](https://apps.apple.com/app/tampermonkey/id1482490089)
 
-### 第二步：安装脚本
+### 2. 安装脚本
 
-点击 [一键安装](https://github.com/Tanox/GitHub_i18n/raw/refs/heads/main/build/GitHub_i18n.user.js)，Tampermonkey 会自动弹出安装确认页面，点击「安装」即可。
+点击 [一键安装](https://github.com/Tanox/GitHub_i18n/raw/refs/heads/main/build/GitHub_i18n.user.js)，然后在 Tampermonkey 中点击「安装」。
 
-### 第三步：开始使用
+### 3. 开始使用
 
-刷新 GitHub 页面，你会看到界面已经变成中文了！
+刷新 GitHub 页面，界面就会变成中文啦！
+
+## 使用技巧
+
+### 快速配置
+
+点击页面右下角的「设置」按钮，可以：
+- 开启/关闭调试模式
+- 查看翻译性能统计
+- 重置为默认设置
+
+### 通过油猴菜单操作
+
+点击浏览器工具栏的 Tampermonkey 图标，可以：
+- 打开插件设置
+- 立即翻译当前页面
 
 ## 常见问题
 
 **Q：有些文字没翻译？**
 
-A：本插件主要翻译界面文字，不会翻译用户内容（如仓库标题、代码、评论等）。如果有漏翻的界面文字，欢迎反馈。
+A：插件只翻译 GitHub 的界面文字，不会翻译用户写的内容（比如仓库名、代码、评论等）。如果发现有漏翻的界面文字，欢迎反馈。
 
-**Q：页面布局乱了？**
+**Q：页面显示乱了？**
 
-A：请确保使用最新版本，并避免同时启用其他翻译插件。如果还有问题，请提交 Issue。
+A：请使用最新版本，并避免同时使用其他翻译插件。如果还有问题，请告诉我。
 
-**Q：如何关闭插件？**
+**Q：怎么关闭插件？**
 
-A：点击浏览器工具栏的 Tampermonkey 图标，在菜单中取消勾选「GitHub 中文翻译插件」即可。
+A：点击 Tampermonkey 图标，取消勾选「GitHub 中文翻译插件」即可。
 
-**Q：如何贡献翻译？**
+**Q：如何帮着改进翻译？**
 
-A：欢迎提交 PR！直接修改 `src/dictionaries/` 目录下的词典文件即可。
+A：欢迎提交 Pull Request！直接修改 `src/dictionaries/` 下的词典文件就行。
 
-## 项目说明
-
-这是一个开源项目，使用以下技术构建：
-
-- 翻译数据存储在 `src/dictionaries/` 目录
-- 核心代码位于 `src/` 目录
-- 构建产物在 `build/GitHub_i18n.user.js`
-
-### 开发指南
+## 参与开发
 
 如果你想参与开发：
 
 ```bash
-# 克隆项目
 git clone https://github.com/Tanox/GitHub_i18n.git
 cd GitHub_i18n
-
-# 安装依赖
 npm install
-
-# 构建脚本
 npm run build
-
-# 运行测试
-npm run test
-
-# 代码检查
-npm run lint
 ```
 
-更多开发细节请查看 [docs/development.md](docs/development.md)。
+详细开发指南请查看 [docs/development.md](docs/development.md)。
 
 ## 许可证
 

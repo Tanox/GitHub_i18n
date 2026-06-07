@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GitHub 中文翻译
 // @namespace    https://github.com/Tanox/GitHub_i18n
-// @version      1.9.17
+// @version      1.9.18
 // @description  GitHub页面自动翻译为中文
 // @author       Sut
 // @match        https://github.com/*
@@ -26,8 +26,8 @@
 /**
  * 版本信息模块
  * @file version.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 统一管理GitHub自动化字符串更新工具的版本信息
  */
@@ -36,12 +36,12 @@
  * @type {string}
  * @description 这是项目的单一版本源，所有其他版本号引用都应从此处获取
  */
-const VERSION = '1.9.17';
+const VERSION = '1.9.18';
 /**
  * GitHub 中文翻译配置文件
  * @file config.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 包含脚本所有可配置项
  */
@@ -288,8 +288,8 @@ const CONFIG = {
 /**
  * Trie树数据结构模块
  * @file trie.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 高效的字符串匹配数据结构，用于部分匹配翻译
  */
@@ -362,8 +362,8 @@ class Trie {
 /**
  * 工具函数模块
  * @file utils.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 包含各种通用的辅助函数
  */
@@ -709,8 +709,8 @@ const utils = {
 /**
  * LRU缓存管理模块
  * @file cacheManager.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 实现LRU缓存策略，用于翻译结果缓存
  */
@@ -802,8 +802,8 @@ class CacheManager {
 /**
  * 错误处理模块
  * @file errorHandler.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 负责统一管理所有错误处理和恢复机制
  */
@@ -988,8 +988,8 @@ ErrorHandler.init();
 /**
  * 开发工具模块
  * @file tools.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 包含字符串提取、自动更新和词典处理等开发工具
  */
@@ -1134,8 +1134,8 @@ function loadTools() {
 /**
  * 页面监控缓存管理模块
  * @file pageMonitor/cacheManager.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 管理页面监控中的缓存
  */
@@ -1199,8 +1199,8 @@ const pageMonitorCache = {
 /**
  * 页面分析模块
  * @file pageMonitor/pageAnalyzer.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 分析页面类型和关键区域
  */
@@ -1330,8 +1330,8 @@ const pageAnalyzer = {
 /**
  * 路径变化监听模块
  * @file pageMonitor/pathListener.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 监听URL路径变化
  */
@@ -1387,8 +1387,8 @@ const pathListener = {
 /**
  * DOM变化观察器模块
  * @file pageMonitor/domObserver.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 观察DOM变化并触发翻译
  */
@@ -2046,8 +2046,8 @@ const domObserver = {
 /**
  * 翻译触发模块
  * @file pageMonitor/translationTrigger.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 管理翻译触发和节流
  */
@@ -2134,8 +2134,8 @@ const translationTrigger = {
 /**
  * 页面监控主模块
  * @file pageMonitor/index.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 页面监控主入口，整合所有子模块
  */
@@ -2221,8 +2221,8 @@ const pageMonitor = {
 /**
  * 通用翻译词典
  * @file common.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 包含所有页面共用的翻译字符串
  */
@@ -3236,8 +3236,8 @@ const commonDictionary = {
 /**
  * Codespaces 页面翻译词典
  * @file codespaces.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 包含 GitHub Codespaces 页面的翻译词典
  */
@@ -3266,8 +3266,8 @@ const codespacesDictionary = {
 /**
  * Explore 页面翻译词典
  * @file explore.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 包含 GitHub Explore 页面的翻译词典
  */
@@ -3424,8 +3424,8 @@ const exploreDictionary = {
 /**
  * 翻译词典合并模块
  * @file index.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 整合所有页面的翻译词典
  */
@@ -3452,8 +3452,8 @@ function mergeAllDictionaries() {
 /**
  * 翻译词典管理模块
  * @file translationCore/dictionaryManager.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 管理翻译词典的加载和查询
  */
@@ -3573,8 +3573,8 @@ const dictionaryManager = {
 /**
  * 页面模式检测模块
  * @file translationCore/pageModeDetector.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 检测当前页面的模式
  */
@@ -3640,8 +3640,8 @@ const pageModeDetector = {
 /**
  * 翻译元素选择模块
  * @file translationCore/elementSelector.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 选择需要翻译的DOM元素
  */
@@ -3966,8 +3966,8 @@ const elementSelector = {
 /**
  * 元素翻译模块
  * @file translationCore/elementTranslator.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 实际翻译DOM元素的模块
  */
@@ -4137,8 +4137,8 @@ const elementTranslator = {
 /**
  * 部分匹配翻译模块
  * @file translationCore/partialTranslator.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 使用Trie树进行部分匹配翻译
  */
@@ -4235,8 +4235,8 @@ const partialTranslator = {
 /**
  * 性能监控模块
  * @file translationCore/performanceMonitor.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 监控翻译性能数据
  */
@@ -4333,8 +4333,8 @@ const performanceMonitor = {
 /**
  * 翻译核心主模块
  * @file translationCore/index.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 翻译核心主入口，整合所有子模块
  */
@@ -4669,8 +4669,8 @@ const translationCore = {
 /**
  * GitHub 中文翻译配置界面模块
  * @file configUI.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 提供用户友好的配置界面，允许用户调整插件参数
  */
@@ -5420,8 +5420,8 @@ const configUI = new ConfigUI();
 /**
  * 版本更新检查模块
  * @file versionChecker.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 负责检查和处理脚本更新
  */
@@ -5823,8 +5823,8 @@ const versionChecker = {
 /**
  * 虚拟DOM模块
  * @file virtualDom.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 用于跟踪已翻译元素的状态，避免重复翻译和不必要的DOM操作
  */
@@ -6255,8 +6255,8 @@ virtualDomManager;
 /**
  * 国际化支持框架
  * @file i18n.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 为GitHub翻译插件提供多语言支持的基础框架
  */
@@ -6660,8 +6660,8 @@ async function switchLanguage(locale) {
 /**
  * GitHub 中文翻译主入口文件
  * @file main.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 整合所有模块并初始化脚本
  */

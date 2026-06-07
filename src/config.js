@@ -1,8 +1,8 @@
 /**
  * GitHub 中文翻译配置文件
  * @file config.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 包含脚本所有可配置项
  */

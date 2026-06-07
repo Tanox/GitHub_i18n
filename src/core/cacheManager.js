@@ -1,8 +1,8 @@
 /**
  * LRU缓存管理模块
  * @file cacheManager.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 实现LRU缓存策略，用于翻译结果缓存
  */

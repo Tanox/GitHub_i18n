@@ -1,8 +1,8 @@
 /**
  * Explore 页面翻译词典
  * @file explore.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 包含 GitHub Explore 页面的翻译词典
  */

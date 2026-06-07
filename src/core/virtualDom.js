@@ -1,8 +1,8 @@
 /**
  * 虚拟DOM模块
  * @file virtualDom.js
- * @version 1.9.17
- * @date 2026-05-22
+ * @version 1.9.18
+ * @date 2026-06-07
  * @author Sut
  * @description 用于跟踪已翻译元素的状态，避免重复翻译和不必要的DOM操作
  */
