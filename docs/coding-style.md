@@ -24,8 +24,8 @@
 ```
 src/
 ├── dictionaries/
-├── pageMonitor/
-└── translationCore/
+├── page-monitor/
+└── translation-core/
 ```
 
 ### 1.2 文件命名
@@ -41,7 +41,7 @@ src/
 ├── config.js
 ├── main.js
 ├── utils.js
-├── translationCore/
+├── translation-core/
 │   ├── index.js
 │   ├── dictionaryManager.js
 │   └── elementTranslator.js
@@ -282,8 +282,8 @@ function processData(data)
 /**
  * GitHub 中文翻译主入口文件
  * @file main.js
- * @version 1.9.15
- * @date 2026-05-01
+ * @version 1.9.19
+ * @date 2026-06-08
  * @author Sut
  * @description 整合所有模块并初始化脚本
  */
@@ -349,7 +349,7 @@ if (element.classList && element.classList.contains('sr-only')) {
 **示例**：
 ```javascript
 // TODO: 优化这个算法，时间复杂度可以从 O(n²) 降到 O(n)
-// TODO(Sut): 2026-05-01 添加更多错误处理
+// TODO(Sut): 2026-06-08 添加更多错误处理
 ```
 
 ---

@@ -40,8 +40,8 @@ const VERSION = '1.9.19';
 /**
  * GitHub 中文翻译配置文件
  * @file config.js
- * @version 1.9.18
- * @date 2026-06-07
+ * @version 1.9.19
+ * @date 2026-06-08
  * @author Sut
  * @description 包含脚本所有可配置项
  */
