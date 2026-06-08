@@ -1,27 +1,41 @@
-/.trae
-/.vscode
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
 /node_modules
-# /build  <- 允许追踪源码
-# /test   <- 允许追踪调试脚本
-/utils/api
-/dist
-*.code-workspace
-*.bak
-github_string_fetcher.js
-*/test-*
-*/fix-*
-*/fix_*
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-# 保留重要配置文件
-# .eslintrc.js - 代码规范配置
-# .gitattributes - Git属性配置
-# package.json - 项目配置
-# package-lock.json - 依赖锁定
+# testing
+/coverage
 
-# 测试文件不忽略，确保测试代码被版本控制
-# /test
+# next.js
+/.next/
+/out/
 
-/docs/_backup
-/docs/_templates
-/docs/_fragments
+# production
+/build
 
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
