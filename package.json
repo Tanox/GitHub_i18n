@@ -20,7 +20,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
     "build:userscript": "node build.cjs",
+    "build:all": "npm run clean && npm run build:userscript && npm run build",
     "clean": "node -e \"const fs=require('fs');const path=require('path');['build','dist','coverage','.next'].forEach(dir=>{if(fs.existsSync(dir)){fs.rmSync(dir,{recursive:true});console.log('已清理:',dir)}})\""
   },
   "dependencies": {
