@@ -1,8 +1,8 @@
 /**
  * 元素翻译模块
  * @file translationCore/elementTranslator.js
- * @version 1.9.18
- * @date 2026-06-07
+ * @version 1.9.19
+ * @date 2026-06-08
  * @author Sut
  * @description 实际翻译DOM元素的模块
  */
@@ -54,7 +54,6 @@ export const elementTranslator = {
     this.performanceData.elementsProcessed++;
 
     if (!elementSelector.shouldTranslateElement(element)) {
-      element.setAttribute('data-github-zh-translated', 'checked');
       return false;
     }
 
