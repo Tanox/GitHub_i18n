@@ -1,8 +1,8 @@
 /**
  * 路径变化监听模块
  * @file pageMonitor/pathListener.js
- * @version 1.9.18
- * @date 2026-06-07
+ * @version 1.9.19
+ * @date 2026-06-08
  * @author Sut
  * @description 监听URL路径变化
  */

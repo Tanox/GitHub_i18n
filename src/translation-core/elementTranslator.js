@@ -112,7 +112,11 @@ export const elementTranslator = {
 
       const translatedText = dictionaryManager.getTranslatedText(originalText.trim());
 
-      if (translatedText && typeof translatedText === 'string' && translatedText !== originalText.trim()) {
+      if (
+        translatedText &&
+        typeof translatedText === 'string' &&
+        translatedText !== originalText.trim()
+      ) {
         try {
           const safeTranslatedText =
             typeof translatedText === 'string'

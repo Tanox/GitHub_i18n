@@ -2,6 +2,7 @@
  * ESLint 配置文件
  * @file eslint.config.js
  * @description 项目代码规范配置
+ * @note 格式化相关规则由 Prettier 处理，ESLint 专注于代码质量和逻辑问题
  */
 
 import js from '@eslint/js';
@@ -41,24 +42,18 @@ export default [
       'no-var': 'error',
       'prefer-const': 'error',
 
-      indent: ['error', 2, { SwitchCase: 1 }],
-      quotes: ['error', 'single', { avoidEscape: true }],
-      semi: ['error', 'always'],
-      'comma-dangle': ['error', 'always-multiline'],
-      'object-curly-spacing': ['error', 'always'],
-      'array-bracket-spacing': ['error', 'never'],
-      'space-before-function-paren': [
-        'error',
-        {
-          anonymous: 'always',
-          named: 'never',
-          asyncArrow: 'always',
-        },
-      ],
-      'keyword-spacing': 'error',
-      'space-infix-ops': 'error',
-      'eol-last': 'error',
-      'no-trailing-spaces': 'error',
+      // 禁用与 Prettier 冲突的格式化规则
+      'indent': 'off',
+      'quotes': 'off',
+      'semi': 'off',
+      'comma-dangle': 'off',
+      'object-curly-spacing': 'off',
+      'array-bracket-spacing': 'off',
+      'space-before-function-paren': 'off',
+      'keyword-spacing': 'off',
+      'space-infix-ops': 'off',
+      'eol-last': 'off',
+      'no-trailing-spaces': 'off',
 
       eqeqeq: ['error', 'always', { null: 'ignore' }],
       curly: ['error', 'multi-line'],

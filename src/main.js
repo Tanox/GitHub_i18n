@@ -1,8 +1,8 @@
 /**
  * GitHub 中文翻译主入口文件
  * @file main.js
- * @version 1.9.18
- * @date 2026-06-07
+ * @version 1.9.19
+ * @date 2026-06-08
  * @author Sut
  * @description 整合所有模块并初始化脚本
  */

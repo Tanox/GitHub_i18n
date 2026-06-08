@@ -1,8 +1,8 @@
 /**
  * Codespaces 页面翻译词典
  * @file codespaces.js
- * @version 1.9.18
- * @date 2026-06-07
+ * @version 1.9.19
+ * @date 2026-06-08
  * @author Sut
  * @description 包含 GitHub Codespaces 页面的翻译词典
  */

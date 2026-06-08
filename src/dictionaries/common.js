@@ -1,8 +1,8 @@
 /**
  * 通用翻译词典
  * @file common.js
- * @version 1.9.18
- * @date 2026-06-07
+ * @version 1.9.19
+ * @date 2026-06-08
  * @author Sut
  * @description 包含所有页面共用的翻译字符串
  */
@@ -737,7 +737,6 @@ export const commonDictionary = {
   'Preview changes': '预览更改',
   'No changes': '无更改',
   'Edit new file': '编辑新文件',
-  Cancel: '取消',
   'Commit changes': '提交更改',
   'Commit directly to the main branch.': '直接提交到 main 分支。',
   'Create a new branch for this commit and start a pull request.':
@@ -907,10 +906,6 @@ export const commonDictionary = {
   'The repository has been forked.': '仓库已复刻。',
   'The repository has been cloned.': '仓库已克隆。',
   'The repository has been downloaded.': '仓库已下载。',
-  'The repository has been archived.': '仓库已归档。',
-  'The repository has been unarchived.': '仓库已取消归档。',
-  'The repository has been transferred.': '仓库已转移。',
-  'The repository has been deleted.': '仓库已删除。',
   'The repository has been made public.': '仓库已公开。',
   'The repository has been made private.': '仓库已设为私有。',
   'The repository has been made internal.': '仓库已设为内部。',
