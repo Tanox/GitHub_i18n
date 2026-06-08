@@ -1,6 +1,6 @@
 {
   "name": "github-i18n",
-  "version": "1.9.18",
+  "version": "1.9.19",
   "description": "GitHub 中文本地化解决方案 - 用户脚本及自动化工具",
   "main": "src/main.js",
   "type": "module",
@@ -14,7 +14,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "validate": "node -e \"const fs=require('fs');const path=require('path');const buildFile=path.join('build','GitHub_i18n.user.js');if(!fs.existsSync(buildFile)){console.error('构建产物不存在');process.exit(1)}const content=fs.readFileSync(buildFile,'utf8');if(content.length<1000){console.error('构建产物过小');process.exit(1)}console.log('验证通过');process.exit(0)\"",
-    "clean": "node -e \"const fs=require('fs');const path=require('path');['build','dist','coverage'].forEach(dir=>{if(fs.existsSync(dir)){fs.rmSync(dir,{recursive:true});console.log('已清理:',dir)}})\"",
+    "clean": "node -e \"const fs=require('fs');const path=require('path');['build','dist','coverage'].forEach(dir=>{if(fs.existsSync(dir)){fs.rmSync(dir,{recursive:true});console.log('已清理:',dir)}})",
     "prepare": "husky install || true",
     "tools:install": "cd utils && npm install",
     "tools:server": "cd utils && npm run server",

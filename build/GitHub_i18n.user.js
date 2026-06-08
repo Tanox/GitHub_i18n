@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GitHub 中文翻译
 // @namespace    https://github.com/Tanox/GitHub_i18n
-// @version      1.9.18
+// @version      1.9.19
 // @description  GitHub页面自动翻译为中文
 // @author       Sut
 // @match        https://github.com/*
@@ -26,8 +26,8 @@
 /**
  * 版本信息模块
  * @file version.js
- * @version 1.9.18
- * @date 2026-06-07
+ * @version 1.9.19
+ * @date 2026-06-08
  * @author Sut
  * @description 统一管理GitHub自动化字符串更新工具的版本信息
  */
@@ -36,7 +36,7 @@
  * @type {string}
  * @description 这是项目的单一版本源，所有其他版本号引用都应从此处获取
  */
-const VERSION = '1.9.18';
+const VERSION = '1.9.19';
 /**
  * GitHub 中文翻译配置文件
  * @file config.js
@@ -3966,8 +3966,8 @@ const elementSelector = {
 /**
  * 元素翻译模块
  * @file translationCore/elementTranslator.js
- * @version 1.9.18
- * @date 2026-06-07
+ * @version 1.9.19
+ * @date 2026-06-08
  * @author Sut
  * @description 实际翻译DOM元素的模块
  */
@@ -4007,25 +4007,30 @@ const elementTranslator = {
     }
     this.performanceData.elementsProcessed++;
     if (!elementSelector.shouldTranslateElement(element)) {
-      element.setAttribute('data-github-zh-translated', 'checked');
       return false;
     }
     const fragment = document.createDocumentFragment();
     let hasTranslation = false;
+    let hasTranslatableContent = false;
     const childNodes = Array.from(element.childNodes);
     const textNodesToProcess = [];
     for (const node of childNodes) {
       if (node.nodeType === Node.TEXT_NODE) {
         const trimmedText = node.nodeValue.trim();
         if (trimmedText && trimmedText.length >= CONFIG.performance?.minTextLengthToTranslate) {
-          textNodesToProcess.push(node);
+          // 预先检查是否有对应的翻译
+          const translatedText = dictionaryManager.getTranslatedText(trimmedText);
+          if (translatedText && translatedText !== trimmedText) {
+            textNodesToProcess.push({ node, originalText: node.nodeValue });
+            hasTranslatableContent = true;
+          }
         }
       } else if (node.nodeType === Node.ELEMENT_NODE) {
         try {
           element.removeChild(node);
           fragment.appendChild(node);
           const childTranslated = this.translateElement(node);
-          hasTranslation = hasTranslation || childTranslated;
+          hasTranslatableContent = hasTranslatableContent || childTranslated;
         } catch (e) {
           if (CONFIG.debugMode) {
             console.error('[GitHub 中文翻译] 处理子元素失败:', e, '元素:', node);
@@ -4042,12 +4047,18 @@ const elementTranslator = {
         }
       }
     }
-    textNodesToProcess.forEach((node) => {
+    // 如果没有任何可翻译的内容，直接返回false，不修改DOM
+    if (!hasTranslatableContent) {
+      return false;
+    }
+    // 只有在有可翻译内容时才进行文本节点处理
+    textNodesToProcess.forEach(({ node, originalText }) => {
       const parentNode = node.parentNode;
-      parentNode.removeChild(node);
-      const originalText = node.nodeValue;
-      const translatedText = dictionaryManager.getTranslatedText(originalText);
-      if (translatedText && typeof translatedText === 'string' && translatedText !== originalText) {
+      if (parentNode) {
+        parentNode.removeChild(node);
+      }
+      const translatedText = dictionaryManager.getTranslatedText(originalText.trim());
+      if (translatedText && typeof translatedText === 'string' && translatedText !== originalText.trim()) {
         try {
           const safeTranslatedText =
             typeof translatedText === 'string'
@@ -4084,8 +4095,6 @@ const elementTranslator = {
     }
     if (hasTranslation) {
       virtualDomManager.markElementAsTranslated(element);
-    } else {
-      element.setAttribute('data-github-zh-translated', 'checked');
     }
     elementSelector.elementCache.set(element, true);
     return hasTranslation;
