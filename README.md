@@ -1,10 +1,11 @@
 # GitHub 中文翻译插件
 
-让 GitHub 界面变成中文，提升使用体验！
-
+[![GitHub stars](https://img.shields.io/github/stars/Tanox/GitHub_i18n?style=social&label=Stars)](https://github.com/Tanox/GitHub_i18n/stargazers)
 [![GitHub license](https://img.shields.io/github/license/Tanox/GitHub_i18n?color=blue)](LICENSE)
 [![GitHub release](https://img.shields.io/github/v/release/Tanox/GitHub_i18n?display_name=tag&color=green)](https://github.com/Tanox/GitHub_i18n/releases)
 [![Userscript](https://img.shields.io/badge/Install-Tampermonkey-green?logo=tampermonkey)](https://github.com/Tanox/GitHub_i18n/raw/main/build/GitHub_i18n.user.js)
+
+让 GitHub 界面变成中文，提升使用体验！
 
 ## 功能介绍
 
@@ -137,6 +138,10 @@ npm run build         # 构建用户脚本
 npm run validate      # 验证构建产物
 npm run watch         # 监听文件变化自动构建
 ```
+
+## 版本
+
+当前版本：v1.9.19
 
 ## 许可证
 
