@@ -1,7 +1,8 @@
 /**
  * GitHub 中文翻译插件构建脚本
  * @file build.cjs
- * @version 1.9.18
+ * @version 1.9.20
+ * @date 2026-06-08
  * @description 简化的单文件构建脚本
  */
 
@@ -9,7 +10,7 @@ const fs = require('fs');
 const path = require('path');
 
 const PROJECT_ROOT = path.resolve(__dirname);
-const SRC_DIR = path.join(PROJECT_ROOT, 'scripts');
+const SRC_DIR = path.join(PROJECT_ROOT, 'src');
 const BUILD_DIR = path.join(PROJECT_ROOT, 'build');
 const OUTPUT_FILE = path.join(BUILD_DIR, 'GitHub_i18n.user.js');
 

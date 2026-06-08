@@ -1,0 +1,321 @@
+/**
+ * DOM变化观察器模块
+ * @file pageMonitor/domObserver.js
+ * @version 1.9.19
+ * @date 2026-06-08
+ * @author Sut
+ * @description 观察DOM变化并触发翻译
+ */
+
+import { CONFIG } from '../config.js';
+import { utils } from '../utils/utils.js';
+import { translationCore } from '../translation-core/index.js';
+import { pageAnalyzer } from './pageAnalyzer.js';
+import { pageMonitorCache } from './cacheManager.js';
+import {
+  isElementImportant,
+  isElementIgnored,
+  isMutationContentRelated,
+  processMutationBatch,
+  checkWeightedThreshold,
+} from './domObserver.utils.js';
+
+export const domObserver = {
+  observer: null,
+  onTranslationTrigger: null,
+  isPageUnloading: false,
+  errorCount: 0,
+
+  init(translationTriggerCallback) {
+    this.onTranslationTrigger = translationTriggerCallback;
+    this.setupDomObserver();
+  },
+
+  setupDomObserver() {
+    try {
+      if (this.observer) {
+        try {
+          this.observer.disconnect();
+          this.observer = null;
+        } catch (error) {
+          if (CONFIG.debugMode) {
+            console.warn('[GitHub 中文翻译] 断开现有observer失败:', error);
+          }
+        }
+      }
+
+      const pageMode = translationCore.detectPageMode();
+      const rootNode = this.selectOptimalRootNode(pageMode);
+      const observerConfig = this.getOptimizedObserverConfig(pageMode);
+
+      if (CONFIG.debugMode) {
+        console.log('[GitHub 中文翻译] 当前页面模式:', pageMode);
+      }
+
+      const handleMutations = (mutations) => {
+        try {
+          const pageMode = translationCore.detectPageMode();
+          if (this.shouldTriggerTranslation(mutations, pageMode)) {
+            if (this.onTranslationTrigger) {
+              this.onTranslationTrigger();
+            }
+          }
+        } catch (error) {
+          console.error('[GitHub 中文翻译] 处理DOM变化时出错:', error);
+        }
+      };
+
+      this.observer = new MutationObserver(
+        utils.debounce(handleMutations, CONFIG.debounceDelay || 300),
+      );
+
+      if (rootNode) {
+        try {
+          this.observer.observe(rootNode, observerConfig);
+          if (CONFIG.debugMode) {
+            console.log(
+              '[GitHub 中文翻译] DOM观察器已启动，观察范围:',
+              rootNode.tagName + (rootNode.id ? '#' + rootNode.id : ''),
+            );
+          }
+        } catch (error) {
+          if (CONFIG.debugMode) {
+            console.error('[GitHub 中文翻译] 启动DOM观察者失败:', error);
+          }
+          this.setupFallbackMonitoring();
+        }
+      } else {
+        console.error('[GitHub 中文翻译] 无法找到合适的观察节点，回退到body');
+        const domLoadedHandler = () => {
+          try {
+            this.setupDomObserver();
+          } catch (error) {
+            if (CONFIG.debugMode) {
+              console.error('[GitHub 中文翻译] DOMContentLoaded后启动观察者失败:', error);
+            }
+          }
+        };
+        document.addEventListener('DOMContentLoaded', domLoadedHandler);
+        pageMonitorCache.addEventListener({
+          target: document,
+          type: 'DOMContentLoaded',
+          handler: domLoadedHandler,
+        });
+      }
+    } catch (error) {
+      console.error('[GitHub 中文翻译] 设置DOM观察器失败:', error);
+      this.setupFallbackMonitoring();
+    }
+  },
+
+  selectOptimalRootNode(pageMode) {
+    const effectivePageMode = pageMode || translationCore.detectPageMode();
+    let candidateSelectors;
+
+    switch (effectivePageMode) {
+      case 'search':
+        candidateSelectors = ['.codesearch-results', '#js-pjax-container', 'main', 'body'];
+        break;
+      case 'issues':
+      case 'pullRequests':
+        candidateSelectors = [
+          '.js-discussion',
+          '.issue-details',
+          '#js-issue-title',
+          '#js-pjax-container',
+          'main',
+          'body',
+        ];
+        break;
+      case 'repository':
+        candidateSelectors = [
+          '#js-repo-pjax-container',
+          '.repository-content',
+          '.application-main',
+          'body',
+        ];
+        break;
+      case 'notifications':
+        candidateSelectors = [
+          '.notifications-list',
+          '.notification-shelf',
+          '#js-pjax-container',
+          'main',
+          'body',
+        ];
+        break;
+      case 'wiki':
+        candidateSelectors = [
+          '.wiki-wrapper',
+          '.markdown-body',
+          '#js-pjax-container',
+          'main',
+          'body',
+        ];
+        break;
+      case 'actions':
+        candidateSelectors = [
+          '.workflow-run-list',
+          '.workflow-jobs',
+          '.workflow-run-header',
+          '#js-pjax-container',
+          'main',
+          'body',
+        ];
+        break;
+      case 'projects':
+        candidateSelectors = [
+          '.project-layout',
+          '.project-columns',
+          '#js-pjax-container',
+          'main',
+          'body',
+        ];
+        break;
+      default:
+        candidateSelectors = ['#js-pjax-container', 'main', '.application-main', 'body'];
+    }
+
+    for (const selector of candidateSelectors) {
+      const element = document.querySelector(selector);
+      if (element && element.textContent.trim().length > 0) {
+        return element;
+      }
+    }
+
+    return document.body;
+  },
+
+  getOptimizedObserverConfig(pageMode) {
+    pageMode = pageMode || translationCore.detectPageMode();
+    const baseConfig = { childList: true };
+
+    if (!CONFIG.performance?.ignoreCharacterDataMutations) {
+      baseConfig.characterData = true;
+    }
+
+    const complexPages = ['wiki', 'issues', 'pullRequests', 'markdown'];
+    const simplePages = ['search', 'codespaces', 'marketplace'];
+
+    if (complexPages.includes(pageMode)) {
+      baseConfig.subtree = CONFIG.performance?.observeSubtree;
+    } else if (simplePages.includes(pageMode)) {
+      baseConfig.subtree = false;
+    } else {
+      baseConfig.subtree = CONFIG.performance?.observeSubtree;
+    }
+
+    if (CONFIG.performance?.observeAttributes && !CONFIG.performance?.ignoreAttributeMutations) {
+      baseConfig.attributes = true;
+      baseConfig.attributeFilter = CONFIG.performance?.importantAttributes || [
+        'id',
+        'class',
+        'href',
+        'title',
+      ];
+    }
+
+    return baseConfig;
+  },
+
+  setupFallbackMonitoring() {
+    if (CONFIG.debugMode) {
+      console.log('[GitHub 中文翻译] 使用降级监控方案');
+    }
+  },
+
+  shouldTriggerTranslation(mutations, pageMode) {
+    pageMode = pageMode || translationCore.detectPageMode();
+    try {
+      if (!mutations || mutations.length === 0) {
+        return false;
+      }
+
+      const { mutationThreshold = 30, maxMutationProcessing = 50 } = CONFIG.performance || {};
+
+      const quickPathThreshold = pageAnalyzer.getQuickPathThresholdByPageMode(pageMode);
+      if (mutations.length <= quickPathThreshold) {
+        return this.detectImportantChanges(mutations, pageMode);
+      }
+
+      const maxCheckCount = Math.min(
+        mutations.length,
+        Math.max(mutationThreshold, maxMutationProcessing),
+      );
+
+      const batchResult = processMutationBatch(
+        mutations.slice(0, maxCheckCount),
+        maxCheckCount,
+        pageMode,
+      );
+
+      if (batchResult.shouldTrigger) {
+        return true;
+      }
+
+      return checkWeightedThreshold(
+        batchResult.contentChanges,
+        batchResult.importantChanges,
+        maxCheckCount,
+        pageMode,
+      );
+    } catch (error) {
+      console.error('[GitHub 中文翻译] 判断翻译触发条件时出错:', error);
+      return false;
+    }
+  },
+
+  detectImportantChanges(mutations, pageMode) {
+    for (const mutation of mutations) {
+      if (mutation.target && mutation.target.nodeType === Node.ELEMENT_NODE) {
+        if (isElementImportant(mutation.target, [], new WeakMap(), pageMode)) {
+          return true;
+        }
+      }
+      if (isMutationContentRelated(mutation, pageMode)) {
+        return true;
+      }
+    }
+    return false;
+  },
+
+  isImportantElement(element, importantElements, cache, pageMode) {
+    return isElementImportant(element, importantElements, cache, pageMode);
+  },
+
+  shouldIgnoreElement(node, ignoreElements, cache, pageMode) {
+    return isElementIgnored(node, ignoreElements, cache, pageMode);
+  },
+
+  isContentRelatedMutation(mutation, pageMode) {
+    return isMutationContentRelated(mutation, pageMode);
+  },
+
+  handleError(operation, error) {
+    const errorMessage = `[GitHub 中文翻译] ${operation}时出错: ${error.message}`;
+    if (CONFIG.debugMode) {
+      console.error(errorMessage, error);
+    } else {
+      console.error(errorMessage);
+    }
+
+    this.errorCount++;
+
+    if (this.errorCount > (CONFIG.performance?.maxErrorCount || 5)) {
+      if (CONFIG.debugMode) {
+        console.log('[GitHub 中文翻译] 错误次数过多，尝试重启监控');
+      }
+      setTimeout(() => {
+        this.setupDomObserver();
+      }, 1000);
+      this.errorCount = 0;
+    }
+  },
+
+  stop() {
+    if (this.observer) {
+      this.observer.disconnect();
+      this.observer = null;
+    }
+  },
+};
