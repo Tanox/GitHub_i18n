@@ -1,0 +1,1778 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub i18n Admin - UI/UX 原型设计</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Primary Colors */
+            --primary-50: #eff6ff;
+            --primary-100: #dbeafe;
+            --primary-200: #bfdbfe;
+            --primary-300: #93c5fd;
+            --primary-400: #60a5fa;
+            --primary-500: #3b82f6;
+            --primary-600: #2563eb;
+            --primary-700: #1d4ed8;
+            --primary-800: #1e40af;
+            --primary-900: #1e3a8a;
+
+            /* Gray Scale */
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --gray-950: #030712;
+
+            /* Semantic Colors */
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --info: #3b82f6;
+
+            /* Typography */
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+
+            /* Spacing */
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.25rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+            --space-10: 2.5rem;
+            --space-12: 3rem;
+
+            /* Border Radius */
+            --radius-sm: 0.25rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-2xl: 1.5rem;
+
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+            /* Transitions */
+            --transition-fast: 150ms;
+            --transition-base: 200ms;
+            --transition-slow: 300ms;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--gray-50);
+            color: var(--gray-900);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: white;
+            border-right: 1px solid var(--gray-200);
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .nav-header {
+            padding: var(--space-6);
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .nav-logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary-600), var(--primary-700));
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .nav-logo-text h1 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .nav-logo-text span {
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+
+        .nav-section {
+            padding: var(--space-4) var(--space-3);
+        }
+
+        .nav-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-400);
+            padding: 0 var(--space-3);
+            margin-bottom: var(--space-2);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-3);
+            border-radius: var(--radius-lg);
+            color: var(--gray-600);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+            margin-bottom: var(--space-1);
+        }
+
+        .nav-item:hover {
+            background: var(--gray-100);
+            color: var(--gray-900);
+        }
+
+        .nav-item.active {
+            background: var(--primary-50);
+            color: var(--primary-600);
+            font-weight: 500;
+        }
+
+        .nav-item-icon {
+            font-size: 20px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-item-text {
+            flex: 1;
+        }
+
+        .nav-item-title {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-item-desc {
+            font-size: 11px;
+            color: var(--gray-400);
+            margin-top: 2px;
+        }
+
+        /* Main Content */
+        .main {
+            margin-left: 280px;
+            min-height: 100vh;
+            background: var(--gray-50);
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            padding: var(--space-4) var(--space-8);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-left h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: var(--space-1);
+        }
+
+        .header-left p {
+            font-size: 14px;
+            color: var(--gray-500);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: var(--space-3);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-lg);
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all var(--transition-fast);
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--primary-600);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-700);
+        }
+
+        .btn-secondary {
+            background: var(--gray-100);
+            color: var(--gray-700);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-200);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--gray-600);
+        }
+
+        .btn-ghost:hover {
+            background: var(--gray-100);
+        }
+
+        .btn-danger {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .btn-danger:hover {
+            background: #fee2e2;
+        }
+
+        /* Content Area */
+        .content {
+            padding: var(--space-8);
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: var(--space-6);
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .card-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--gray-900);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .card-body {
+            padding: var(--space-6);
+        }
+
+        /* Grid System */
+        .grid {
+            display: grid;
+            gap: var(--space-6);
+        }
+
+        .grid-cols-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .grid-cols-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .grid-cols-4 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        @media (max-width: 1200px) {
+            .grid-cols-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .grid-cols-2,
+            .grid-cols-3,
+            .grid-cols-4 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Stat Cards */
+        .stat-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .stat-icon.blue {
+            background: var(--primary-50);
+            color: var(--primary-600);
+        }
+
+        .stat-icon.green {
+            background: #ecfdf5;
+            color: var(--success);
+        }
+
+        .stat-icon.purple {
+            background: #f5f3ff;
+            color: #8b5cf6;
+        }
+
+        .stat-icon.orange {
+            background: #fffbeb;
+            color: var(--warning);
+        }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--gray-500);
+            margin-bottom: var(--space-1);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        /* Progress Bar */
+        .progress {
+            height: 8px;
+            background: var(--gray-200);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-500), var(--primary-600));
+            border-radius: var(--radius-full);
+            transition: width var(--transition-slow);
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            text-align: left;
+            padding: var(--space-4);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-500);
+            background: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .table td {
+            padding: var(--space-4);
+            border-bottom: 1px solid var(--gray-100);
+            color: var(--gray-700);
+        }
+
+        .table tr:hover {
+            background: var(--gray-50);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: var(--space-1) var(--space-3);
+            border-radius: var(--radius-full);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-blue {
+            background: var(--primary-100);
+            color: var(--primary-700);
+        }
+
+        .badge-green {
+            background: #d1fae5;
+            color: #047857;
+        }
+
+        .badge-yellow {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .badge-red {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        /* Toggle Switch */
+        .toggle {
+            position: relative;
+            width: 48px;
+            height: 28px;
+            background: var(--gray-300);
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+
+        .toggle.active {
+            background: var(--primary-600);
+        }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: var(--shadow-sm);
+            transition: transform var(--transition-fast);
+        }
+
+        .toggle.active::after {
+            transform: translateX(20px);
+        }
+
+        /* Input Fields */
+        .input {
+            width: 100%;
+            padding: var(--space-3) var(--space-4);
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            font-size: 14px;
+            transition: all var(--transition-fast);
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Section Title */
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: var(--space-4);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        /* Info List */
+        .info-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-label {
+            color: var(--gray-600);
+        }
+
+        .info-value {
+            font-weight: 500;
+            color: var(--gray-900);
+        }
+
+        /* Feature Grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-4);
+        }
+
+        .feature-item {
+            display: flex;
+            gap: var(--space-3);
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            background: var(--gray-50);
+        }
+
+        .feature-icon {
+            font-size: 28px;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: var(--space-1);
+        }
+
+        .feature-desc {
+            font-size: 13px;
+            color: var(--gray-600);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+        }
+
+        .quick-action {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+            padding: var(--space-4);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }
+
+        .quick-action:hover {
+            border-color: var(--primary-500);
+            background: var(--primary-50);
+        }
+
+        .quick-action-icon {
+            font-size: 28px;
+        }
+
+        .quick-action-content h4 {
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: var(--space-1);
+        }
+
+        .quick-action-content p {
+            font-size: 13px;
+            color: var(--gray-500);
+        }
+
+        /* Page Banner */
+        .banner {
+            background: linear-gradient(135deg, var(--primary-600), #4f46e5);
+            border-radius: var(--radius-2xl);
+            padding: var(--space-8);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .banner h2 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: var(--space-2);
+        }
+
+        .banner p {
+            font-size: 18px;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: var(--space-6);
+        }
+
+        .banner-actions {
+            display: flex;
+            gap: var(--space-3);
+            flex-wrap: wrap;
+        }
+
+        .banner-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: var(--space-3) var(--space-5);
+            border-radius: var(--radius-lg);
+            font-weight: 500;
+            text-decoration: none;
+            transition: all var(--transition-fast);
+            backdrop-filter: blur(10px);
+        }
+
+        .banner-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 1024px) {
+            .nav {
+                transform: translateX(-100%);
+                transition: transform var(--transition-slow);
+            }
+
+            .nav.open {
+                transform: translateX(0);
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .mobile-header {
+                display: flex !important;
+            }
+        }
+
+        .mobile-header {
+            display: none;
+            padding: var(--space-4);
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .mobile-menu-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: var(--gray-100);
+            border-radius: var(--radius-lg);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        /* Tab Navigation */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--gray-200);
+            margin-bottom: var(--space-6);
+        }
+
+        .tab {
+            padding: var(--space-4) var(--space-6);
+            border-bottom: 2px solid transparent;
+            color: var(--gray-500);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .tab:hover {
+            color: var(--gray-700);
+        }
+
+        .tab.active {
+            color: var(--primary-600);
+            border-bottom-color: var(--primary-600);
+        }
+
+        /* Form Groups */
+        .form-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-4) 0;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .form-group:last-child {
+            border-bottom: none;
+        }
+
+        .form-label h4 {
+            font-weight: 500;
+            color: var(--gray-900);
+            margin-bottom: var(--space-1);
+        }
+
+        .form-label p {
+            font-size: 13px;
+            color: var(--gray-500);
+        }
+
+        /* Section */
+        .page-section {
+            margin-bottom: var(--space-8);
+        }
+
+        /* Documentation Styles */
+        .doc-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .doc-header {
+            margin-bottom: var(--space-12);
+            text-align: center;
+        }
+
+        .doc-header h1 {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-600), #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: var(--space-4);
+        }
+
+        .doc-header p {
+            font-size: 20px;
+            color: var(--gray-600);
+        }
+
+        .doc-section {
+            margin-bottom: var(--space-16);
+        }
+
+        .doc-section h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: var(--space-6);
+            padding-bottom: var(--space-3);
+            border-bottom: 2px solid var(--primary-100);
+        }
+
+        .doc-section h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin: var(--space-8) 0 var(--space-4);
+        }
+
+        .doc-section p {
+            font-size: 16px;
+            color: var(--gray-700);
+            margin-bottom: var(--space-4);
+        }
+
+        .doc-section ul {
+            margin-left: var(--space-6);
+            margin-bottom: var(--space-4);
+        }
+
+        .doc-section li {
+            margin-bottom: var(--space-2);
+            color: var(--gray-700);
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: var(--space-4);
+        }
+
+        .color-item {
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--gray-200);
+        }
+
+        .color-preview {
+            height: 80px;
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-3);
+        }
+
+        .color-name {
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: var(--space-1);
+        }
+
+        .color-hex {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--gray-600);
+        }
+
+        /* Prototype Preview */
+        .prototype-frame {
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+            margin: var(--space-8) 0;
+        }
+
+        .prototype-header {
+            background: var(--gray-100);
+            padding: var(--space-3) var(--space-4);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .prototype-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .prototype-dot.red { background: #ef4444; }
+        .prototype-dot.yellow { background: #f59e0b; }
+        .prototype-dot.green { background: #22c55e; }
+
+        .prototype-content {
+            padding: var(--space-6);
+        }
+
+        /* Enhancement Tips */
+        .tip-box {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border-left: 4px solid var(--primary-500);
+            padding: var(--space-6);
+            border-radius: var(--radius-lg);
+            margin: var(--space-6) 0;
+        }
+
+        .tip-box h4 {
+            color: var(--primary-700);
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: var(--space-3);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .tip-box p {
+            color: var(--primary-800);
+            font-size: 14px;
+        }
+
+        /* Print Styles */
+        @media print {
+            .nav {
+                display: none;
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .header {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Sidebar -->
+    <nav class="nav">
+        <div class="nav-header">
+            <div class="nav-logo">
+                <div class="nav-logo-icon">G</div>
+                <div class="nav-logo-text">
+                    <h1>GitHub i18n</h1>
+                    <span>v1.9.19 Admin</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">主导航</div>
+            <a href="#dashboard" class="nav-item active">
+                <span class="nav-item-icon">🏠</span>
+                <div class="nav-item-text">
+                    <div class="nav-item-title">首页</div>
+                    <div class="nav-item-desc">概览和快速访问</div>
+                </div>
+            </a>
+            <a href="#config" class="nav-item">
+                <span class="nav-item-icon">⚙️</span>
+                <div class="nav-item-text">
+                    <div class="nav-item-title">配置管理</div>
+                    <div class="nav-item-desc">插件设置</div>
+                </div>
+            </a>
+            <a href="#monitor" class="nav-item">
+                <span class="nav-item-icon">📊</span>
+                <div class="nav-item-text">
+                    <div class="nav-item-title">性能监控</div>
+                    <div class="nav-item-desc">翻译统计</div>
+                </div>
+            </a>
+            <a href="#dictionary" class="nav-item">
+                <span class="nav-item-icon">📖</span>
+                <div class="nav-item-text">
+                    <div class="nav-item-title">词典管理</div>
+                    <div class="nav-item-desc">翻译词典</div>
+                </div>
+            </a>
+            <a href="#about" class="nav-item">
+                <span class="nav-item-icon">ℹ️</span>
+                <div class="nav-item-text">
+                    <div class="nav-item-title">关于</div>
+                    <div class="nav-item-desc">项目信息</div>
+                </div>
+            </a>
+        </div>
+
+        <div class="nav-section" style="margin-top: auto; border-top: 1px solid var(--gray-100); padding-top: var(--space-4);">
+            <div style="padding: var(--space-3); font-size: 12px; color: var(--gray-500); text-align: center;">
+                © 2026 GitHub i18n<br>
+                <span style="font-size: 11px;">GPL-2.0 License</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <button class="mobile-menu-btn" onclick="toggleNav()">☰</button>
+        <div class="nav-logo">
+            <div class="nav-logo-icon" style="width: 36px; height: 36px; font-size: 18px;">G</div>
+            <div>
+                <h1 style="font-size: 16px; font-weight: 600;">GitHub i18n</h1>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main" id="main-content">
+        <div class="content doc-container">
+            
+            <!-- Documentation Header -->
+            <div class="doc-header">
+                <h1>🎨 GitHub i18n Admin</h1>
+                <p>UI/UX 原型设计文档 v1.0</p>
+                <p style="font-size: 14px; color: var(--gray-500); margin-top: var(--space-2);">
+                    为 GitHub 中文翻译插件提供现代化的 Web 管理界面
+                </p>
+            </div>
+
+            <!-- Table of Contents -->
+            <div class="card" style="margin-bottom: var(--space-12);">
+                <div class="card-body">
+                    <h3 class="section-title">📋 目录</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-3);">
+                        <a href="#design-principles" style="color: var(--primary-600); text-decoration: none; padding: var(--space-3); border-radius: var(--radius-lg); background: var(--primary-50);">🎯 设计原则</a>
+                        <a href="#color-system" style="color: var(--primary-600); text-decoration: none; padding: var(--space-3); border-radius: var(--radius-lg); background: var(--primary-50);">🎨 颜色系统</a>
+                        <a href="#typography" style="color: var(--primary-600); text-decoration: none; padding: var(--space-3); border-radius: var(--radius-lg); background: var(--primary-50);">✍️ 字体规范</a>
+                        <a href="#components" style="color: var(--primary-600); text-decoration: none; padding: var(--space-3); border-radius: var(--radius-lg); background: var(--primary-50);">🧩 组件设计</a>
+                        <a href="#pages" style="color: var(--primary-600); text-decoration: none; padding: var(--space-3); border-radius: var(--radius-lg); background: var(--primary-50);">📄 页面原型</a>
+                        <a href="#mobile" style="color: var(--primary-600); text-decoration: none; padding: var(--space-3); border-radius: var(--radius-lg); background: var(--primary-50);">📱 移动端适配</a>
+                        <a href="#enhancements" style="color: var(--primary-600); text-decoration: none; padding: var(--space-3); border-radius: var(--radius-lg); background: var(--primary-50);">💡 优化建议</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Design Principles -->
+            <div class="doc-section" id="design-principles">
+                <h2>🎯 设计原则</h2>
+                
+                <div class="grid grid-cols-3" style="margin-bottom: var(--space-8);">
+                    <div class="card">
+                        <div class="card-body" style="text-align: center; padding: var(--space-8);">
+                            <div style="font-size: 48px; margin-bottom: var(--space-4);">🎯</div>
+                            <h3 style="font-size: 18px; font-weight: 600; margin-bottom: var(--space-2);">简洁直观</h3>
+                            <p style="font-size: 14px; color: var(--gray-600);">
+                                界面清晰明了，用户能够快速理解并使用各项功能，无需复杂的学习过程。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body" style="text-align: center; padding: var(--space-8);">
+                            <div style="font-size: 48px; margin-bottom: var(--space-4);">⚡</div>
+                            <h3 style="font-size: 18px; font-weight: 600; margin-bottom: var(--space-2);">性能优先</h3>
+                            <p style="font-size: 14px; color: var(--gray-600);">
+                                注重性能优化，确保界面响应迅速，加载流畅，操作无延迟。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body" style="text-align: center; padding: var(--space-8);">
+                            <div style="font-size: 48px; margin-bottom: var(--space-4);">♿</div>
+                            <h3 style="font-size: 18px; font-weight: 600; margin-bottom: var(--space-2);">无障碍设计</h3>
+                            <p style="font-size: 14px; color: var(--gray-600);">
+                                遵循 WCAG 标准，确保色盲友好、键盘可访问、屏幕阅读器兼容。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>核心理念</h3>
+                <ul>
+                    <li><strong>一致性</strong>：整个应用采用统一的设计语言和交互模式</li>
+                    <li><strong>反馈性</strong>：每个操作都有即时的视觉反馈</li>
+                    <li><strong>可恢复性</strong>：支持撤销操作，防止误操作造成损失</li>
+                    <li><strong>效率性</strong>：为高级用户提供快捷方式和批量操作</li>
+                </ul>
+            </div>
+
+            <!-- Color System -->
+            <div class="doc-section" id="color-system">
+                <h2>🎨 颜色系统</h2>
+                
+                <h3>主色调</h3>
+                <div class="color-grid">
+                    <div class="color-item">
+                        <div class="color-preview" style="background: #3b82f6;"></div>
+                        <div class="color-name">Primary 500</div>
+                        <div class="color-hex">#3b82f6</div>
+                    </div>
+                    <div class="color-item">
+                        <div class="color-preview" style="background: #2563eb;"></div>
+                        <div class="color-name">Primary 600</div>
+                        <div class="color-hex">#2563eb</div>
+                    </div>
+                    <div class="color-item">
+                        <div class="color-preview" style="background: #1d4ed8;"></div>
+                        <div class="color-name">Primary 700</div>
+                        <div class="color-hex">#1d4ed8</div>
+                    </div>
+                    <div class="color-item">
+                        <div class="color-preview" style="background: #eff6ff;"></div>
+                        <div class="color-name">Primary 50</div>
+                        <div class="color-hex">#eff6ff</div>
+                    </div>
+                </div>
+
+                <h3>语义色彩</h3>
+                <div class="color-grid">
+                    <div class="color-item">
+                        <div class="color-preview" style="background: #10b981;"></div>
+                        <div class="color-name">Success</div>
+                        <div class="color-hex">#10b981</div>
+                    </div>
+                    <div class="color-item">
+                        <div class="color-preview" style="background: #f59e0b;"></div>
+                        <div class="color-name">Warning</div>
+                        <div class="color-hex">#f59e0b</div>
+                    </div>
+                    <div class="color-item">
+                        <div class="color-preview" style="background: #ef4444;"></div>
+                        <div class="color-name">Error</div>
+                        <div class="color-hex">#ef4444</div>
+                    </div>
+                    <div class="color-item">
+                        <div class="color-preview" style="background: #8b5cf6;"></div>
+                        <div class="color-name">Accent</div>
+                        <div class="color-hex">#8b5cf6</div>
+                    </div>
+                </div>
+
+                <div class="tip-box">
+                    <h4>💡 专业建议</h4>
+                    <p>主色调选择蓝色系，传达专业、可信赖的品牌形象。辅助色使用紫色渐变，增加时尚感和科技感。所有颜色都经过对比度测试，确保符合 WCAG AA 标准。</p>
+                </div>
+            </div>
+
+            <!-- Typography -->
+            <div class="doc-section" id="typography">
+                <h2>✍️ 字体规范</h2>
+                
+                <div class="card" style="margin-bottom: var(--space-6);">
+                    <div class="card-body">
+                        <h3 style="font-family: 'Inter', sans-serif; font-size: 32px; font-weight: 800; margin-bottom: var(--space-4);">
+                            Inter Font Family
+                        </h3>
+                        <p style="font-size: 16px; color: var(--gray-600); margin-bottom: var(--space-4);">
+                            使用 Inter 作为主要字体，这是一款专门为屏幕阅读优化的无衬线字体。
+                        </p>
+                        
+                        <div style="margin-top: var(--space-6);">
+                            <div style="margin-bottom: var(--space-4);">
+                                <span style="font-size: 12px; color: var(--gray-500); text-transform: uppercase;">Heading 1</span>
+                                <div style="font-size: 32px; font-weight: 700; color: var(--gray-900);">页面标题 32px</div>
+                            </div>
+                            <div style="margin-bottom: var(--space-4);">
+                                <span style="font-size: 12px; color: var(--gray-500); text-transform: uppercase;">Heading 2</span>
+                                <div style="font-size: 24px; font-weight: 600; color: var(--gray-900);">页面副标题 24px</div>
+                            </div>
+                            <div style="margin-bottom: var(--space-4);">
+                                <span style="font-size: 12px; color: var(--gray-500); text-transform: uppercase;">Heading 3</span>
+                                <div style="font-size: 20px; font-weight: 600; color: var(--gray-900);">卡片标题 20px</div>
+                            </div>
+                            <div style="margin-bottom: var(--space-4);">
+                                <span style="font-size: 12px; color: var(--gray-500); text-transform: uppercase;">Body</span>
+                                <div style="font-size: 16px; font-weight: 400; color: var(--gray-700);">
+                                    正文内容 16px，这是应用的主要文字大小，适合长时间阅读。
+                                </div>
+                            </div>
+                            <div style="margin-bottom: var(--space-4);">
+                                <span style="font-size: 12px; color: var(--gray-500); text-transform: uppercase;">Small</span>
+                                <div style="font-size: 14px; color: var(--gray-600);">
+                                    次要文字 14px，用于描述、标签等辅助信息。
+                                </div>
+                            </div>
+                            <div>
+                                <span style="font-size: 12px; color: var(--gray-500); text-transform: uppercase;">Caption</span>
+                                <div style="font-size: 12px; color: var(--gray-500);">
+                                    注释文字 12px，用于版权信息、时间戳等。
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>代码字体</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 14px; background: var(--gray-900); color: #10b981; padding: var(--space-4); border-radius: var(--space-lg);">
+                            const config = &#123;<br>
+                            &nbsp;&nbsp;version: '1.9.19',<br>
+                            &nbsp;&nbsp;debugMode: false,<br>
+                            &nbsp;&nbsp;performance: &#123;<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;cacheEnabled: true<br>
+                            &nbsp;&nbsp;&#125;<br>
+                            &#125;;
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Components -->
+            <div class="doc-section" id="components">
+                <h2>🧩 组件设计</h2>
+
+                <h3>按钮组件</h3>
+                <div class="card" style="margin-bottom: var(--space-8);">
+                    <div class="card-body">
+                        <div style="display: flex; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-6);">
+                            <button class="btn btn-primary">主要按钮</button>
+                            <button class="btn btn-secondary">次要按钮</button>
+                            <button class="btn btn-ghost">幽灵按钮</button>
+                            <button class="btn btn-danger">危险操作</button>
+                        </div>
+                        
+                        <h4 style="font-size: 14px; font-weight: 600; margin-bottom: var(--space-3);">按钮状态</h4>
+                        <div style="display: flex; gap: var(--space-4); flex-wrap: wrap;">
+                            <button class="btn btn-primary" style="opacity: 0.5;">禁用状态</button>
+                            <button class="btn btn-primary" style="background: var(--gray-400);">加载中</button>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>表单组件</h3>
+                <div class="card" style="margin-bottom: var(--space-8);">
+                    <div class="card-body">
+                        <div style="margin-bottom: var(--space-6);">
+                            <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: var(--space-2); color: var(--gray-700);">
+                                输入框
+                            </label>
+                            <input type="text" class="input" placeholder="请输入内容...">
+                        </div>
+
+                        <div style="margin-bottom: var(--space-6);">
+                            <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: var(--space-2); color: var(--gray-700);">
+                                开关
+                            </label>
+                            <div style="display: flex; gap: var(--space-4);">
+                                <div class="toggle active"></div>
+                                <span style="font-size: 14px; color: var(--gray-600);">启用状态</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="display: block; font-size: 14px; font-weight: 500; margin-bottom: var(--space-2); color: var(--gray-700);">
+                                徽章
+                            </label>
+                            <div style="display: flex; gap: var(--space-3);">
+                                <span class="badge badge-blue">蓝色</span>
+                                <span class="badge badge-green">绿色</span>
+                                <span class="badge badge-yellow">黄色</span>
+                                <span class="badge badge-red">红色</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>进度指示器</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <div style="margin-bottom: var(--space-6);">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-2);">
+                                <span style="font-size: 14px; font-weight: 500;">缓存命中率</span>
+                                <span style="font-size: 14px; font-weight: 600;">87.5%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar" style="width: 87.5%;"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-2);">
+                                <span style="font-size: 14px; font-weight: 500;">翻译进度</span>
+                                <span style="font-size: 14px; font-weight: 600;">62.3%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar" style="width: 62.3%; background: linear-gradient(90deg, #10b981, #34d399);"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page Prototypes -->
+            <div class="doc-section" id="pages">
+                <h2>📄 页面原型</h2>
+
+                <!-- Dashboard Page -->
+                <div class="prototype-frame" id="dashboard">
+                    <div class="prototype-header">
+                        <div class="prototype-dot red"></div>
+                        <div class="prototype-dot yellow"></div>
+                        <div class="prototype-dot green"></div>
+                        <span style="margin-left: var(--space-4); font-size: 13px; color: var(--gray-500);">首页 - 仪表盘</span>
+                    </div>
+                    <div class="prototype-content">
+                        <div class="banner" style="margin-bottom: var(--space-8);">
+                            <h2>欢迎使用 GitHub i18n</h2>
+                            <p>为 GitHub 提供全面的中文本地化支持</p>
+                            <div class="banner-actions">
+                                <a href="#" class="banner-btn">🌐 访问项目主页</a>
+                                <a href="#" class="banner-btn">📊 生成演示数据</a>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-4" style="margin-bottom: var(--space-8);">
+                            <div class="stat-card">
+                                <div class="stat-icon blue">⏱️</div>
+                                <div class="stat-content">
+                                    <div class="stat-label">总耗时</div>
+                                    <div class="stat-value">42.5ms</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon green">📦</div>
+                                <div class="stat-content">
+                                    <div class="stat-label">元素处理</div>
+                                    <div class="stat-value">1,234</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon purple">📝</div>
+                                <div class="stat-content">
+                                    <div class="stat-label">文本翻译</div>
+                                    <div class="stat-value">567</div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon orange">💾</div>
+                                <div class="stat-content">
+                                    <div class="stat-label">缓存命中率</div>
+                                    <div class="stat-value">87.5%</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>⚡ 性能指标</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="info-list">
+                                        <div class="info-row">
+                                            <span class="info-label">缓存命中</span>
+                                            <span class="info-value">496</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label">缓存未命中</span>
+                                            <span class="info-value">71</span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label">DOM 操作</span>
+                                            <span class="info-value">89</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>🚀 快速操作</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="quick-actions">
+                                        <a href="#" class="quick-action">
+                                            <span class="quick-action-icon">⚙️</span>
+                                            <div class="quick-action-content">
+                                                <h4>配置管理</h4>
+                                                <p>调整翻译插件设置</p>
+                                            </div>
+                                        </a>
+                                        <a href="#" class="quick-action">
+                                            <span class="quick-action-icon">📊</span>
+                                            <div class="quick-action-content">
+                                                <h4>性能监控</h4>
+                                                <p>查看详细统计信息</p>
+                                            </div>
+                                        </a>
+                                        <a href="#" class="quick-action">
+                                            <span class="quick-action-icon">📖</span>
+                                            <div class="quick-action-content">
+                                                <h4>词典管理</h4>
+                                                <p>管理和编辑翻译词典</p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Config Page -->
+                <div class="prototype-frame" id="config">
+                    <div class="prototype-header">
+                        <div class="prototype-dot red"></div>
+                        <div class="prototype-dot yellow"></div>
+                        <div class="prototype-dot green"></div>
+                        <span style="margin-left: var(--space-4); font-size: 13px; color: var(--gray-500);">配置管理</span>
+                    </div>
+                    <div class="prototype-content">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-6);">
+                            <div>
+                                <h2 style="font-size: 24px; font-weight: 600; margin-bottom: var(--space-1);">配置管理</h2>
+                                <p style="font-size: 14px; color: var(--gray-500);">管理 GitHub 中文翻译插件的设置</p>
+                            </div>
+                            <div style="display: flex; gap: var(--space-3);">
+                                <button class="btn btn-secondary">📥 导入配置</button>
+                                <button class="btn btn-primary">📤 导出配置</button>
+                                <button class="btn btn-danger">🔄 重置默认</button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2" style="margin-bottom: var(--space-8);">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>🔧 基本设置</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <div class="form-label">
+                                            <h4>调试模式</h4>
+                                            <p>在控制台显示详细日志信息</p>
+                                        </div>
+                                        <div class="toggle"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>⚡ 性能设置</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <div class="form-label">
+                                            <h4>启用翻译缓存</h4>
+                                            <p>缓存已翻译内容，加速重复访问</p>
+                                        </div>
+                                        <div class="toggle active"></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="form-label">
+                                            <h4>启用虚拟 DOM 优化</h4>
+                                            <p>减少真实 DOM 操作，提升性能</p>
+                                        </div>
+                                        <div class="toggle active"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>ℹ️ 版本信息</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="info-list">
+                                    <div class="info-row">
+                                        <span class="info-label">当前版本</span>
+                                        <span class="info-value">1.9.19</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">检查频率</span>
+                                        <span class="info-value">24 小时</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dictionary Page -->
+                <div class="prototype-frame" id="dictionary">
+                    <div class="prototype-header">
+                        <div class="prototype-dot red"></div>
+                        <div class="prototype-dot yellow"></div>
+                        <div class="prototype-dot green"></div>
+                        <span style="margin-left: var(--space-4); font-size: 13px; color: var(--gray-500);">词典管理</span>
+                    </div>
+                    <div class="prototype-content">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-6);">
+                            <div>
+                                <h2 style="font-size: 24px; font-weight: 600; margin-bottom: var(--space-1);">词典管理</h2>
+                                <p style="font-size: 14px; color: var(--gray-500);">管理和编辑翻译词典</p>
+                            </div>
+                            <button class="btn btn-primary">📤 导出词典</button>
+                        </div>
+
+                        <div class="tabs">
+                            <div class="tab active">📖 常用词典 (8)</div>
+                            <div class="tab">💻 Codespaces (4)</div>
+                            <div class="tab">🔍 Explore (3)</div>
+                        </div>
+
+                        <div style="margin-bottom: var(--space-6);">
+                            <input type="text" class="input" placeholder="🔍 搜索词典条目...">
+                        </div>
+
+                        <div class="card">
+                            <div class="table-container">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>原文</th>
+                                            <th>译文</th>
+                                            <th>分类</th>
+                                            <th style="text-align: right;">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td style="font-weight: 500;">Issues</td>
+                                            <td>问题</td>
+                                            <td><span class="badge badge-blue">navigation</span></td>
+                                            <td style="text-align: right;">
+                                                <button class="btn btn-ghost" style="padding: var(--space-1) var(--space-2);">编辑</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="font-weight: 500;">Pull Requests</td>
+                                            <td>拉取请求</td>
+                                            <td><span class="badge badge-blue">navigation</span></td>
+                                            <td style="text-align: right;">
+                                                <button class="btn btn-ghost" style="padding: var(--space-1) var(--space-2);">编辑</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="font-weight: 500;">Repository</td>
+                                            <td>仓库</td>
+                                            <td><span class="badge badge-green">general</span></td>
+                                            <td style="text-align: right;">
+                                                <button class="btn btn-ghost" style="padding: var(--space-1) var(--space-2);">编辑</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div style="text-align: center; margin-top: var(--space-4); font-size: 14px; color: var(--gray-500);">
+                            显示 8 / 8 条记录
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Responsive -->
+            <div class="doc-section" id="mobile">
+                <h2>📱 移动端适配</h2>
+                
+                <div class="grid grid-cols-2" style="margin-bottom: var(--space-8);">
+                    <div class="card" style="text-align: center;">
+                        <div class="card-body" style="padding: var(--space-6);">
+                            <div style="font-size: 48px; margin-bottom: var(--space-4);">📱</div>
+                            <h3 style="font-size: 18px; font-weight: 600; margin-bottom: var(--space-2);">移动优先设计</h3>
+                            <p style="font-size: 14px; color: var(--gray-600);">
+                                采用移动优先的响应式设计策略，确保在小屏幕设备上也能获得优秀的用户体验。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="card" style="text-align: center;">
+                        <div class="card-body" style="padding: var(--space-6);">
+                            <div style="font-size: 48px; margin-bottom: var(--space-4);">🖐️</div>
+                            <h3 style="font-size: 18px; font-weight: 600; margin-bottom: var(--space-2);">触摸友好</h3>
+                            <p style="font-size: 14px; color: var(--gray-600);">
+                                所有交互元素都有足够的点击区域（至少44x44像素），支持手势操作。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>响应式断点</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="info-list">
+                            <div class="info-row">
+                                <span class="info-label">移动设备</span>
+                                <span class="info-value">< 768px</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">平板设备</span>
+                                <span class="info-value">768px - 1024px</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">桌面设备</span>
+                                <span class="info-value">1024px - 1280px</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">大屏幕</span>
+                                <span class="info-value">> 1280px</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhancement Suggestions -->
+            <div class="doc-section" id="enhancements">
+                <h2>💡 专业优化建议</h2>
+
+                <div class="tip-box" style="background: linear-gradient(135deg, #fef3c7, #fde68a); border-left-color: #f59e0b; margin-bottom: var(--space-8);">
+                    <h4 style="color: #b45309;">🏆 国际顶尖设计师视角</h4>
+                    <p>以下建议基于 Apple Human Interface Guidelines、Google Material Design 和 Nielsen Norman Group 的用户体验研究。</p>
+                </div>
+
+                <h3>1. 视觉层次与可读性</h3>
+                <div class="card" style="margin-bottom: var(--space-6);">
+                    <div class="card-body">
+                        <ul style="margin-left: var(--space-6); line-height: 2;">
+                            <li><strong>增加微妙的阴影层次</strong>：使用更细腻的阴影效果（如 `0 1px 3px rgba(0,0,0,0.12)`）来创建视觉深度</li>
+                            <li><strong>优化字体对比度</strong>：确保正文与背景的对比度至少达到 4.5:1（WCAG AA 标准）</li>
+                            <li><strong>使用更大胆的标题</strong>：主标题使用 700-800 字重，配合渐变色或品牌色，增加品牌识别度</li>
+                            <li><strong>添加品牌动效</strong>：Logo 或欢迎区域添加微妙的入场动画（如渐入 + 上浮），提升专业感</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>2. 交互设计优化</h3>
+                <div class="card" style="margin-bottom: var(--space-6);">
+                    <div class="card-body">
+                        <ul style="margin-left: var(--space-6); line-height: 2;">
+                            <li><strong>按钮悬停效果</strong>：添加更丰富的悬停状态（如轻微上浮 + 阴影增强 + 颜色变化）</li>
+                            <li><strong>加载状态设计</strong>：使用优雅的骨架屏（Skeleton Screen）代替传统的加载动画</li>
+                            <li><strong>成功/错误反馈</strong>：使用 Toast 通知或内联消息，添加图标和颜色双重编码</li>
+                            <li><strong>表单验证</strong>：实时验证并显示友好的错误提示，支持键盘导航</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>3. 数据可视化增强</h3>
+                <div class="card" style="margin-bottom: var(--space-6);">
+                    <div class="card-body">
+                        <ul style="margin-left: var(--space-6); line-height: 2;">
+                            <li><strong>趋势图表</strong>：添加折线图或面积图展示性能随时间的变化趋势</li>
+                            <li><strong>仪表盘小部件</strong>：使用环形进度条、数字计数器等现代 UI 组件</li>
+                            <li><strong>颜色编码</strong>：使用语义颜色（绿色=良好，黄色=警告，红色=错误）辅助理解</li>
+                            <li><strong>数据对比</strong>：添加"相比上次"的变化百分比，使用向上/向下箭头</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>4. 移动端体验</h3>
+                <div class="card" style="margin-bottom: var(--space-6);">
+                    <div class="card-body">
+                        <ul style="margin-left: var(--space-6); line-height: 2;">
+                            <li><strong>汉堡菜单</strong>：在小屏幕上使用侧滑抽屉式导航</li>
+                            <li><strong>底部操作栏</strong>：将主要操作按钮固定在屏幕底部，符合移动端操作习惯</li>
+                            <li><strong>手势支持</strong>：支持滑动手势进行页面切换或操作确认</li>
+                            <li><strong>深色模式</strong>：实现完整的深色模式，考虑 OLED 屏幕的省电特性</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>5. 无障碍与包容性设计</h3>
+                <div class="card" style="margin-bottom: var(--space-6);">
+                    <div class="card-body">
+                        <ul style="margin-left: var(--space-6); line-height: 2;">
+                            <li><strong>ARIA 标签</strong>：为所有交互元素添加适当的 ARIA 标签</li>
+                            <li><strong>焦点管理</strong>：确保键盘导航的逻辑性和可见性</li>
+                            <li><strong>屏幕阅读器</strong>：优化内容结构和阅读顺序</li>
+                            <li><strong>动效控制</strong>：提供"减少动画"选项，尊重用户偏好</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>6. 性能与体验</h3>
+                <div class="card">
+                    <div class="card-body">
+                        <ul style="margin-left: var(--space-6); line-height: 2;">
+                            <li><strong>代码分割</strong>：使用 Next.js 的动态导入减少首屏加载时间</li>
+                            <li><strong>图片优化</strong>：使用 WebP 格式，添加 srcset 支持</li>
+                            <li><strong>预加载</strong>：预加载关键资源，使用 `<link rel="preload">`</li>
+                            <li><strong>缓存策略</strong>：合理设置 Service Worker 缓存策略</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="tip-box" style="margin-top: var(--space-8);">
+                    <h4>✨ 高级特性建议</h4>
+                    <p>考虑添加以下高级功能来提升产品竞争力：PWA 支持、离线使用、数据导出/导入、个性化设置、云同步、团队协作等。</p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div style="text-align: center; padding: var(--space-12) 0; border-top: 1px solid var(--gray-200); margin-top: var(--space-12);">
+                <p style="color: var(--gray-500); font-size: 14px;">
+                    GitHub i18n Admin UI/UX 原型设计文档<br>
+                    <span style="font-size: 12px;">© 2026 | GPL-2.0 License</span>
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Mobile navigation toggle
+        function toggleNav() {
+            const nav = document.querySelector('.nav');
+            nav.classList.toggle('open');
+        }
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Active navigation highlighting
+        const sections = document.querySelectorAll('.prototype-frame');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (window.pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('href') === '#' + current) {
+                    item.classList.add('active');
+                }
+            });
+        });
+
+        // Add entrance animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.card, .stat-card').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+
+        // Progress bar animation
+        document.querySelectorAll('.progress-bar').forEach(bar => {
+            const width = bar.style.width;
+            bar.style.width = '0';
+            setTimeout(() => {
+                bar.style.width = width;
+            }, 500);
+        });
+    </script>
+</body>
+</html>
