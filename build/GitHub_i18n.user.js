@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GitHub 中文翻译
 // @namespace    https://github.com/Tanox/GitHub_i18n
-// @version      1.9.19
+// @version      1.9.20
 // @description  GitHub页面自动翻译为中文
 // @author       Sut
 // @match        https://github.com/*
@@ -26,7 +26,7 @@
 /**
  * 版本信息模块
  * @file version.js
- * @version 1.9.19
+ * @version 1.9.20
  * @date 2026-06-08
  * @author Sut
  * @description 统一管理GitHub自动化字符串更新工具的版本信息
@@ -36,7 +36,7 @@
  * @type {string}
  * @description 这是项目的单一版本源，所有其他版本号引用都应从此处获取
  */
-const VERSION = '1.9.19';
+const VERSION = '1.9.20';
 /**
  * GitHub 中文翻译配置文件
  * @file config.js
