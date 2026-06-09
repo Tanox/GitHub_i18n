@@ -10,18 +10,8 @@
     "lint:fix": "eslint src/ build.cjs --fix",
     "format": "prettier --write \"src/**/*.js\" \"build.cjs\"",
     "format:check": "prettier --check \"src/**/*.js\" \"build.cjs\"",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
     "validate": "node -e \"const fs=require('fs');const path=require('path');const buildFile=path.join('build','GitHub_i18n.user.js');if(!fs.existsSync(buildFile)){console.error('构建产物不存在');process.exit(1)}const content=fs.readFileSync(buildFile,'utf8');if(content.length<1000){console.error('构建产物过小');process.exit(1)}console.log('验证通过');process.exit(0)\"",
-    "clean": "node -e \"const fs=require('fs');const path=require('path');['build','dist','coverage'].forEach(dir=>{if(fs.existsSync(dir)){fs.rmSync(dir,{recursive:true});console.log('已清理:',dir)}})",
-    "prepare": "husky install || true",
-    "tools:install": "cd utils && npm install",
-    "tools:server": "cd utils && npm run server",
-    "tools:start": "cd utils && npm run start",
-    "dictionary:export": "cd utils && node dictionary_processor.js export",
-    "dictionary:import": "cd utils && node dictionary_processor.js import",
-    "dictionary:optimize": "cd utils && node dictionary_processor.js optimize"
+    "clean": "node -e \"const fs=require('fs');const path=require('path');['build','dist','coverage'].forEach(dir=>{if(fs.existsSync(dir)){fs.rmSync(dir,{recursive:true});console.log('已清理:',dir)}})\""
   },
   "keywords": [
     "github",
@@ -49,12 +39,8 @@
     "@babel/core": "^7.29.0",
     "@babel/preset-env": "^7.29.5",
     "@eslint/js": "^9.39.4",
-    "babel-jest": "^30.4.1",
     "eslint": "^9.0.0",
     "globals": "^14.0.0",
-    "husky": "^9.0.0",
-    "jest": "^29.7.0",
-    "jest-environment-jsdom": "^29.7.0",
     "lint-staged": "^15.0.0",
     "prettier": "^3.2.0"
   },
