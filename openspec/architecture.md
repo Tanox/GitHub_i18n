@@ -345,6 +345,7 @@ GitHub_i18n/
 │   │   ├── index.js
 │   │   ├── cacheManager.js
 │   │   ├── domObserver.js
+│   │   ├── domObserver.utils.js
 │   │   ├── pageAnalyzer.js
 │   │   ├── pathListener.js
 │   │   └── translationTrigger.js
@@ -357,6 +358,10 @@ GitHub_i18n/
 │   │   ├── partialTranslator.js
 │   │   └── performanceMonitor.js
 │   ├── ui/                     # UI 模块
+│   │   ├── components/
+│   │   │   └── performanceMonitor.js
+│   │   ├── styles/
+│   │   │   └── configUI.styles.js
 │   │   └── configUI.js
 │   ├── utils/                   # 工具模块
 │   │   ├── tools.js
@@ -411,6 +416,7 @@ GitHub_i18n/
 
 | 版本 | 日期 | 说明 |
 |------|------|------|
+| 1.9.20 | 2026-06-09 | ⭐ 审查和完善 openspec 文档：更新版本号，修正目录结构描述，统一文档与实际代码一致 |
 | 1.9.19 | 2026-06-08 | ⭐ 代码审查与优化：修复 ESLint 错误，统一版本号，完善代码质量 |
 | 1.9.18 | 2026-06-07 | 版本更新和 bug 修复 |
 | 1.9.17 | 2026-05-22 | 之前版本 |

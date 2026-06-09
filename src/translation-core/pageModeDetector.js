@@ -1,8 +1,8 @@
 /**
  * 页面模式检测模块
  * @file translationCore/pageModeDetector.js
- * @version 1.9.19
- * @date 2026-06-08
+ * @version 1.9.20
+ * @date 2026-06-09
  * @author Sut
  * @description 检测当前页面的模式
  */

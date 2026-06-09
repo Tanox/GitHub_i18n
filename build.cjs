@@ -2,7 +2,7 @@
  * GitHub 中文翻译插件构建脚本
  * @file build.cjs
  * @version 1.9.20
- * @date 2026-06-08
+ * @date 2026-06-09
  * @description 简化的单文件构建脚本
  */
 

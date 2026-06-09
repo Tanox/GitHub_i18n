@@ -282,8 +282,8 @@ function processData(data)
 /**
  * GitHub 中文翻译主入口文件
  * @file main.js
- * @version 1.9.19
- * @date 2026-06-08
+ * @version 1.9.20
+ * @date 2026-06-09
  * @author Sut
  * @description 整合所有模块并初始化脚本
  */

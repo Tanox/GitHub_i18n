@@ -24,8 +24,8 @@
 ```
 src/
 ├── dictionaries/
-├── pageMonitor/
-└── translationCore/
+├── page-monitor/
+└── translation-core/
 ```
 
 ### 1.2 文件命名
@@ -41,7 +41,7 @@ src/
 ├── config.js
 ├── main.js
 ├── utils.js
-├── translationCore/
+├── translation-core/
 │   ├── index.js
 │   ├── dictionaryManager.js
 │   └── elementTranslator.js
