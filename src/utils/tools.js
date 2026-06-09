@@ -1,8 +1,8 @@
 /**
  * 开发工具模块
  * @file tools.js
- * @version 1.9.19
- * @date 2026-06-08
+ * @version 1.9.20
+ * @date 2026-06-09
  * @author Sut
  * @description 包含字符串提取、自动更新和词典处理等开发工具
  */

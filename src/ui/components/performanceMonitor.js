@@ -1,8 +1,8 @@
 /**
  * GitHub 中文翻译性能监控组件
  * @file performanceMonitor.js
- * @version 1.9.19
- * @date 2026-06-08
+ * @version 1.9.20
+ * @date 2026-06-09
  * @author Sut
  * @description 性能监控区域组件
  */
@@ -149,7 +149,7 @@ export function exportPerformanceStats() {
     const stats = window.translationCore.getPerformanceStats();
     const exportData = {
       timestamp: new Date().toISOString(),
-      version: '1.9.19',
+      version: '1.9.20',
       ...stats,
     };
 
