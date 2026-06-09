@@ -74,47 +74,32 @@ A：欢迎提交 Pull Request！直接修改 `src/dictionaries/` 下的词典文
 ## 项目结构
 
 ```
-src/
-├── core/                 # 核心模块
-│   ├── cacheManager.js   # LRU缓存管理
-│   ├── errorHandler.js   # 错误处理
-│   ├── trie.js           # Trie树数据结构
-│   └── virtualDom.js     # 虚拟DOM优化
-├── dictionaries/         # 翻译词典
-│   ├── common.js         # 通用翻译
-│   ├── codespaces.js     # Codespaces页面
-│   ├── explore.js        # Explore页面
-│   └── index.js          # 词典合并
-├── page-monitor/         # 页面监控
-│   ├── cacheManager.js   # 监控缓存
-│   ├── domObserver.js    # DOM变化观察
-│   ├── domObserver.utils.js # 观察器工具函数
-│   ├── pageAnalyzer.js   # 页面分析
-│   ├── pathListener.js   # 路径监听
-│   ├── translationTrigger.js # 翻译触发
-│   └── index.js          # 监控主模块
-├── translation-core/     # 翻译核心
-│   ├── dictionaryManager.js # 词典管理
-│   ├── elementSelector.js   # 元素选择
-│   ├── elementTranslator.js # 元素翻译
-│   ├── pageModeDetector.js  # 页面模式检测
-│   ├── partialTranslator.js # 部分匹配翻译
-│   ├── performanceMonitor.js # 性能监控
-│   └── index.js          # 翻译核心主模块
-├── ui/                   # UI组件
-│   ├── components/       # 组件目录
-│   │   └── performanceMonitor.js # 性能监控组件
-│   ├── styles/           # 样式目录
-│   │   └── configUI.styles.js # 配置界面样式
-│   └── configUI.js       # 配置界面
-├── utils/                # 工具函数
-│   ├── tools.js          # 开发工具
-│   └── utils.js          # 通用工具
-├── config.js             # 配置文件
-├── i18n.js               # 国际化支持
-├── main.js               # 主入口
-├── version.js            # 版本信息
-└── versionChecker.js     # 版本检查
+GitHub_i18n/
+├── src/                  # 用户脚本源码
+│   ├── core/            # 核心模块（缓存、错误处理、Trie树、虚拟DOM）
+│   ├── dictionaries/    # 翻译词典（通用、Codespaces、Explore）
+│   ├── page-monitor/    # 页面监控（DOM观察、路径监听、翻译触发）
+│   ├── translation-core/ # 翻译核心（词典管理、元素选择器、翻译器）
+│   ├── ui/              # 配置界面（浮动按钮、配置面板）
+│   ├── utils/           # 工具函数
+│   ├── config.js        # 配置文件
+│   ├── i18n.js         # 国际化
+│   ├── main.js          # 主入口
+│   ├── version.js       # 版本信息
+│   └── versionChecker.js # 版本检查
+├── docs/                 # 文档目录
+│   ├── prototype/       # 高保真原型设计（HTML）
+│   ├── prototype.md     # 原型设计文档
+│   ├── architecture.md # 架构文档
+│   ├── development.md   # 开发指南
+│   ├── coding-style.md  # 代码风格
+│   ├── project.md       # 项目规范
+│   └── config.yaml      # 配置
+├── build/               # 构建产物（用户脚本）
+├── package.json
+├── build.cjs           # 构建脚本
+├── eslint.config.js    # ESLint 配置
+└── README.md
 ```
 
 ## 参与开发
@@ -135,7 +120,6 @@ npm run lint          # 代码检查
 npm run format        # 代码格式化
 npm run build         # 构建用户脚本
 npm run validate      # 验证构建产物
-npm run watch         # 监听文件变化自动构建
 ```
 
 ## 许可证
