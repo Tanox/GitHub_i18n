@@ -1,6 +1,19 @@
 # 项目规范文档索引
 
-本目录包含项目的所有规范和配置文档，用于指导开发流程和项目管理。
+本目录集中管理项目规范与配置文档，用于指导开发流程与协作。
+
+## 原型与设计系统
+
+设计系统与高保真原型已迁移至 [prototype/](../prototype/)，它是设计与开发的唯一信息源：
+
+| 模块 | 路径 | 说明 |
+|------|------|------|
+| 设计系统规范 | [prototype/design-system/](../prototype/design-system/) | 色彩、字体、间距、图标、动效 |
+| 组件库规范 | [prototype/components/](../prototype/components/) | 基础组件、复合组件、业务组件 |
+| 交互标准 | [prototype/interaction/](../prototype/interaction/) | 交互模式、反馈、错误处理、空状态 |
+| 高保真原型 | [prototype/prototypes/](../prototype/prototypes/) | 桌面端 UI、移动端 UI |
+
+打开 [prototype/index.html](../prototype/index.html) 浏览完整的原型与设计系统。
 
 ## 目录导航
 
@@ -8,8 +21,8 @@
 
 | 文档 | 路径 | 说明 |
 |------|------|------|
-| 项目规范 | [openspec/project.md](../openspec/project.md) | 项目概述、目录结构、开发规范、核心模块说明等 |
-| 配置文件 | [openspec/config.yaml](../openspec/config.yaml) | OpenSpec 系统配置、项目上下文和规则定义 |
+| 项目规范 | [project.md](./project.md) | 项目概述、目录结构、开发规范、核心模块说明等 |
+| 配置文件 | [config.yaml](./config.yaml) | OpenSpec 系统配置、项目上下文和规则定义 |
 | 开发指南 | [development.md](./development.md) | 分支策略、提交规范、发布流程、测试要求等 |
 | 架构文档 | [architecture.md](./architecture.md) | 系统架构、核心模块、技术选型等 |
 | 代码风格 | [coding-style.md](./coding-style.md) | 命名约定、代码格式、注释规范、最佳实践等 |
@@ -29,16 +42,7 @@
   - 项目上下文信息（技术栈、领域等）
   - 提案和变更的规则定义
 
-### 关于 openspec/ 目录
+### 与文档相关的变更
 
-`openspec/` 目录保持不变，继续作为 OpenSpec 系统的核心工作区，包含：
-- 提案管理
-- 变更记录
-- 项目规范
-- 系统配置
-
-## 注意事项
-
-1. 本目录（spec/）仅用于规范文档索引和组织
-2. 所有规范内容仍存储在 openspec/ 目录中
-3. 请勿在本目录中添加新的规范文件，规范内容统一管理在 openspec/ 目录中
+- 旧 `docs/prototype/prototype.html` 已被 `prototype/` 替代并移除
+- 所有新增的设计 / 交互规范请直接在 `prototype/` 下维护
