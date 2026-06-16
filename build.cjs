@@ -17,7 +17,6 @@ const OUTPUT_FILE = path.join(BUILD_DIR, 'GitHub_i18n.user.js');
 const SOURCE_ORDER = [
   'version.js',
   'config.js',
-  'core/trie.js',
   'utils/utils.js',
   'core/cacheManager.js',
   'core/errorHandler.js',
@@ -42,7 +41,6 @@ const SOURCE_ORDER = [
   'ui/configUI.js',
   'versionChecker.js',
   'core/virtualDom.js',
-  'i18n.js',
   'main.js',
 ];
 

@@ -1,21 +1,18 @@
 /**
  * 翻译词典管理模块
  * @file translationCore/dictionaryManager.js
- * @version 1.9.19
- * @date 2026-06-08
+ * @version 1.9.20
+ * @date 2026-06-10
  * @author Sut
  * @description 管理翻译词典的加载和查询
  */
 import { CONFIG } from '../config.js';
 import { mergeAllDictionaries } from '../dictionaries/index.js';
-import { Trie } from '../core/trie.js';
 import { CacheManager } from '../core/cacheManager.js';
 
 export const dictionaryManager = {
   dictionary: {},
   dictionaryHash: new Map(),
-  dictionaryTrie: new Trie(),
-  regexCache: new Map(),
   cacheManager: null,
 
   init() {
@@ -28,17 +25,18 @@ export const dictionaryManager = {
       this.cacheManager = new CacheManager(CONFIG.performance?.maxDictSize || 2000);
       this.dictionary = mergeAllDictionaries();
       this.dictionaryHash.clear();
-      this.dictionaryTrie.clear();
-      this.regexCache.clear();
 
+      // 构建哈希表，支持大小写不敏感查询
       Object.keys(this.dictionary).forEach((key) => {
-        if (!this.dictionary[key].startsWith('待翻译: ')) {
-          this.dictionaryHash.set(key, this.dictionary[key]);
+        const value = this.dictionary[key];
+        if (value && !value.startsWith('待翻译: ')) {
+          // 原始键
+          this.dictionaryHash.set(key, value);
+          // 小写键（用于大小写不敏感匹配）
           if (key.length <= 100) {
-            this.dictionaryHash.set(key.toLowerCase(), this.dictionary[key]);
-            this.dictionaryHash.set(key.toUpperCase(), this.dictionary[key]);
+            this.dictionaryHash.set(key.toLowerCase(), value);
+            this.dictionaryHash.set(key.toUpperCase(), value);
           }
-          this.dictionaryTrie.insert(key);
         }
       });
 
@@ -46,14 +44,11 @@ export const dictionaryManager = {
         console.log(`[GitHub 中文翻译] 词典初始化耗时: ${Date.now() - startTime}ms`);
         console.log(`[GitHub 中文翻译] 词典条目数量: ${Object.keys(this.dictionary).length}`);
         console.log(`[GitHub 中文翻译] 哈希表条目数量: ${this.dictionaryHash.size}`);
-        console.log(`[GitHub 中文翻译] Trie树条目数量: ${this.dictionaryTrie.getSize()}`);
       }
     } catch (error) {
       console.error('[GitHub 中文翻译] 词典初始化失败:', error);
       this.dictionary = {};
       this.dictionaryHash.clear();
-      this.dictionaryTrie.clear();
-      this.regexCache.clear();
     }
   },
 
@@ -64,10 +59,12 @@ export const dictionaryManager = {
 
     const normalizedText = text.trim();
 
-    if (normalizedText.length < CONFIG.performance?.minTextLengthToTranslate) {
+    // 检查最小文本长度
+    if (normalizedText.length < (CONFIG.performance?.minTextLengthToTranslate || 3)) {
       return null;
     }
 
+    // 检查缓存
     if (CONFIG.performance?.enableTranslationCache) {
       const cachedResult = this.cacheManager.getFromCache(normalizedText);
       if (cachedResult !== null) {
@@ -75,22 +72,25 @@ export const dictionaryManager = {
       }
     }
 
-    let result = null;
-    result = this.dictionaryHash.get(normalizedText);
+    // 查询哈希表
+    let result = this.dictionaryHash.get(normalizedText);
 
+    // 如果没有找到，尝试大小写不敏感查询
     if (result === null && normalizedText.length <= 100) {
       const lowerCaseText = normalizedText.toLowerCase();
       const upperCaseText = normalizedText.toUpperCase();
       result = this.dictionaryHash.get(lowerCaseText) || this.dictionaryHash.get(upperCaseText);
     }
 
+    // 清理文本中的潜在危险内容
     if (result !== null) {
       result = this.sanitizeText(result);
     }
 
+    // 缓存结果
     if (
       CONFIG.performance?.enableTranslationCache &&
-      normalizedText.length <= CONFIG.performance?.maxCachedTextLength
+      normalizedText.length <= (CONFIG.performance?.maxCachedTextLength || 100)
     ) {
       if (result !== null) {
         this.cacheManager.setToCache(normalizedText, result, false);
@@ -101,12 +101,16 @@ export const dictionaryManager = {
   },
 
   sanitizeText(text) {
+    // 移除 HTML 标签
     let sanitizedText = text.replace(/<[^>]*>/g, '');
+    // 移除事件处理器
     sanitizedText = sanitizedText.replace(/on\w+\s*=\s*["'][^"']*["']/gi, '');
+    // 移除危险协议
     sanitizedText = sanitizedText.replace(/javascript:/gi, '');
     sanitizedText = sanitizedText.replace(/data:/gi, '');
-    sanitizedText = sanitizedText.replace(/expression\([^)]*\)/gi, '');
     sanitizedText = sanitizedText.replace(/vbscript:/gi, '');
+    // 移除危险元素
+    sanitizedText = sanitizedText.replace(/expression\([^)]*\)/gi, '');
     sanitizedText = sanitizedText.replace(/<\s*script/gi, '');
     sanitizedText = sanitizedText.replace(/<\s*iframe/gi, '');
     sanitizedText = sanitizedText.replace(/<\s*object/gi, '');
@@ -121,13 +125,13 @@ export const dictionaryManager = {
       Object.assign(this.dictionary, newDictionary);
 
       Object.keys(newDictionary).forEach((key) => {
-        if (!newDictionary[key].startsWith('待翻译: ')) {
-          this.dictionaryHash.set(key, newDictionary[key]);
+        const value = newDictionary[key];
+        if (value && !value.startsWith('待翻译: ')) {
+          this.dictionaryHash.set(key, value);
           if (key.length <= 100) {
-            this.dictionaryHash.set(key.toLowerCase(), newDictionary[key]);
-            this.dictionaryHash.set(key.toUpperCase(), newDictionary[key]);
+            this.dictionaryHash.set(key.toLowerCase(), value);
+            this.dictionaryHash.set(key.toUpperCase(), value);
           }
-          this.dictionaryTrie.insert(key);
         }
       });
 
