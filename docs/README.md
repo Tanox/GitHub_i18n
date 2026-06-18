@@ -1,82 +1,26 @@
-# 项目规范文档索引
+# 文档索引
 
-本目录包含项目的所有规范和配置文档，用于指导开发流程和项目管理。
+面向开发者与贡献者的文档入口。设计规范与高保真原型由 `prototype/` 目录统一维护。
 
 ## 目录导航
 
-### 项目核心文档
-
 | 文档 | 路径 | 说明 |
 |------|------|------|
-| 项目规范 | [project.md](./project.md) | 项目概述、目录结构、项目信息、版本号管理 |
-| 架构文档 | [architecture.md](./architecture.md) | 系统架构、核心模块、技术选型、版本历史 |
-| 开发指南 | [development.md](./development.md) | 分支策略、提交规范、发布流程、测试要求 |
-| 代码风格 | [coding-style.md](./coding-style.md) | 命名约定、代码格式、注释规范、最佳实践 |
-| 原型设计 | [prototype.md](./prototype.md) | 系统原型设计、流程图、UI 设计、状态管理 |
-| 配置文件 | [config.yaml](./config.yaml) | OpenSpec 系统配置、项目上下文和规则定义 |
+| 项目结构与规范 | [project.md](./project.md) | 项目概述、目录结构、核心模块说明 |
+| 架构设计 | [architecture.md](./architecture.md) | 系统架构、技术选型 |
+| 代码风格 | [coding-style.md](./coding-style.md) | 命名约定、注释规范、最佳实践 |
+| 开发流程 | [development.md](./development.md) | 分支策略、提交规范、发布流程 |
+| 配置 | [config.yaml](./config.yaml) | OpenSpec 配置与上下文 |
+| 原型与设计规范 | [prototype.md](./prototype.md) | 原型设计理念与组件规范 |
 
-### 规范文档说明
+## 设计系统与高保真原型
 
-- **project.md**
-  - 包含完整的项目概述和目录结构
-  - 文档索引和项目基本信息
-  - 当前版本：1.9.20
+- 设计系统规范：[../prototype/design-system/](../prototype/design-system/)
+- 组件库：[../prototype/components/](../prototype/components/)
+- 交互标准：[../prototype/interaction/](../prototype/interaction/)
+- 高保真原型：[../prototype/prototypes/](../prototype/prototypes/)
+- 统一入口：[../prototype/index.html](../prototype/index.html)
 
-- **architecture.md**
-  - 详细的系统架构说明
-  - 核心模块功能描述
-  - 数据流和交互流程
-  - 技术选型和目录结构
-  - 版本历史记录
+## 备注
 
-- **development.md**
-  - 分支策略和 Git 工作流程
-  - 语义化提交规范
-  - 版本发布流程
-  - 测试要求和覆盖率指标
-  - 命令速查
-
-- **coding-style.md**
-  - 文件和目录命名规范
-  - 变量、函数、类命名规范
-  - 代码风格（缩进、空行、结构）
-  - 注释规范（文件头、函数、内联、TODO）
-  - 最佳实践（错误处理、异步、性能、可访问性）
-
-- **prototype.md**
-  - 系统整体架构流程图
-  - 核心翻译流程详解
-  - 词典匹配流程（Trie 树优化）
-  - 配置面板布局和规格
-  - 响应式设计断点
-  - 按钮状态和交互设计
-  - 状态管理流程
-  - 性能监控数据流
-  - 页面模式检测流程
-  - 版本历史记录
-
-- **config.yaml**
-  - OpenSpec 驱动架构配置
-  - 项目上下文信息（技术栈、领域、版本等）
-  - 提案和变更的规则定义
-  - 规范文档目录索引
-
-### 关于 openspec/ 目录
-
-`openspec/` 目录保持不变，继续作为 OpenSpec 系统的核心工作区，包含：
-- 提案管理
-- 变更记录
-- 项目规范
-- 系统配置
-
-## 版本信息
-
-- **当前版本**: 1.9.20
-- **更新日期**: 2026-06-09
-
-## 注意事项
-
-1. 本目录（docs/）用于正式规范文档索引和组织
-2. 所有规范内容统一管理在 docs/ 和 openspec/ 目录中
-3. 更新版本号时，请同步更新所有文档中的版本引用
-4. 变更记录请同步更新 CHANGELOG.md 文件
+`docs/` 目录保留架构与流程类 Markdown 文档，视觉与组件规范统一在 `prototype/` 中维护，避免重复。

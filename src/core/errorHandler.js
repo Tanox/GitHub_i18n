@@ -1,8 +1,8 @@
 /**
  * 错误处理模块
  * @file errorHandler.js
- * @version 1.9.20
- * @date 2026-06-09
+ * @version 1.9.19
+ * @date 2026-06-08
  * @author Sut
  * @description 负责统一管理所有错误处理和恢复机制
  */

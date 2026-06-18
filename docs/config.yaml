@@ -5,9 +5,7 @@ context: |
   技术栈: JavaScript, Node.js
   使用语义化提交
   领域: GitHub中文本地化插件
-  版本: 1.9.20
-  日期: 2026-06-09
-  规范文档: docs/ 目录存放正式规范文档
+  规范文档: spec/ 目录存放正式规范文档
 
 # Per-artifact rules
 rules:
@@ -17,14 +15,12 @@ rules:
 
 # Specification directories
 specDirectories:
-  - path: ../docs
+  - path: ../spec
     purpose: 存放正式规范文档
     description: |
       包含项目架构、开发指南、代码风格等正式规范文档。
       主要文档：
-      - project.md: 项目规范文档
       - architecture.md: 系统架构文档
       - development.md: 开发流程指南
       - coding-style.md: 代码风格规范
-      - prototype.md: 原型设计文档
-      - config.yaml: OpenSpec 系统配置
+

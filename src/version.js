@@ -2,7 +2,7 @@
  * 版本信息模块
  * @file version.js
  * @version 1.9.20
- * @date 2026-06-09
+ * @date 2026-06-10
  * @author Sut
  * @description 统一管理GitHub自动化字符串更新工具的版本信息
  */

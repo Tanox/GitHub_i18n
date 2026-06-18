@@ -345,7 +345,6 @@ GitHub_i18n/
 │   │   ├── index.js
 │   │   ├── cacheManager.js
 │   │   ├── domObserver.js
-│   │   ├── domObserver.utils.js
 │   │   ├── pageAnalyzer.js
 │   │   ├── pathListener.js
 │   │   └── translationTrigger.js
@@ -358,10 +357,6 @@ GitHub_i18n/
 │   │   ├── partialTranslator.js
 │   │   └── performanceMonitor.js
 │   ├── ui/                     # UI 模块
-│   │   ├── components/
-│   │   │   └── performanceMonitor.js
-│   │   ├── styles/
-│   │   │   └── configUI.styles.js
 │   │   └── configUI.js
 │   ├── utils/                   # 工具模块
 │   │   ├── tools.js
@@ -372,15 +367,20 @@ GitHub_i18n/
 │   ├── version.js
 │   └── versionChecker.js
 ├── docs/                        # 文档目录
-│   ├── prototype/              # 高保真原型设计（HTML）
 │   ├── prototype.md            # 原型设计文档
 │   ├── architecture.md
 │   ├── development.md
-│   ├── coding-style.md
-│   ├── project.md
-│   └── config.yaml
+│   └── coding-style.md
 ├── build/                       # 用户脚本构建产物
+├── openspec/                    # OpenSpec 规范
+│   ├── project.md
+│   ├── architecture.md
+│   ├── development.md
+│   ├── coding-style.md
+│   ├── config.yaml
+│   └── README.md
 ├── build.cjs
+├── jest.config.js
 ├── eslint.config.js
 ├── package.json
 └── README.md
@@ -396,9 +396,13 @@ GitHub_i18n/
 - 遵循 ESLint 规则
 - Prettier 代码格式化
 
-### 6.2 Git 提交规范
-- 使用语义化提交信息
-- 提交前运行 lint 检查
+### 6.2 测试规范
+- 单元测试覆盖核心功能
+- 测试文件与源码文件对应
+- 使用 Jest 测试框架
+
+### 6.3 Git 提交规范
+- 提交前自动运行 lint 和测试
 - 使用语义化版本管理
 
 ---
@@ -407,8 +411,7 @@ GitHub_i18n/
 
 | 版本 | 日期 | 说明 |
 |------|------|------|
-| 1.9.20 | 2026-06-09 | ⭐ 创建原型设计文档，完善代码架构和文档组织 |
-| 1.9.19 | 2026-06-08 | 优化翻译逻辑：无匹配时不修改 DOM，更新架构文档 |
+| 1.9.19 | 2026-06-08 | ⭐ 优化翻译逻辑：无匹配时不修改 DOM，更新架构文档 |
 | 1.9.18 | 2026-06-07 | 版本更新和 bug 修复 |
 | 1.9.17 | 2026-05-22 | 之前版本 |
 | 1.9.16 | 2026-05-22 | 之前版本 |

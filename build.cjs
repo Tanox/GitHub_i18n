@@ -1,8 +1,8 @@
 /**
  * GitHub 中文翻译插件构建脚本
  * @file build.cjs
- * @version 1.9.20
- * @date 2026-06-09
+ * @version 1.9.19
+ * @date 2026-06-08
  * @description 简化的单文件构建脚本
  */
 
@@ -17,7 +17,6 @@ const OUTPUT_FILE = path.join(BUILD_DIR, 'GitHub_i18n.user.js');
 const SOURCE_ORDER = [
   'version.js',
   'config.js',
-  'core/trie.js',
   'utils/utils.js',
   'core/cacheManager.js',
   'core/errorHandler.js',
@@ -42,7 +41,6 @@ const SOURCE_ORDER = [
   'ui/configUI.js',
   'versionChecker.js',
   'core/virtualDom.js',
-  'i18n.js',
   'main.js',
 ];
 
