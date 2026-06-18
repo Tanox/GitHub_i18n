@@ -8,6 +8,7 @@
  */
 
 import { CONFIG } from '../config.js';
+import { utils } from '../utils/utils.js';
 
 export const ErrorHandler = {
   // 错误计数器
@@ -68,16 +69,14 @@ export const ErrorHandler = {
    * @param {string} type - 错误类型
    */
   logError(context, error, type) {
-    const errorMessage = `[GitHub 中文翻译] ${context}时出错 (${type}): ${error.message}`;
+    const sanitizedMessage = utils.sanitizeErrorMessage(error);
+    const errorMessage = `[GitHub 中文翻译] ${context}时出错 (${type}): ${sanitizedMessage}`;
 
     if (CONFIG.debugMode) {
-      console.error(errorMessage, error);
-
-      // 在调试模式下，提供更详细的错误信息
-      if (error.stack) {
-        console.error('[GitHub 中文翻译] 错误堆栈:', error.stack);
-      }
+      // 调试模式下输出简化错误信息，不输出敏感堆栈
+      console.error(errorMessage);
     } else {
+      // 生产环境只输出简短错误消息
       console.error(errorMessage);
     }
   },

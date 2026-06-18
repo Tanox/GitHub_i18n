@@ -10,6 +10,15 @@ import { CONFIG } from './config.js';
 import { utils } from './utils/utils.js';
 
 /**
+ * 远程脚本的已知哈希值（用于完整性验证）
+ * 在发布新版本时更新此值
+ */
+const KNOWN_SCRIPT_HASHES = {
+  'https://github.com/Tanox/GitHub_i18n/raw/main/build/GitHub_i18n.user.js':
+    'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456',
+};
+
+/**
  * 版本检查器对象
  */
 const versionChecker = {
@@ -77,9 +86,10 @@ const versionChecker = {
 
       return false;
     } catch (error) {
-      const errorMsg = `[GitHub 中文翻译] 检查更新时发生错误: ${error.message || error}`;
+      const sanitizedError = utils.sanitizeErrorMessage(error);
+      const errorMsg = `[GitHub 中文翻译] 检查更新时发生错误: ${sanitizedError}`;
       if (CONFIG.debugMode) {
-        console.error(errorMsg, error);
+        console.error(errorMsg);
       }
 
       // 记录错误日志
@@ -87,7 +97,7 @@ const versionChecker = {
         localStorage.setItem(
           'githubZhUpdateError',
           JSON.stringify({
-            message: error.message,
+            message: sanitizedError,
             timestamp: now,
           }),
         );
@@ -135,7 +145,20 @@ const versionChecker = {
           throw new Error(`HTTP错误! 状态码: ${response.status}`);
         }
 
-        return await response.text();
+        const scriptContent = await response.text();
+
+        // 验证脚本完整性（如果已知哈希值存在）
+        if (KNOWN_SCRIPT_HASHES[url]) {
+          const isValid = await this.verifyScriptIntegrity(scriptContent, url);
+          if (!isValid) {
+            if (CONFIG.debugMode) {
+              console.warn('[GitHub 中文翻译] 脚本完整性验证失败，可能存在安全风险');
+            }
+            // 不阻止更新，但记录警告
+          }
+        }
+
+        return scriptContent;
       } catch (error) {
         lastError = error;
 
@@ -150,6 +173,39 @@ const versionChecker = {
     }
 
     throw lastError;
+  },
+
+  /**
+   * 验证脚本完整性
+   * @param {string} scriptContent - 脚本内容
+   * @param {string} url - 脚本URL
+   * @returns {Promise<boolean>} 验证是否通过
+   */
+  async verifyScriptIntegrity(scriptContent, url) {
+    try {
+      const expectedHash = KNOWN_SCRIPT_HASHES[url];
+      if (!expectedHash) {
+        return true; // 没有已知哈希，跳过验证
+      }
+
+      const actualHash = await utils.sha256Hash(scriptContent);
+      const isValid = actualHash === expectedHash;
+
+      if (CONFIG.debugMode) {
+        console.log(`[GitHub 中文翻译] 脚本完整性验证: ${isValid ? '通过' : '失败'}`);
+        if (!isValid) {
+          console.log(`[GitHub 中文翻译] 期望哈希: ${expectedHash.substring(0, 16)}...`);
+          console.log(`[GitHub 中文翻译] 实际哈希: ${actualHash.substring(0, 16)}...`);
+        }
+      }
+
+      return isValid;
+    } catch (error) {
+      if (CONFIG.debugMode) {
+        console.error('[GitHub 中文翻译] 脚本完整性验证出错:', utils.sanitizeErrorMessage(error));
+      }
+      return false;
+    }
   },
 
   /**

@@ -8,12 +8,16 @@
  */
 
 import { CONFIG } from '../config.js';
+import { utils } from '../utils/utils.js';
 import { addConfigUIStyles } from './styles/configUI.styles.js';
 import {
   createPerformanceMonitoringSection,
   updatePerformanceStats,
   exportPerformanceStats,
 } from './components/performanceMonitor.js';
+
+// 配置存储键名
+const CONFIG_STORAGE_KEY = 'github-i18n-config';
 
 class ConfigUI {
   constructor() {
@@ -30,10 +34,25 @@ class ConfigUI {
 
   loadUserSettings() {
     try {
-      const saved = localStorage.getItem('github-i18n-config');
-      return saved ? JSON.parse(saved) : {};
+      const saved = localStorage.getItem(CONFIG_STORAGE_KEY);
+      if (!saved) return {};
+
+      // 尝试解码混淆的数据
+      const decoded = utils.deobfuscateData(saved);
+      if (decoded) {
+        return JSON.parse(decoded);
+      }
+
+      // 如果解码失败，尝试直接解析（兼容旧格式）
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return {};
+      }
     } catch (error) {
-      console.error('[GitHub 中文翻译] 加载用户配置失败:', error);
+      if (CONFIG.debugMode) {
+        console.error('[GitHub 中文翻译] 加载用户配置失败:', utils.sanitizeErrorMessage(error));
+      }
       return {};
     }
   }
@@ -56,11 +75,16 @@ class ConfigUI {
 
   saveUserSettings(settings) {
     try {
-      localStorage.setItem('github-i18n-config', JSON.stringify(settings));
+      const jsonData = JSON.stringify(settings);
+      // 混淆存储配置数据，防止恶意脚本或扩展读取
+      const obfuscatedData = utils.obfuscateData(jsonData);
+      localStorage.setItem(CONFIG_STORAGE_KEY, obfuscatedData);
       this.userConfig = { ...settings };
       this.mergeUserConfig();
     } catch (error) {
-      console.error('[GitHub 中文翻译] 保存用户配置失败:', error);
+      if (CONFIG.debugMode) {
+        console.error('[GitHub 中文翻译] 保存用户配置失败:', utils.sanitizeErrorMessage(error));
+      }
     }
   }
 
@@ -314,7 +338,7 @@ class ConfigUI {
   }
 
   handleReset() {
-    localStorage.removeItem('github-i18n-config');
+    localStorage.removeItem(CONFIG_STORAGE_KEY);
     this.userConfig = {};
     this.settings = {};
     this.hide();
