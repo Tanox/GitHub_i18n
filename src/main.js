@@ -141,8 +141,8 @@ function startScript() {
 // 导出函数供其他模块使用
 export { init, startScript, cleanup };
 
-// 将核心模块暴露到全局作用域，便于调试和配置界面使用
-if (typeof window !== 'undefined') {
+// 将核心模块暴露到全局作用域 - 仅在调试模式下
+if (typeof window !== 'undefined' && CONFIG.debugMode) {
   window.translationCore = translationCore;
   window.configUI = configUI;
 }

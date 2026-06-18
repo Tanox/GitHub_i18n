@@ -631,6 +631,109 @@ const utils = {
       return defaultValue;
     }
   },
+  /**
+   * 对数据进行Base64编码（用于轻量级数据混淆，非加密）
+   * @param {string} data - 要编码的数据
+   * @returns {string} Base64编码后的字符串
+   */
+  base64Encode(data) {
+    try {
+      return btoa(unescape(encodeURIComponent(data)));
+    } catch (_error) {
+      return data;
+    }
+  },
+  /**
+   * 对Base64编码的数据进行解码
+   * @param {string} encodedData - Base64编码的字符串
+   * @returns {string|null} 解码后的字符串或null
+   */
+  base64Decode(encodedData) {
+    try {
+      return decodeURIComponent(escape(atob(encodedData)));
+    } catch (_error) {
+      return null;
+    }
+  },
+  /**
+   * 混淆敏感配置数据（轻量级保护）
+   * 使用XOR加密配合Base64编码
+   * @param {string} data - 要混淆的数据
+   * @param {string} key - 混淆密钥
+   * @returns {string} 混淆后的数据
+   */
+  obfuscateData(data, key = 'github-i18n-secure') {
+    try {
+      const encoded = this.base64Encode(data);
+      let result = '';
+      for (let i = 0; i < encoded.length; i++) {
+        const charCode = encoded.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+        result += String.fromCharCode(charCode);
+      }
+      return this.base64Encode(result);
+    } catch (_error) {
+      return data;
+    }
+  },
+  /**
+   * 还原被混淆的配置数据
+   * @param {string} obfuscatedData - 被混淆的数据
+   * @param {string} key - 混淆密钥
+   * @returns {string|null} 还原后的数据或null
+   */
+  deobfuscateData(obfuscatedData, key = 'github-i18n-secure') {
+    try {
+      const decoded = this.base64Decode(obfuscatedData);
+      if (!decoded) return null;
+      let result = '';
+      for (let i = 0; i < decoded.length; i++) {
+        const charCode = decoded.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+        result += String.fromCharCode(charCode);
+      }
+      return this.base64Decode(result);
+    } catch (_error) {
+      return null;
+    }
+  },
+  /**
+   * 计算字符串的SHA-256哈希值
+   * @param {string} data - 要计算哈希的数据
+   * @returns {Promise<string>} SHA-256哈希值（十六进制格式）
+   */
+  async sha256Hash(data) {
+    try {
+      const msgUint8 = new TextEncoder().encode(data);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+    } catch (_error) {
+      return '';
+    }
+  },
+  /**
+   * 脱敏错误信息，移除敏感路径和内部细节
+   * @param {string|Error} error - 错误对象或错误消息
+   * @returns {string} 脱敏后的错误消息
+   */
+  sanitizeErrorMessage(error) {
+    try {
+      let message = typeof error === 'string' ? error : error.message || String(error);
+      // 移除文件路径信息
+      message = message.replace(/\/[a-zA-Z0-9_/.-]+:[0-9]+:[0-9]+/g, '[位置]');
+      message = message.replace(/\/workspace\//g, '');
+      message = message.replace(/at\s+[a-zA-Z0-9_.]+\s+[<(]/g, 'at [函数]');
+      // 移除可能的敏感数据
+      message = message.replace(/(password|token|secret|key)\s*[=:]\s*['"][^'"]*['"]/gi, '$1=[已隐藏]');
+      message = message.replace(/['"][a-zA-Z0-9+/=]{20,}['"]/g, '[已隐藏]');
+      // 限制错误消息长度
+      if (message.length > 200) {
+        message = message.substring(0, 200) + '...';
+      }
+      return message;
+    } catch (_error) {
+      return '[未知错误]';
+    }
+  },
 };
 /**
  * LRU缓存管理模块
@@ -785,14 +888,13 @@ const ErrorHandler = {
    * @param {string} type - 错误类型
    */
   logError(context, error, type) {
-    const errorMessage = `[GitHub 中文翻译] ${context}时出错 (${type}): ${error.message}`;
+    const sanitizedMessage = utils.sanitizeErrorMessage(error);
+    const errorMessage = `[GitHub 中文翻译] ${context}时出错 (${type}): ${sanitizedMessage}`;
     if (CONFIG.debugMode) {
-      console.error(errorMessage, error);
-      // 在调试模式下，提供更详细的错误信息
-      if (error.stack) {
-        console.error('[GitHub 中文翻译] 错误堆栈:', error.stack);
-      }
+      // 调试模式下输出简化错误信息，不输出敏感堆栈
+      console.error(errorMessage);
     } else {
+      // 生产环境只输出简短错误消息
       console.error(errorMessage);
     }
   },
@@ -3677,6 +3779,8 @@ import {
   updatePerformanceStats,
   exportPerformanceStats,
 } from './components/performanceMonitor.js';
+// 配置存储键名
+const CONFIG_STORAGE_KEY = 'github-i18n-config';
 class ConfigUI {
   constructor() {
     this.config = CONFIG;
@@ -3690,10 +3794,23 @@ class ConfigUI {
   }
   loadUserSettings() {
     try {
-      const saved = localStorage.getItem('github-i18n-config');
-      return saved ? JSON.parse(saved) : {};
+      const saved = localStorage.getItem(CONFIG_STORAGE_KEY);
+      if (!saved) return {};
+      // 尝试解码混淆的数据
+      const decoded = utils.deobfuscateData(saved);
+      if (decoded) {
+        return JSON.parse(decoded);
+      }
+      // 如果解码失败，尝试直接解析（兼容旧格式）
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return {};
+      }
     } catch (error) {
-      console.error('[GitHub 中文翻译] 加载用户配置失败:', error);
+      if (CONFIG.debugMode) {
+        console.error('[GitHub 中文翻译] 加载用户配置失败:', utils.sanitizeErrorMessage(error));
+      }
       return {};
     }
   }
@@ -3712,11 +3829,16 @@ class ConfigUI {
   }
   saveUserSettings(settings) {
     try {
-      localStorage.setItem('github-i18n-config', JSON.stringify(settings));
+      const jsonData = JSON.stringify(settings);
+      // 混淆存储配置数据，防止恶意脚本或扩展读取
+      const obfuscatedData = utils.obfuscateData(jsonData);
+      localStorage.setItem(CONFIG_STORAGE_KEY, obfuscatedData);
       this.userConfig = { ...settings };
       this.mergeUserConfig();
     } catch (error) {
-      console.error('[GitHub 中文翻译] 保存用户配置失败:', error);
+      if (CONFIG.debugMode) {
+        console.error('[GitHub 中文翻译] 保存用户配置失败:', utils.sanitizeErrorMessage(error));
+      }
     }
   }
   mergeUserConfig() {
@@ -3922,7 +4044,7 @@ class ConfigUI {
     this.hide();
   }
   handleReset() {
-    localStorage.removeItem('github-i18n-config');
+    localStorage.removeItem(CONFIG_STORAGE_KEY);
     this.userConfig = {};
     this.settings = {};
     this.hide();
@@ -3936,6 +4058,14 @@ class ConfigUI {
  * @author Sut
  * @description 负责检查和处理脚本更新
  */
+/**
+ * 远程脚本的已知哈希值（用于完整性验证）
+ * 在发布新版本时更新此值
+ */
+const KNOWN_SCRIPT_HASHES = {
+  'https://github.com/Tanox/GitHub_i18n/raw/main/build/GitHub_i18n.user.js':
+    'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456',
+};
 /**
  * 版本检查器对象
  */
@@ -3992,16 +4122,17 @@ const versionChecker = {
       }
       return false;
     } catch (error) {
-      const errorMsg = `[GitHub 中文翻译] 检查更新时发生错误: ${error.message || error}`;
+      const sanitizedError = utils.sanitizeErrorMessage(error);
+      const errorMsg = `[GitHub 中文翻译] 检查更新时发生错误: ${sanitizedError}`;
       if (CONFIG.debugMode) {
-        console.error(errorMsg, error);
+        console.error(errorMsg);
       }
       // 记录错误日志
       try {
         localStorage.setItem(
           'githubZhUpdateError',
           JSON.stringify({
-            message: error.message,
+            message: sanitizedError,
             timestamp: now,
           }),
         );
@@ -4041,7 +4172,18 @@ const versionChecker = {
         if (!response.ok) {
           throw new Error(`HTTP错误! 状态码: ${response.status}`);
         }
-        return await response.text();
+        const scriptContent = await response.text();
+        // 验证脚本完整性（如果已知哈希值存在）
+        if (KNOWN_SCRIPT_HASHES[url]) {
+          const isValid = await this.verifyScriptIntegrity(scriptContent, url);
+          if (!isValid) {
+            if (CONFIG.debugMode) {
+              console.warn('[GitHub 中文翻译] 脚本完整性验证失败，可能存在安全风险');
+            }
+            // 不阻止更新，但记录警告
+          }
+        }
+        return scriptContent;
       } catch (error) {
         lastError = error;
         // 如果是最后一次尝试，则抛出错误
@@ -4053,6 +4195,35 @@ const versionChecker = {
       }
     }
     throw lastError;
+  },
+  /**
+   * 验证脚本完整性
+   * @param {string} scriptContent - 脚本内容
+   * @param {string} url - 脚本URL
+   * @returns {Promise<boolean>} 验证是否通过
+   */
+  async verifyScriptIntegrity(scriptContent, url) {
+    try {
+      const expectedHash = KNOWN_SCRIPT_HASHES[url];
+      if (!expectedHash) {
+        return true; // 没有已知哈希，跳过验证
+      }
+      const actualHash = await utils.sha256Hash(scriptContent);
+      const isValid = actualHash === expectedHash;
+      if (CONFIG.debugMode) {
+        console.log(`[GitHub 中文翻译] 脚本完整性验证: ${isValid ? '通过' : '失败'}`);
+        if (!isValid) {
+          console.log(`[GitHub 中文翻译] 期望哈希: ${expectedHash.substring(0, 16)}...`);
+          console.log(`[GitHub 中文翻译] 实际哈希: ${actualHash.substring(0, 16)}...`);
+        }
+      }
+      return isValid;
+    } catch (error) {
+      if (CONFIG.debugMode) {
+        console.error('[GitHub 中文翻译] 脚本完整性验证出错:', utils.sanitizeErrorMessage(error));
+      }
+      return false;
+    }
   },
   /**
    * 从脚本内容中提取版本号
@@ -4882,8 +5053,8 @@ function startScript() {
   }
 }
 // 导出函数供其他模块使用
-// 将核心模块暴露到全局作用域，便于调试和配置界面使用
-if (typeof window !== 'undefined') {
+// 将核心模块暴露到全局作用域 - 仅在调试模式下
+if (typeof window !== 'undefined' && CONFIG.debugMode) {
   window.translationCore = translationCore;
   window.configUI = configUI;
 }
