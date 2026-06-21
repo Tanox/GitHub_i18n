@@ -201,7 +201,7 @@ MAJOR.MINOR.PATCH
 
 ### 4.1 测试框架
 
-项目使用 **Jest** 作为测试框架，配合 **jsdom** 模拟浏览器环境。
+项目使用 **ESLint** 和 **Prettier** 进行代码质量检查和格式化。
 
 ### 4.2 测试文件组织
 
@@ -217,17 +217,29 @@ src/
     └── cacheManager.test.js
 ```
 
-### 4.3 测试命令
+### 4.3 开发命令
 
 ```bash
-# 运行所有测试
+# 运行完整测试流水线（lint → build → validate）
 npm test
 
-# 运行测试并监视文件变化
-npm run test:watch
+# 运行代码检查
+npm run lint
 
-# 生成测试覆盖率报告
-npm run test:coverage
+# 自动修复 ESLint 问题
+npm run lint:fix
+
+# 运行 Prettier 格式化
+npm run format
+
+# 检查代码格式
+npm run format:check
+
+# 构建项目
+npm run build
+
+# 验证构建产物
+npm run validate
 ```
 
 ### 4.4 覆盖率要求
@@ -290,9 +302,6 @@ npm run test:coverage
 | `npm run lint:fix` | 自动修复 ESLint 问题 |
 | `npm run format` | 运行 Prettier 格式化 |
 | `npm run format:check` | 检查代码格式 |
-| `npm test` | 运行测试 |
-| `npm run test:watch` | 运行测试并监听变化 |
-| `npm run test:coverage` | 生成覆盖率报告 |
 | `npm run build` | 构建项目 |
 | `npm run validate` | 验证构建产物 |
 | `npm run clean` | 清理构建产物 |

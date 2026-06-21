@@ -345,6 +345,7 @@ GitHub_i18n/
 │   │   ├── index.js
 │   │   ├── cacheManager.js
 │   │   ├── domObserver.js
+│   │   ├── domObserver.utils.js  # DOM 工具函数
 │   │   ├── pageAnalyzer.js
 │   │   ├── pathListener.js
 │   │   └── translationTrigger.js
@@ -357,6 +358,10 @@ GitHub_i18n/
 │   │   ├── partialTranslator.js
 │   │   └── performanceMonitor.js
 │   ├── ui/                     # UI 模块
+│   │   ├── components/        # UI 组件
+│   │   │   └── performanceMonitor.js
+│   │   ├── styles/            # UI 样式
+│   │   │   └── configUI.styles.js
 │   │   └── configUI.js
 │   ├── utils/                   # 工具模块
 │   │   ├── tools.js
@@ -411,6 +416,7 @@ GitHub_i18n/
 
 | 版本 | 日期 | 说明 |
 |------|------|------|
+| 1.9.20 | 2026-06-10 | 完善项目规范文档至 100% 完成度，统一版本号，修正 CI/CD 配置 |
 | 1.9.19 | 2026-06-08 | ⭐ 优化翻译逻辑：无匹配时不修改 DOM，更新架构文档 |
 | 1.9.18 | 2026-06-07 | 版本更新和 bug 修复 |
 | 1.9.17 | 2026-05-22 | 之前版本 |
