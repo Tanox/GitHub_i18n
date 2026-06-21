@@ -1,8 +1,8 @@
 /**
  * 性能监控模块
  * @file translationCore/performanceMonitor.js
- * @version 1.9.19
- * @date 2026-06-08
+ * @version 1.9.20
+ * @date 2026-06-10
  * @author Sut
  * @description 监控翻译性能数据
  */

@@ -282,8 +282,8 @@ function processData(data)
 /**
  * GitHub 中文翻译主入口文件
  * @file main.js
- * @version 1.9.19
- * @date 2026-06-08
+ * @version 1.9.20
+ * @date 2026-06-10
  * @author Sut
  * @description 整合所有模块并初始化脚本
  */
@@ -527,7 +527,7 @@ function createUser(name, email, age, address, phone) {
 
 ### 5.8 复杂度控制
 
-- 圈复杂度不超过 20（ESLint 警告）
+- 圈复杂度不超过 20（与 ESLint 规则一致）
 - 使用提前返回减少嵌套
 - 使用映射代替多个 if-else
 
