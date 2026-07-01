@@ -3877,11 +3877,26 @@ class ConfigUI {
     const header = document.createElement('div');
     header.className = 'github-i18n-config-header';
     const title = document.createElement('h3');
-    title.textContent = 'GitHub 中文翻译配置';
+    title.textContent = 'GitHub 中文翻译';
+    const versionBadge = document.createElement('span');
+    versionBadge.style.fontFamily = '"JetBrains Mono", "SF Mono", SFMono-Regular, Menlo, Consolas, "Courier New", monospace';
+    versionBadge.style.fontSize = '11px';
+    versionBadge.style.color = '#6e7681';
+    versionBadge.style.padding = '2px 8px';
+    versionBadge.style.borderRadius = '4px';
+    versionBadge.style.background = '#010409';
+    versionBadge.style.border = '1px solid #21262d';
+    versionBadge.textContent = `v${VERSION}`;
+    const headerLeft = document.createElement('div');
+    headerLeft.style.display = 'flex';
+    headerLeft.style.alignItems = 'center';
+    headerLeft.style.gap = '10px';
+    headerLeft.appendChild(title);
+    headerLeft.appendChild(versionBadge);
     const closeBtn = document.createElement('button');
     closeBtn.className = 'github-i18n-config-close';
     closeBtn.textContent = '×';
-    header.appendChild(title);
+    header.appendChild(headerLeft);
     header.appendChild(closeBtn);
     return header;
   }
@@ -3937,11 +3952,18 @@ class ConfigUI {
     const resetBtn = document.createElement('button');
     resetBtn.className = 'github-i18n-config-reset';
     resetBtn.textContent = '重置默认';
+    const footerRight = document.createElement('div');
+    footerRight.className = 'github-i18n-config-footer-right';
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'github-i18n-config-cancel';
+    cancelBtn.textContent = '取消';
     const saveBtn = document.createElement('button');
     saveBtn.className = 'github-i18n-config-save';
     saveBtn.textContent = '保存配置';
+    footerRight.appendChild(cancelBtn);
+    footerRight.appendChild(saveBtn);
     footer.appendChild(resetBtn);
-    footer.appendChild(saveBtn);
+    footer.appendChild(footerRight);
     return footer;
   }
   createConfigSection(title, items) {
@@ -3997,6 +4019,7 @@ class ConfigUI {
     const closeBtn = this.container.querySelector('.github-i18n-config-close');
     const saveBtn = this.container.querySelector('.github-i18n-config-save');
     const resetBtn = this.container.querySelector('.github-i18n-config-reset');
+    const cancelBtn = this.container.querySelector('.github-i18n-config-cancel');
     const refreshBtn = this.container.querySelector('#github-i18n-refresh-stats');
     const exportBtn = this.container.querySelector('#github-i18n-export-stats');
     const handleClose = () => this.hide();
@@ -4012,6 +4035,7 @@ class ConfigUI {
     closeBtn?.addEventListener('click', handleClose);
     saveBtn?.addEventListener('click', handleSave);
     resetBtn?.addEventListener('click', handleReset);
+    cancelBtn?.addEventListener('click', handleClose);
     refreshBtn?.addEventListener('click', handleRefresh);
     exportBtn?.addEventListener('click', handleExport);
     this.container?.addEventListener('click', handleContainerClick);
@@ -4019,6 +4043,7 @@ class ConfigUI {
       { element: closeBtn, event: 'click', handler: handleClose },
       { element: saveBtn, event: 'click', handler: handleSave },
       { element: resetBtn, event: 'click', handler: handleReset },
+      { element: cancelBtn, event: 'click', handler: handleClose },
       { element: refreshBtn, event: 'click', handler: handleRefresh },
       { element: exportBtn, event: 'click', handler: handleExport },
       { element: this.container, event: 'click', handler: handleContainerClick },
