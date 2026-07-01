@@ -28,15 +28,12 @@ GitHub_i18n/
 │   ├── core/                     # 核心工具模块
 │   │   ├── cacheManager.js       # LRU 缓存管理器
 │   │   ├── errorHandler.js       # 统一错误处理
-│   │   ├── trie.js               # Trie 树数据结构
 │   │   └── virtualDom.js         # 虚拟 DOM 优化
 │   ├── dictionaries/             # 翻译词典目录
 │   │   ├── codespaces.js         # Codespaces 相关翻译
 │   │   ├── common.js             # 通用词汇翻译
 │   │   ├── explore.js            # Explore 页面翻译
-│   │   ├── index.js              # 词典导出入口
-│   │   ├── notifications.js      # 通知相关翻译
-│   │   └── settings.js           # 设置页面翻译
+│   │   └── index.js              # 词典导出入口
 │   ├── page-monitor/             # 页面监控模块
 │   │   ├── cacheManager.js       # 页面级缓存管理
 │   │   ├── domObserver.js        # DOM 变化观察器
@@ -75,9 +72,7 @@ GitHub_i18n/
 │   └── index.html                # 原型入口
 ├── build/                        # 构建产物目录
 │   └── GitHub_i18n.user.js       # 编译后的用户脚本
-├── utils/                        # 自动化工具目录
-├── docs/                         # 项目规范文档
-├── openspec/                     # OpenSpec 工具配置
+├── openspec/                     # 项目规范文档
 │   ├── project.md                # 项目规范（本文档）
 │   ├── architecture.md           # 架构文档
 │   ├── development.md            # 开发指南
@@ -85,11 +80,13 @@ GitHub_i18n/
 │   ├── prototype.md              # 原型设计
 │   ├── config.yaml               # OpenSpec 配置
 │   └── README.md                 # 规范文档索引
+├── collect-dict.cjs              # 词典收集脚本
 ├── package.json                  # NPM 包配置
 ├── build.cjs                     # 构建脚本
 ├── eslint.config.js              # ESLint 配置
 ├── .prettierrc                   # Prettier 配置
 ├── CONTRIBUTING.md               # 贡献指南
+├── CHANGELOG.md                  # 变更日志
 ├── README.md                     # 项目说明
 └── .gitignore                    # Git 忽略配置
 ```
@@ -117,7 +114,6 @@ GitHub_i18n/
 ### 3. core（核心工具）
 提供基础设施支持。
 - `cacheManager.js`：LRU 缓存，减少重复翻译
-- `trie.js`：Trie 树结构加速词典查询
 - `errorHandler.js`：统一错误处理和日志记录
 - `virtualDom.js`：虚拟 DOM 优化
 
@@ -134,8 +130,6 @@ GitHub_i18n/
 - `common.js`：通用翻译词典
 - `codespaces.js`：GitHub Codespaces 相关词典
 - `explore.js`：GitHub Explore 页面词典
-- `notifications.js`：通知相关翻译
-- `settings.js`：设置页面翻译
 
 ---
 

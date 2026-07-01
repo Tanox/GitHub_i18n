@@ -587,8 +587,8 @@ npm run format:check
 
 ---
 
-## 相关文档
+##### 相关文档
 
 - [development.md](./development.md) - 开发指南
 - [architecture.md](./architecture.md) - 架构文档
-- [openspec/project.md](../openspec/project.md) - 项目规范
+- [project.md](./project.md) - 项目规范

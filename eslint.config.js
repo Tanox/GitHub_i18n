@@ -71,26 +71,6 @@ export default [
     },
   },
   {
-    files: ['**/*.test.js', '**/__tests__/**/*.js'],
-    languageOptions: {
-      globals: {
-        ...globals.jest,
-        describe: 'readonly',
-        it: 'readonly',
-        expect: 'readonly',
-        beforeEach: 'readonly',
-        afterEach: 'readonly',
-        beforeAll: 'readonly',
-        afterAll: 'readonly',
-        jest: 'readonly',
-      },
-    },
-    rules: {
-      'no-console': 'off',
-      'max-lines-per-function': 'off',
-    },
-  },
-  {
     files: ['build.cjs'],
     languageOptions: {
       sourceType: 'commonjs',

@@ -2,26 +2,23 @@
 /.vscode
 /node_modules
 # /build  <- 允许追踪源码
-# /test   <- 允许追踪调试脚本
-/utils/api
 /dist
 *.code-workspace
 *.bak
-github_string_fetcher.js
+*.log
+*.swp
+*~
+
+# 临时文件
 */test-*
 */fix-*
 */fix_*
+
+# 覆盖率报告
+/coverage
 
 # 保留重要配置文件
 # .eslintrc.js - 代码规范配置
 # .gitattributes - Git属性配置
 # package.json - 项目配置
 # package-lock.json - 依赖锁定
-
-# 测试文件不忽略，确保测试代码被版本控制
-# /test
-
-/docs/_backup
-/docs/_templates
-/docs/_fragments
-

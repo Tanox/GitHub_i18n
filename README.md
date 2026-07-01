@@ -71,7 +71,6 @@ prototype/                   # 设计系统与高保真原型
 └── prototypes/              # 高保真原型
 build/                        # 构建产物
 openspec/                     # 项目规范 (架构 / 代码风格 / 开发流程)
-docs/                         # 正式规范文档
 ```
 
 ## 🛠️ 参与开发

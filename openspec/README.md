@@ -67,6 +67,6 @@
 
 ### 与文档相关的变更
 
-- 旧 `docs/prototype/prototype.html` 已被 `prototype/` 替代并移除
 - 所有新增的设计 / 交互规范请直接在 `prototype/` 下维护
 - 版本号单一来源：`src/version.js`
+- `docs/` 目录已合并至 `openspec/`，统一文档管理
