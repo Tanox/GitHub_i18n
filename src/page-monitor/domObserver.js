@@ -186,8 +186,8 @@ export const domObserver = {
     return document.body;
   },
 
-  getOptimizedObserverConfig(pageMode) {
-    pageMode = pageMode || translationCore.detectPageMode();
+  getOptimizedObserverConfig(inputPageMode) {
+    const pageMode = inputPageMode || translationCore.detectPageMode();
     const baseConfig = { childList: true };
 
     if (!CONFIG.performance?.ignoreCharacterDataMutations) {
@@ -224,8 +224,8 @@ export const domObserver = {
     }
   },
 
-  shouldTriggerTranslation(mutations, pageMode) {
-    pageMode = pageMode || translationCore.detectPageMode();
+  shouldTriggerTranslation(mutations, inputPageMode) {
+    const pageMode = inputPageMode || translationCore.detectPageMode();
     try {
       if (!mutations || mutations.length === 0) {
         return false;

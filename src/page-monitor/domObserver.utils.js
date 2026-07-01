@@ -55,6 +55,9 @@ export function isElementIgnored(target, ignoreElements, elementCheckCache, page
           shouldIgnore = true;
         }
         break;
+      default:
+        // 未知页面模式
+        break;
     }
   }
 
@@ -101,6 +104,9 @@ export function isElementImportant(target, importantElements, elementCheckCache,
         break;
       case 'codespaces':
         isImportant = target.classList.contains('codespace-status');
+        break;
+      default:
+        // 未知页面模式
         break;
     }
   }
@@ -171,6 +177,9 @@ export function isMutationContentRelated(mutation, pageMode) {
                   element.classList.contains('search-result') ||
                   element.classList.contains('search-match')
                 );
+              default:
+                // 未知页面模式
+                return false;
             }
           }
           return true;

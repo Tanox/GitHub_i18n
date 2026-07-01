@@ -6,6 +6,11 @@
  * @author Sut
  * @description 管理翻译词典的加载和查询
  */
+
+// 词典管理常量
+const DEFAULT_MAX_DICT_SIZE = 2000; // 默认最大词典大小
+const MAX_KEY_LENGTH_FOR_CASE_VARIANTS = 100; // 生成大小写变体的最大键长度
+
 import { CONFIG } from '../config.js';
 import { mergeAllDictionaries } from '../dictionaries/index.js';
 import { CacheManager } from '../core/cacheManager.js';
@@ -22,7 +27,7 @@ export const dictionaryManager = {
         startTime = Date.now();
       }
 
-      this.cacheManager = new CacheManager(CONFIG.performance?.maxDictSize || 2000);
+      this.cacheManager = new CacheManager(CONFIG.performance?.maxDictSize || DEFAULT_MAX_DICT_SIZE);
       this.dictionary = mergeAllDictionaries();
       this.dictionaryHash.clear();
 
@@ -33,7 +38,7 @@ export const dictionaryManager = {
           // 原始键
           this.dictionaryHash.set(key, value);
           // 小写键（用于大小写不敏感匹配）
-          if (key.length <= 100) {
+          if (key.length <= MAX_KEY_LENGTH_FOR_CASE_VARIANTS) {
             this.dictionaryHash.set(key.toLowerCase(), value);
             this.dictionaryHash.set(key.toUpperCase(), value);
           }
@@ -76,7 +81,7 @@ export const dictionaryManager = {
     let result = this.dictionaryHash.get(normalizedText);
 
     // 如果没有找到，尝试大小写不敏感查询
-    if (result === null && normalizedText.length <= 100) {
+    if (result === null && normalizedText.length <= MAX_KEY_LENGTH_FOR_CASE_VARIANTS) {
       const lowerCaseText = normalizedText.toLowerCase();
       const upperCaseText = normalizedText.toUpperCase();
       result = this.dictionaryHash.get(lowerCaseText) || this.dictionaryHash.get(upperCaseText);

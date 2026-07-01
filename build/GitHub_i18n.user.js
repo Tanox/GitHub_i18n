@@ -47,7 +47,7 @@ const VERSION = '1.9.20';
  */
 // 导入版本常量（从单一版本源）
 // 定义greasemonkeyInfo以避免未定义错误，使用空值合并运算符提高代码可读性
-const greasemonkeyInfo = typeof window !== 'undefined' ? (window.GM_info ?? {}) : {};
+const greasemonkeyInfo = typeof window === 'undefined' ? {} : (window.GM_info ?? {});
 /**
  * 从用户脚本头部注释中提取版本号
  * @returns {string} 版本号
@@ -293,6 +293,12 @@ const CONFIG = {
  * @author Sut
  * @description 包含各种通用的辅助函数
  */
+// 工具函数常量
+const MAX_REGEX_LENGTH = 100; // 正则表达式最大长度
+const MAX_REPETITION_COUNT = 5; // 最大重复量词数
+const RADIX_16 = 16; // 十六进制基数
+const PAD_LENGTH_2 = 2; // 填充长度
+const PAD_CHAR = '0'; // 填充字符
 /**
  * 工具函数集合
  */
@@ -314,11 +320,13 @@ const utils = {
       inThrottle = false;
       if (trailing && lastArgs) {
         result = func.apply(context, args);
-        lastArgs = lastThis = null;
+        lastArgs = null;
+        lastThis = null;
       }
     };
     return function () {
       const args = arguments;
+      // eslint-disable-next-line no-invalid-this
       const context = this;
       if (!inThrottle) {
         if (leading) {
@@ -353,6 +361,7 @@ const utils = {
     };
     return function () {
       const args = arguments;
+      // eslint-disable-next-line no-invalid-this
       const context = this;
       const isLeadingCall = !timeout && leading;
       clearTimeout(timeout);
@@ -369,7 +378,9 @@ const utils = {
    * @returns {Promise<void>}
    */
   delay(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
   },
   /**
    * 转义正则表达式中的特殊字符
@@ -400,10 +411,11 @@ const utils = {
    * @returns {boolean} - 是否安全
    */
   isSafeRegex(pattern) {
-    if (typeof pattern === 'string') {
-      pattern = new RegExp(pattern);
+    let patternObj = pattern;
+    if (typeof patternObj === 'string') {
+      patternObj = new RegExp(patternObj);
     }
-    const source = pattern.source;
+    const source = patternObj.source;
     let depth = 0;
     let hasNestedRepetition = false;
     // 检查是否存在嵌套的重复量词（ReDoS的主要来源）
@@ -420,8 +432,8 @@ const utils = {
       }
     }
     // 检查是否存在长时间运行的可能性
-    const longPatternWarning = source.length > 100; // 过长的正则表达式
-    const hasMultipleRepetitions = (source.match(/[*+?]/g) || []).length > 5; // 过多的重复量词
+    const longPatternWarning = source.length > MAX_REGEX_LENGTH; // 过长的正则表达式
+    const hasMultipleRepetitions = (source.match(/[*+?]/g) || []).length > MAX_REPETITION_COUNT; // 过多的重复量词
     return !hasNestedRepetition && !longPatternWarning && !hasMultipleRepetitions;
   },
   /**
@@ -611,6 +623,7 @@ const utils = {
       console.warn('[GitHub 中文翻译] 深拷贝失败:', error);
       return obj;
     }
+    return null;
   },
   /**
    * 安全地执行函数，捕获可能的异常
@@ -667,7 +680,8 @@ const utils = {
       const encoded = this.base64Encode(data);
       let result = '';
       for (let i = 0; i < encoded.length; i++) {
-        const charCode = encoded.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+        // eslint-disable-next-line no-bitwise
+      const charCode = encoded.charCodeAt(i) ^ key.charCodeAt(i % key.length);
         result += String.fromCharCode(charCode);
       }
       return this.base64Encode(result);
@@ -687,6 +701,7 @@ const utils = {
       if (!decoded) return null;
       let result = '';
       for (let i = 0; i < decoded.length; i++) {
+        // eslint-disable-next-line no-bitwise
         const charCode = decoded.charCodeAt(i) ^ key.charCodeAt(i % key.length);
         result += String.fromCharCode(charCode);
       }
@@ -705,7 +720,7 @@ const utils = {
       const msgUint8 = new TextEncoder().encode(data);
       const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+      return hashArray.map((b) => b.toString(RADIX_16).padStart(PAD_LENGTH_2, PAD_CHAR)).join('');
     } catch (_error) {
       return '';
     }
@@ -836,6 +851,14 @@ class CacheManager {
  * @author Sut
  * @description 负责统一管理所有错误处理和恢复机制
  */
+// 错误恢复常量
+const RECOVERY_BASE_DELAY_MS = 100; // 指数退避基础延迟
+const RECOVERY_MAX_DELAY_MS = 2000; // 最大延迟
+const DEFAULT_THRESHOLD = 20; // 默认错误阈值
+const BATCH_DELAY_MIN_MS = 50; // 最小批处理延迟
+const NETWORK_INTERVAL_MIN_MS = 1000; // 最小网络请求间隔
+const NETWORK_INTERVAL_MAX_MS = 5000; // 最大网络请求间隔
+const BATCH_DELAY_FALLBACK_MS = 100; // 通用批处理延迟回退值
 const ErrorHandler = {
   // 错误计数器
   errorCounts: new Map(),
@@ -921,10 +944,10 @@ const ErrorHandler = {
       }
       if (attempt < maxRetries) {
         // 指数退避重试
-        const delay = Math.pow(2, attempt) * 100; // 100ms, 200ms, 400ms...
+        const delay = Math.pow(2, attempt) * RECOVERY_BASE_DELAY_MS;
         setTimeout(() => {
           this.attemptRecovery(context, recoveryFn, maxRetries, attempt);
-        }, delay);
+        }, Math.min(delay, RECOVERY_MAX_DELAY_MS));
       }
     }
   },
@@ -936,13 +959,13 @@ const ErrorHandler = {
   checkErrorThreshold(type, count) {
     const thresholds = {
       [this.ERROR_TYPES.TRANSLATION]: CONFIG.performance?.maxTranslationErrorCount || 10,
-      [this.ERROR_TYPES.DOM_OPERATION]: CONFIG.performance?.maxDomErrorCount || 20,
+      [this.ERROR_TYPES.DOM_OPERATION]: CONFIG.performance?.maxDomErrorCount || DEFAULT_THRESHOLD,
       [this.ERROR_TYPES.DICTIONARY]: CONFIG.performance?.maxDictionaryErrorCount || 5,
       [this.ERROR_TYPES.NETWORK]: CONFIG.performance?.maxNetworkErrorCount || 3,
       [this.ERROR_TYPES.PERFORMANCE]: CONFIG.performance?.maxPerformanceErrorCount || 15,
       [this.ERROR_TYPES.OTHER]: CONFIG.performance?.maxOtherErrorCount || 25,
     };
-    const threshold = thresholds[type] || 20;
+    const threshold = thresholds[type] || DEFAULT_THRESHOLD;
     if (count >= threshold) {
       this.handleErrorOverflow(type, count, threshold);
     }
@@ -965,7 +988,7 @@ const ErrorHandler = {
         break;
       case this.ERROR_TYPES.DOM_OPERATION:
         // 减少DOM操作频率
-        CONFIG.performance.batchDelay = Math.max(CONFIG.performance.batchDelay || 0, 50);
+        CONFIG.performance.batchDelay = Math.max(CONFIG.performance.batchDelay || 0, BATCH_DELAY_MIN_MS);
         break;
       case this.ERROR_TYPES.DICTIONARY:
         // 重新初始化词典
@@ -976,13 +999,13 @@ const ErrorHandler = {
       case this.ERROR_TYPES.NETWORK:
         // 增加网络请求间隔
         CONFIG.performance.networkRequestInterval = Math.max(
-          CONFIG.performance.networkRequestInterval || 1000,
-          5000,
+          CONFIG.performance.networkRequestInterval || NETWORK_INTERVAL_MIN_MS,
+          NETWORK_INTERVAL_MAX_MS,
         );
         break;
       default:
         // 通用紧急措施：减少处理频率
-        CONFIG.performance.batchDelay = Math.max(CONFIG.performance.batchDelay || 0, 100);
+        CONFIG.performance.batchDelay = Math.max(CONFIG.performance.batchDelay || 0, BATCH_DELAY_FALLBACK_MS);
         break;
     }
     // 重置错误计数
@@ -1051,7 +1074,9 @@ const stringExtractor = {
     // 合并所有词典
     const mergedDictionary = {};
     for (const module in translationModule) {
-      Object.assign(mergedDictionary, translationModule[module]);
+      if (Object.prototype.hasOwnProperty.call(translationModule, module)) {
+        Object.assign(mergedDictionary, translationModule[module]);
+      }
     }
     // 检查每个字符串是否已翻译
     allStrings.forEach((string) => {
@@ -1077,7 +1102,7 @@ class AutoStringUpdater {
    * 查找需要添加的字符串
    * @returns {Set<string>} 需要添加的字符串集合
    */
-  findStringsToAdd() {
+  static findStringsToAdd() {
     const untranslated = stringExtractor.findUntranslatedStrings(false);
     return new Set(Array.from(untranslated).filter((str) => !str.startsWith('待翻译: ')));
   }
@@ -1116,10 +1141,12 @@ class DictionaryProcessor {
    * 合并词典
    * @returns {Object} 合并后的词典
    */
-  mergeDictionaries() {
+  static mergeDictionaries() {
     const merged = {};
     for (const module in translationModule) {
-      Object.assign(merged, translationModule[module]);
+      if (Object.prototype.hasOwnProperty.call(translationModule, module)) {
+        Object.assign(merged, translationModule[module]);
+      }
     }
     return merged;
   }
@@ -1581,8 +1608,8 @@ const domObserver = {
     }
     return document.body;
   },
-  getOptimizedObserverConfig(pageMode) {
-    pageMode = pageMode || translationCore.detectPageMode();
+  getOptimizedObserverConfig(inputPageMode) {
+    const pageMode = inputPageMode || translationCore.detectPageMode();
     const baseConfig = { childList: true };
     if (!CONFIG.performance?.ignoreCharacterDataMutations) {
       baseConfig.characterData = true;
@@ -1612,8 +1639,8 @@ const domObserver = {
       console.log('[GitHub 中文翻译] 使用降级监控方案');
     }
   },
-  shouldTriggerTranslation(mutations, pageMode) {
-    pageMode = pageMode || translationCore.detectPageMode();
+  shouldTriggerTranslation(mutations, inputPageMode) {
+    const pageMode = inputPageMode || translationCore.detectPageMode();
     try {
       if (!mutations || mutations.length === 0) {
         return false;
@@ -1721,7 +1748,7 @@ const translationTrigger = {
             this.delayedTranslate(0);
           }, minInterval);
         }
-        return;
+        return null;
       }
       if (now - this.lastTranslateTimestamp >= minInterval) {
         return this.delayedTranslate(0);
@@ -1733,6 +1760,7 @@ const translationTrigger = {
     } catch (error) {
       console.error('[GitHub 中文翻译] 翻译触发失败:', error);
     }
+    return null;
   },
   async delayedTranslate() {
     try {
@@ -2527,7 +2555,9 @@ const translationModule = {
 function mergeAllDictionaries() {
   const merged = {};
   for (const module in translationModule) {
-    Object.assign(merged, translationModule[module]);
+    if (Object.prototype.hasOwnProperty.call(translationModule, module)) {
+      Object.assign(merged, translationModule[module]);
+    }
   }
   return merged;
 }
@@ -2539,6 +2569,9 @@ function mergeAllDictionaries() {
  * @author Sut
  * @description 管理翻译词典的加载和查询
  */
+// 词典管理常量
+const DEFAULT_MAX_DICT_SIZE = 2000; // 默认最大词典大小
+const MAX_KEY_LENGTH_FOR_CASE_VARIANTS = 100; // 生成大小写变体的最大键长度
 const dictionaryManager = {
   dictionary: {},
   dictionaryHash: new Map(),
@@ -2549,7 +2582,7 @@ const dictionaryManager = {
       if (CONFIG.debugMode) {
         startTime = Date.now();
       }
-      this.cacheManager = new CacheManager(CONFIG.performance?.maxDictSize || 2000);
+      this.cacheManager = new CacheManager(CONFIG.performance?.maxDictSize || DEFAULT_MAX_DICT_SIZE);
       this.dictionary = mergeAllDictionaries();
       this.dictionaryHash.clear();
       // 构建哈希表，支持大小写不敏感查询
@@ -2559,7 +2592,7 @@ const dictionaryManager = {
           // 原始键
           this.dictionaryHash.set(key, value);
           // 小写键（用于大小写不敏感匹配）
-          if (key.length <= 100) {
+          if (key.length <= MAX_KEY_LENGTH_FOR_CASE_VARIANTS) {
             this.dictionaryHash.set(key.toLowerCase(), value);
             this.dictionaryHash.set(key.toUpperCase(), value);
           }
@@ -2595,7 +2628,7 @@ const dictionaryManager = {
     // 查询哈希表
     let result = this.dictionaryHash.get(normalizedText);
     // 如果没有找到，尝试大小写不敏感查询
-    if (result === null && normalizedText.length <= 100) {
+    if (result === null && normalizedText.length <= MAX_KEY_LENGTH_FOR_CASE_VARIANTS) {
       const lowerCaseText = normalizedText.toLowerCase();
       const upperCaseText = normalizedText.toUpperCase();
       result = this.dictionaryHash.get(lowerCaseText) || this.dictionaryHash.get(upperCaseText);
@@ -3117,7 +3150,7 @@ const elementTranslator = {
           element.removeChild(node);
           fragment.appendChild(node);
           const childTranslated = this.translateElement(node);
-          hasTranslatableContent = hasTranslatableContent || childTranslated;
+          hasTranslatableContent ||= childTranslated;
         } catch (e) {
           if (CONFIG.debugMode) {
             console.error('[GitHub 中文翻译] 处理子元素失败:', e, '元素:', node);
@@ -3397,6 +3430,9 @@ const performanceMonitor = {
       case 'error':
         elementTranslator.performanceData.errorCount++;
         break;
+      default:
+        // 未知事件类型
+        break;
     }
   },
   getPerformanceStats() {
@@ -3467,13 +3503,14 @@ const translationCore = {
   },
   startCacheCleanupTimer() {
     this.stopCacheCleanupTimer();
+    const CLEANUP_INTERVAL_MS = 120000; // 清理间隔（2分钟）
     this.cacheCleanupTimer = setInterval(() => {
       if (this.isPageUnloading) {
         this.stopCacheCleanupTimer();
         return;
       }
       this.cleanCache();
-    }, 120000);
+    }, CLEANUP_INTERVAL_MS);
   },
   stopCacheCleanupTimer() {
     if (this.cacheCleanupTimer) {
@@ -3598,8 +3635,8 @@ const translationCore = {
       }
     });
   },
-  async processElementsInBatches(elements) {
-    elements = virtualDomManager.processElements(elements);
+  async processElementsInBatches(inputElements) {
+    const elements = virtualDomManager.processElements(inputElements);
     const modeConfig = this.getCurrentPageModeConfig();
     const batchSize = modeConfig.batchSize || CONFIG.performance?.batchSize || 50;
     const delay = CONFIG.performance?.batchDelay || 0;
@@ -3792,7 +3829,7 @@ class ConfigUI {
     this.eventListeners = [];
     this.setupPageUnloadHandler();
   }
-  loadUserSettings() {
+  static loadUserSettings() {
     try {
       const saved = localStorage.getItem(CONFIG_STORAGE_KEY);
       if (!saved) return {};
@@ -3873,7 +3910,7 @@ class ConfigUI {
     addConfigUIStyles();
     this.addEventListeners();
   }
-  createHeader() {
+  static createHeader() {
     const header = document.createElement('div');
     header.className = 'github-i18n-config-header';
     const title = document.createElement('h3');
@@ -3931,7 +3968,7 @@ class ConfigUI {
     content.appendChild(monitoringSection);
     return content;
   }
-  createFooter() {
+  static createFooter() {
     const footer = document.createElement('div');
     footer.className = 'github-i18n-config-footer';
     const resetBtn = document.createElement('button');
@@ -3944,7 +3981,7 @@ class ConfigUI {
     footer.appendChild(saveBtn);
     return footer;
   }
-  createConfigSection(title, items) {
+  static createConfigSection(title, items) {
     const section = document.createElement('div');
     section.className = 'github-i18n-config-section';
     const sectionTitle = document.createElement('h4');
@@ -4058,6 +4095,18 @@ class ConfigUI {
  * @author Sut
  * @description 负责检查和处理脚本更新
  */
+// 版本检查常量
+const DEFAULT_INTERVAL_HOURS = 24; // 默认检查间隔（小时）
+const HOURS_TO_MS = 60 * 60 * 1000; // 小时转毫秒
+const PARSE_INT_RADIX = 10; // parseInt 基数
+const DEFAULT_MAX_RETRIES = 2; // 默认最大重试次数
+const DEFAULT_RETRY_DELAY_MS = 1000; // 默认重试延迟
+const FETCH_TIMEOUT_MS = 8000; // 请求超时时间
+const EXPONENTIAL_BASE = 2; // 指数退避基数
+const HASH_DISPLAY_LENGTH = 16; // 哈希显示长度
+const NOTIFICATION_AUTO_HIDE_MS = 20000; // 通知自动隐藏时间
+const NOTIFICATION_ANIMATION_MS = 300; // 通知动画时间
+const MAX_HISTORY_LENGTH = 10; // 最大历史记录数
 /**
  * 远程脚本的已知哈希值（用于完整性验证）
  * 在发布新版本时更新此值
@@ -4086,11 +4135,11 @@ const versionChecker = {
     // 检查是否达到检查间隔
     const lastCheck = localStorage.getItem('githubZhLastUpdateCheck');
     const now = Date.now();
-    const intervalMs = (CONFIG.updateCheck.intervalHours || 24) * 60 * 60 * 1000;
-    if (lastCheck && now - parseInt(lastCheck) < intervalMs) {
+    const intervalMs = (CONFIG.updateCheck.intervalHours || DEFAULT_INTERVAL_HOURS) * HOURS_TO_MS;
+    if (lastCheck && now - parseInt(lastCheck, PARSE_INT_RADIX) < intervalMs) {
       if (CONFIG.debugMode) {
         console.log(
-          `[GitHub 中文翻译] 未达到更新检查间隔，跳过检查 (上次检查: ${new Date(parseInt(lastCheck)).toLocaleString()})`,
+          `[GitHub 中文翻译] 未达到更新检查间隔，跳过检查 (上次检查: ${new Date(parseInt(lastCheck, PARSE_INT_RADIX)).toLocaleString()})`,
         );
       }
       return false;
@@ -4149,7 +4198,7 @@ const versionChecker = {
    * @param {number} retryDelay - 重试间隔（毫秒）
    * @returns {Promise<string>} 响应文本
    */
-  async fetchWithRetry(url, maxRetries = 2, retryDelay = 1000) {
+  async fetchWithRetry(url, maxRetries = DEFAULT_MAX_RETRIES, retryDelay = DEFAULT_RETRY_DELAY_MS) {
     let lastError;
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
@@ -4158,7 +4207,7 @@ const versionChecker = {
         }
         // 自定义超时控制
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8秒超时
+        const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS); // 8秒超时
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -4191,7 +4240,7 @@ const versionChecker = {
           throw error;
         }
         // 等待后重试
-        await utils.delay(retryDelay * Math.pow(2, attempt)); // 指数退避策略
+        await utils.delay(retryDelay * Math.pow(EXPONENTIAL_BASE, attempt)); // 指数退避策略
       }
     }
     throw lastError;
@@ -4213,8 +4262,8 @@ const versionChecker = {
       if (CONFIG.debugMode) {
         console.log(`[GitHub 中文翻译] 脚本完整性验证: ${isValid ? '通过' : '失败'}`);
         if (!isValid) {
-          console.log(`[GitHub 中文翻译] 期望哈希: ${expectedHash.substring(0, 16)}...`);
-          console.log(`[GitHub 中文翻译] 实际哈希: ${actualHash.substring(0, 16)}...`);
+          console.log(`[GitHub 中文翻译] 期望哈希: ${expectedHash.substring(0, HASH_DISPLAY_LENGTH)}...`);
+          console.log(`[GitHub 中文翻译] 实际哈希: ${actualHash.substring(0, HASH_DISPLAY_LENGTH)}...`);
         }
       }
       return isValid;
@@ -4383,7 +4432,7 @@ const versionChecker = {
         if (CONFIG.updateCheck.autoHideNotification !== false) {
           setTimeout(() => {
             this.hideNotification(notification, false);
-          }, 20000); // 20秒后自动隐藏
+          }, NOTIFICATION_AUTO_HIDE_MS); // 20秒后自动隐藏
         }
         if (CONFIG.debugMode) {
           console.log(`[GitHub 中文翻译] 显示更新通知: 版本 ${newVersion}`);
@@ -4407,7 +4456,7 @@ const versionChecker = {
         if (notification.parentNode) {
           notification.parentNode.removeChild(notification);
         }
-      }, 300);
+      }, NOTIFICATION_ANIMATION_MS);
       // 如果是永久隐藏，记录到localStorage
       if (permanently) {
         localStorage.setItem('githubZhUpdateNotificationDismissed', 'dismissed');
@@ -4437,8 +4486,8 @@ const versionChecker = {
         detectedAt: Date.now(),
       });
       // 限制历史记录数量
-      if (history.length > 10) {
-        history = history.slice(-10);
+      if (history.length > MAX_HISTORY_LENGTH) {
+        history = history.slice(-MAX_HISTORY_LENGTH);
       }
       localStorage.setItem(historyKey, JSON.stringify(history));
     } catch (_error) {
@@ -4510,6 +4559,30 @@ const versionChecker = {
  * @author Sut
  * @description 用于跟踪已翻译元素的状态，避免重复翻译和不必要的DOM操作
  */
+// 虚拟DOM常量
+const RANDOM_BASE = 36; // Math.random().toString() 的基数
+const RANDOM_START_INDEX = 2; // toString() 生成字符串的起始索引
+const RANDOM_LENGTH = 9; // 随机字符串长度
+const CLEANUP_INTERVAL_MS = 30000; // 清理间隔
+const MAX_NODES_DEFAULT = 5000; // 最大节点数
+const NODES_REMOVE_RATIO = 0.2; // 强制清理时删除节点的比例
+const MAX_AGE_HOURS = 1; // 节点最大存活时间（小时）
+const MAX_AGE_MS = MAX_AGE_HOURS * 60 * 60 * 1000; // 最大存活时间（毫秒）
+/**
+ * 简单的字符串哈希函数（无位运算版本）
+ * @param {string} str - 要哈希的字符串
+ * @returns {string} 哈希值
+ */
+function hashString(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    // 使用乘法和加法替代位运算
+    // eslint-disable-next-line no-magic-numbers
+    hash = (hash * 31 + char) % 2147483647;
+  }
+  return Math.abs(hash).toString(RANDOM_BASE);
+}
 /**
  * 虚拟DOM节点类
  * 表示一个DOM元素的虚拟映射，包含其状态和内容哈希
@@ -4560,13 +4633,13 @@ class VirtualNode {
         this.elementId = `testid:${this.element.dataset.testid}`;
       } else {
         // 生成临时ID
-        this.elementId = `temp:${Date.now()}:${Math.random().toString(36).substr(2, 9)}`;
+        this.elementId = `temp:${Date.now()}:${Math.random().toString(RANDOM_BASE).substr(RANDOM_START_INDEX, RANDOM_LENGTH)}`;
         // 保存到元素上用于跟踪
         this.element.dataset.virtualDomId = this.elementId;
       }
     } catch (_error) {
       // 生成最基本的ID
-      this.elementId = `fallback:${Math.random().toString(36).substr(2, 9)}`;
+      this.elementId = `fallback:${Math.random().toString(RANDOM_BASE).substr(RANDOM_START_INDEX, RANDOM_LENGTH)}`;
     }
   }
   /**
@@ -4576,7 +4649,7 @@ class VirtualNode {
   updateContentHash() {
     try {
       const content = this.element.textContent || '';
-      this.contentHash = this.hashString(content);
+      this.contentHash = hashString(content);
       return this.contentHash;
     } catch (_error) {
       this.contentHash = null;
@@ -4656,20 +4729,6 @@ class VirtualNode {
       // 忽略错误
     }
   }
-  /**
-   * 简单的字符串哈希函数
-   * @param {string} str - 要哈希的字符串
-   * @returns {string} 哈希值
-   */
-  hashString(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash; // 转换为32位整数
-    }
-    return hash.toString(36);
-  }
 }
 /**
  * 虚拟DOM管理器
@@ -4683,8 +4742,8 @@ class VirtualDomManager {
     this.nodes = new Map();
     this.nodeCache = new Map(); // 快速查找缓存
     this.lastCleanupTime = Date.now();
-    this.cleanupInterval = 30000; // 30秒清理一次，提高清理频率
-    this.maxNodes = 5000; // 最大节点数限制
+    this.cleanupInterval = CLEANUP_INTERVAL_MS;
+    this.maxNodes = MAX_NODES_DEFAULT;
     this.cleanupTimer = null;
     this.isPageUnloading = false;
     // 设置页面卸载处理
@@ -4730,7 +4789,7 @@ class VirtualDomManager {
         this.cleanup(true);
         // 如果清理后仍然超过限制，删除最旧的节点
         if (this.nodes.size >= this.maxNodes) {
-          const nodesToRemove = Math.floor(this.maxNodes * 0.2); // 删除20%的节点
+          const nodesToRemove = Math.floor(this.maxNodes * NODES_REMOVE_RATIO); // 删除20%的节点
           const entries = Array.from(this.nodes.entries());
           // 按最后更新时间排序，删除最旧的
           entries.sort((a, b) => a[1].lastUpdated - b[1].lastUpdated);
@@ -4890,7 +4949,7 @@ class VirtualDomManager {
         }
         // 检查节点是否长时间未更新
         const timeSinceUpdate = now - node.lastUpdated;
-        const maxAge = 60 * 60 * 1000; // 1小时
+        const maxAge = MAX_AGE_MS; // 1小时
         if (timeSinceUpdate > maxAge) {
           nodesToRemove.push(id);
         }

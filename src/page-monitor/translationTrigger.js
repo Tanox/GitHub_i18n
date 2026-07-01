@@ -35,7 +35,7 @@ export const translationTrigger = {
           }, minInterval);
         }
 
-        return;
+        return null;
       }
 
       if (now - this.lastTranslateTimestamp >= minInterval) {
@@ -48,6 +48,8 @@ export const translationTrigger = {
     } catch (error) {
       console.error('[GitHub 中文翻译] 翻译触发失败:', error);
     }
+
+    return null;
   },
 
   async delayedTranslate() {

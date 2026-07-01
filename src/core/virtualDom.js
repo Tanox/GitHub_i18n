@@ -8,6 +8,32 @@
  */
 import { CONFIG } from '../config.js';
 
+// 虚拟DOM常量
+const RANDOM_BASE = 36; // Math.random().toString() 的基数
+const RANDOM_START_INDEX = 2; // toString() 生成字符串的起始索引
+const RANDOM_LENGTH = 9; // 随机字符串长度
+const CLEANUP_INTERVAL_MS = 30000; // 清理间隔
+const MAX_NODES_DEFAULT = 5000; // 最大节点数
+const NODES_REMOVE_RATIO = 0.2; // 强制清理时删除节点的比例
+const MAX_AGE_HOURS = 1; // 节点最大存活时间（小时）
+const MAX_AGE_MS = MAX_AGE_HOURS * 60 * 60 * 1000; // 最大存活时间（毫秒）
+
+/**
+ * 简单的字符串哈希函数（无位运算版本）
+ * @param {string} str - 要哈希的字符串
+ * @returns {string} 哈希值
+ */
+function hashString(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    // 使用乘法和加法替代位运算
+    // eslint-disable-next-line no-magic-numbers
+    hash = (hash * 31 + char) % 2147483647;
+  }
+  return Math.abs(hash).toString(RANDOM_BASE);
+}
+
 /**
  * 虚拟DOM节点类
  * 表示一个DOM元素的虚拟映射，包含其状态和内容哈希
@@ -63,13 +89,13 @@ class VirtualNode {
         this.elementId = `testid:${this.element.dataset.testid}`;
       } else {
         // 生成临时ID
-        this.elementId = `temp:${Date.now()}:${Math.random().toString(36).substr(2, 9)}`;
+        this.elementId = `temp:${Date.now()}:${Math.random().toString(RANDOM_BASE).substr(RANDOM_START_INDEX, RANDOM_LENGTH)}`;
         // 保存到元素上用于跟踪
         this.element.dataset.virtualDomId = this.elementId;
       }
     } catch (_error) {
       // 生成最基本的ID
-      this.elementId = `fallback:${Math.random().toString(36).substr(2, 9)}`;
+      this.elementId = `fallback:${Math.random().toString(RANDOM_BASE).substr(RANDOM_START_INDEX, RANDOM_LENGTH)}`;
     }
   }
 
@@ -80,7 +106,7 @@ class VirtualNode {
   updateContentHash() {
     try {
       const content = this.element.textContent || '';
-      this.contentHash = this.hashString(content);
+      this.contentHash = hashString(content);
       return this.contentHash;
     } catch (_error) {
       this.contentHash = null;
@@ -169,21 +195,6 @@ class VirtualNode {
       // 忽略错误
     }
   }
-
-  /**
-   * 简单的字符串哈希函数
-   * @param {string} str - 要哈希的字符串
-   * @returns {string} 哈希值
-   */
-  hashString(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash; // 转换为32位整数
-    }
-    return hash.toString(36);
-  }
 }
 
 /**
@@ -198,8 +209,8 @@ class VirtualDomManager {
     this.nodes = new Map();
     this.nodeCache = new Map(); // 快速查找缓存
     this.lastCleanupTime = Date.now();
-    this.cleanupInterval = 30000; // 30秒清理一次，提高清理频率
-    this.maxNodes = 5000; // 最大节点数限制
+    this.cleanupInterval = CLEANUP_INTERVAL_MS;
+    this.maxNodes = MAX_NODES_DEFAULT;
     this.cleanupTimer = null;
     this.isPageUnloading = false;
 
@@ -253,7 +264,7 @@ class VirtualDomManager {
 
         // 如果清理后仍然超过限制，删除最旧的节点
         if (this.nodes.size >= this.maxNodes) {
-          const nodesToRemove = Math.floor(this.maxNodes * 0.2); // 删除20%的节点
+          const nodesToRemove = Math.floor(this.maxNodes * NODES_REMOVE_RATIO); // 删除20%的节点
           const entries = Array.from(this.nodes.entries());
 
           // 按最后更新时间排序，删除最旧的
@@ -440,7 +451,7 @@ class VirtualDomManager {
 
         // 检查节点是否长时间未更新
         const timeSinceUpdate = now - node.lastUpdated;
-        const maxAge = 60 * 60 * 1000; // 1小时
+        const maxAge = MAX_AGE_MS; // 1小时
 
         if (timeSinceUpdate > maxAge) {
           nodesToRemove.push(id);

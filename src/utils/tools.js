@@ -43,7 +43,9 @@ export const stringExtractor = {
     // 合并所有词典
     const mergedDictionary = {};
     for (const module in translationModule) {
-      Object.assign(mergedDictionary, translationModule[module]);
+      if (Object.prototype.hasOwnProperty.call(translationModule, module)) {
+        Object.assign(mergedDictionary, translationModule[module]);
+      }
     }
 
     // 检查每个字符串是否已翻译
@@ -74,7 +76,7 @@ export class AutoStringUpdater {
    * 查找需要添加的字符串
    * @returns {Set<string>} 需要添加的字符串集合
    */
-  findStringsToAdd() {
+  static findStringsToAdd() {
     const untranslated = stringExtractor.findUntranslatedStrings(false);
     return new Set(Array.from(untranslated).filter((str) => !str.startsWith('待翻译: ')));
   }
@@ -117,10 +119,12 @@ export class DictionaryProcessor {
    * 合并词典
    * @returns {Object} 合并后的词典
    */
-  mergeDictionaries() {
+  static mergeDictionaries() {
     const merged = {};
     for (const module in translationModule) {
-      Object.assign(merged, translationModule[module]);
+      if (Object.prototype.hasOwnProperty.call(translationModule, module)) {
+        Object.assign(merged, translationModule[module]);
+      }
     }
     return merged;
   }

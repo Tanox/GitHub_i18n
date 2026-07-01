@@ -9,6 +9,19 @@
 import { CONFIG } from './config.js';
 import { utils } from './utils/utils.js';
 
+// 版本检查常量
+const DEFAULT_INTERVAL_HOURS = 24; // 默认检查间隔（小时）
+const HOURS_TO_MS = 60 * 60 * 1000; // 小时转毫秒
+const PARSE_INT_RADIX = 10; // parseInt 基数
+const DEFAULT_MAX_RETRIES = 2; // 默认最大重试次数
+const DEFAULT_RETRY_DELAY_MS = 1000; // 默认重试延迟
+const FETCH_TIMEOUT_MS = 8000; // 请求超时时间
+const EXPONENTIAL_BASE = 2; // 指数退避基数
+const HASH_DISPLAY_LENGTH = 16; // 哈希显示长度
+const NOTIFICATION_AUTO_HIDE_MS = 20000; // 通知自动隐藏时间
+const NOTIFICATION_ANIMATION_MS = 300; // 通知动画时间
+const MAX_HISTORY_LENGTH = 10; // 最大历史记录数
+
 /**
  * 远程脚本的已知哈希值（用于完整性验证）
  * 在发布新版本时更新此值
@@ -39,12 +52,12 @@ const versionChecker = {
     // 检查是否达到检查间隔
     const lastCheck = localStorage.getItem('githubZhLastUpdateCheck');
     const now = Date.now();
-    const intervalMs = (CONFIG.updateCheck.intervalHours || 24) * 60 * 60 * 1000;
+    const intervalMs = (CONFIG.updateCheck.intervalHours || DEFAULT_INTERVAL_HOURS) * HOURS_TO_MS;
 
-    if (lastCheck && now - parseInt(lastCheck) < intervalMs) {
+    if (lastCheck && now - parseInt(lastCheck, PARSE_INT_RADIX) < intervalMs) {
       if (CONFIG.debugMode) {
         console.log(
-          `[GitHub 中文翻译] 未达到更新检查间隔，跳过检查 (上次检查: ${new Date(parseInt(lastCheck)).toLocaleString()})`,
+          `[GitHub 中文翻译] 未达到更新检查间隔，跳过检查 (上次检查: ${new Date(parseInt(lastCheck, PARSE_INT_RADIX)).toLocaleString()})`,
         );
       }
       return false;
@@ -116,7 +129,7 @@ const versionChecker = {
    * @param {number} retryDelay - 重试间隔（毫秒）
    * @returns {Promise<string>} 响应文本
    */
-  async fetchWithRetry(url, maxRetries = 2, retryDelay = 1000) {
+  async fetchWithRetry(url, maxRetries = DEFAULT_MAX_RETRIES, retryDelay = DEFAULT_RETRY_DELAY_MS) {
     let lastError;
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -127,7 +140,7 @@ const versionChecker = {
 
         // 自定义超时控制
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8秒超时
+        const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS); // 8秒超时
 
         const response = await fetch(url, {
           method: 'GET',
@@ -168,7 +181,7 @@ const versionChecker = {
         }
 
         // 等待后重试
-        await utils.delay(retryDelay * Math.pow(2, attempt)); // 指数退避策略
+        await utils.delay(retryDelay * Math.pow(EXPONENTIAL_BASE, attempt)); // 指数退避策略
       }
     }
 
@@ -194,8 +207,8 @@ const versionChecker = {
       if (CONFIG.debugMode) {
         console.log(`[GitHub 中文翻译] 脚本完整性验证: ${isValid ? '通过' : '失败'}`);
         if (!isValid) {
-          console.log(`[GitHub 中文翻译] 期望哈希: ${expectedHash.substring(0, 16)}...`);
-          console.log(`[GitHub 中文翻译] 实际哈希: ${actualHash.substring(0, 16)}...`);
+          console.log(`[GitHub 中文翻译] 期望哈希: ${expectedHash.substring(0, HASH_DISPLAY_LENGTH)}...`);
+          console.log(`[GitHub 中文翻译] 实际哈希: ${actualHash.substring(0, HASH_DISPLAY_LENGTH)}...`);
         }
       }
 
@@ -391,7 +404,7 @@ const versionChecker = {
         if (CONFIG.updateCheck.autoHideNotification !== false) {
           setTimeout(() => {
             this.hideNotification(notification, false);
-          }, 20000); // 20秒后自动隐藏
+          }, NOTIFICATION_AUTO_HIDE_MS); // 20秒后自动隐藏
         }
 
         if (CONFIG.debugMode) {
@@ -418,7 +431,7 @@ const versionChecker = {
         if (notification.parentNode) {
           notification.parentNode.removeChild(notification);
         }
-      }, 300);
+      }, NOTIFICATION_ANIMATION_MS);
 
       // 如果是永久隐藏，记录到localStorage
       if (permanently) {
@@ -453,8 +466,8 @@ const versionChecker = {
       });
 
       // 限制历史记录数量
-      if (history.length > 10) {
-        history = history.slice(-10);
+      if (history.length > MAX_HISTORY_LENGTH) {
+        history = history.slice(-MAX_HISTORY_LENGTH);
       }
 
       localStorage.setItem(historyKey, JSON.stringify(history));

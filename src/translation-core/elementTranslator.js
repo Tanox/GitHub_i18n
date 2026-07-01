@@ -80,7 +80,7 @@ export const elementTranslator = {
           element.removeChild(node);
           fragment.appendChild(node);
           const childTranslated = this.translateElement(node);
-          hasTranslatableContent = hasTranslatableContent || childTranslated;
+          hasTranslatableContent ||= childTranslated;
         } catch (e) {
           if (CONFIG.debugMode) {
             console.error('[GitHub 中文翻译] 处理子元素失败:', e, '元素:', node);

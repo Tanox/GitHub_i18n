@@ -32,7 +32,7 @@ class ConfigUI {
     this.setupPageUnloadHandler();
   }
 
-  loadUserSettings() {
+  static loadUserSettings() {
     try {
       const saved = localStorage.getItem(CONFIG_STORAGE_KEY);
       if (!saved) return {};
@@ -129,7 +129,7 @@ class ConfigUI {
     this.addEventListeners();
   }
 
-  createHeader() {
+  static createHeader() {
     const header = document.createElement('div');
     header.className = 'github-i18n-config-header';
 
@@ -199,7 +199,7 @@ class ConfigUI {
     return content;
   }
 
-  createFooter() {
+  static createFooter() {
     const footer = document.createElement('div');
     footer.className = 'github-i18n-config-footer';
 
@@ -217,7 +217,7 @@ class ConfigUI {
     return footer;
   }
 
-  createConfigSection(title, items) {
+  static createConfigSection(title, items) {
     const section = document.createElement('div');
     section.className = 'github-i18n-config-section';
 

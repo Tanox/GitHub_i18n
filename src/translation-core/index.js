@@ -50,13 +50,14 @@ export const translationCore = {
 
   startCacheCleanupTimer() {
     this.stopCacheCleanupTimer();
+    const CLEANUP_INTERVAL_MS = 120000; // 清理间隔（2分钟）
     this.cacheCleanupTimer = setInterval(() => {
       if (this.isPageUnloading) {
         this.stopCacheCleanupTimer();
         return;
       }
       this.cleanCache();
-    }, 120000);
+    }, CLEANUP_INTERVAL_MS);
   },
 
   stopCacheCleanupTimer() {
@@ -197,8 +198,8 @@ export const translationCore = {
     });
   },
 
-  async processElementsInBatches(elements) {
-    elements = virtualDomManager.processElements(elements);
+  async processElementsInBatches(inputElements) {
+    const elements = virtualDomManager.processElements(inputElements);
     const modeConfig = this.getCurrentPageModeConfig();
     const batchSize = modeConfig.batchSize || CONFIG.performance?.batchSize || 50;
     const delay = CONFIG.performance?.batchDelay || 0;

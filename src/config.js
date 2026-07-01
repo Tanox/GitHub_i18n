@@ -11,7 +11,7 @@
 import { VERSION } from './version.js';
 
 // 定义greasemonkeyInfo以避免未定义错误，使用空值合并运算符提高代码可读性
-const greasemonkeyInfo = typeof window !== 'undefined' ? (window.GM_info ?? {}) : {};
+const greasemonkeyInfo = typeof window === 'undefined' ? {} : (window.GM_info ?? {});
 
 /**
  * 从用户脚本头部注释中提取版本号

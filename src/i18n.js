@@ -143,12 +143,13 @@ class I18nManager {
    * @param {Object} params - 参数对象
    * @returns {string} 处理后的字符串
    */
-  interpolate(template, params) {
+  static interpolate(template, params) {
     if (!template || typeof template !== 'string') return template;
     if (!params || typeof params !== 'object') return template;
 
     return template.replace(/\{\{(\w+)\}\}/g, (match, key) => {
-      return params[key] !== undefined ? params[key] : match;
+      if (params[key] === undefined) return match;
+      return params[key];
     });
   }
 
@@ -284,7 +285,8 @@ class I18nManager {
   formatRelativeTime(date, locale = null) {
     const targetLocale = locale || this.currentLocale;
     const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    const MS_TO_SECONDS = 1000; // 毫秒转秒
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / MS_TO_SECONDS);
 
     // 定义时间单位
     const units = [
@@ -296,9 +298,10 @@ class I18nManager {
       { max: Infinity, unit: 'year' },
     ];
 
+    const SECONDS_PER_MINUTE = 60;
     for (const { max, unit } of units) {
       if (diffInSeconds < max) {
-        const value = Math.floor(diffInSeconds / (max / 60));
+        const value = Math.floor(diffInSeconds / (max / SECONDS_PER_MINUTE));
         try {
           return new Intl.RelativeTimeFormat(targetLocale).format(-value, unit);
         } catch (error) {

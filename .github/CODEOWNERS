@@ -1,0 +1,49 @@
+# CODEOWNERS - 自动审查者分配规则
+# 当修改匹配的文件时，会自动请求相应的团队成员进行审查
+
+# 默认审查者（所有文件）
+* @sutandkb
+
+# 核心模块 - 需要核心团队成员审查
+/src/core/* @sutandkb
+/src/core/trie.js @sutandkb
+/src/core/cacheManager.js @sutandkb
+/src/core/errorHandler.js @sutandkb
+/src/core/virtualDom.js @sutandkb
+
+# 翻译核心模块
+/src/translation-core/* @sutandkb
+
+# 页面监控模块
+/src/page-monitor/* @sutandkb
+
+# UI 组件
+/src/ui/* @sutandkb
+
+# 词典文件
+/src/dictionaries/* @sutandkb
+
+# 配置和主入口
+/src/config.js @sutandkb
+/src/main.js @sutandkb
+/src/version.js @sutandkb
+/src/i18n.js @sutandkb
+
+# 构建相关
+/build.* @sutandkb
+/build.cjs @sutandkb
+/babel.config.json @sutandkb
+/package.json @sutandkb
+/package-lock.json @sutandkb
+
+# 文档
+/*.md @sutandkb
+/docs/* @sutandkb
+
+# GitHub 配置
+/.github/* @sutandkb
+
+# 注意：
+# 1. 最后匹配的规则生效（从上到下）
+# 2. 如果没有配置 CODEOWNERS，需要手动分配审查者
+# 3. 团队成员可以在 GitHub 上设置自己的通知偏好

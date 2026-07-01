@@ -10,6 +10,15 @@
 import { CONFIG } from '../config.js';
 import { utils } from '../utils/utils.js';
 
+// 错误恢复常量
+const RECOVERY_BASE_DELAY_MS = 100; // 指数退避基础延迟
+const RECOVERY_MAX_DELAY_MS = 2000; // 最大延迟
+const DEFAULT_THRESHOLD = 20; // 默认错误阈值
+const BATCH_DELAY_MIN_MS = 50; // 最小批处理延迟
+const NETWORK_INTERVAL_MIN_MS = 1000; // 最小网络请求间隔
+const NETWORK_INTERVAL_MAX_MS = 5000; // 最大网络请求间隔
+const BATCH_DELAY_FALLBACK_MS = 100; // 通用批处理延迟回退值
+
 export const ErrorHandler = {
   // 错误计数器
   errorCounts: new Map(),
@@ -105,10 +114,10 @@ export const ErrorHandler = {
 
       if (attempt < maxRetries) {
         // 指数退避重试
-        const delay = Math.pow(2, attempt) * 100; // 100ms, 200ms, 400ms...
+        const delay = Math.pow(2, attempt) * RECOVERY_BASE_DELAY_MS;
         setTimeout(() => {
           this.attemptRecovery(context, recoveryFn, maxRetries, attempt);
-        }, delay);
+        }, Math.min(delay, RECOVERY_MAX_DELAY_MS));
       }
     }
   },
@@ -121,14 +130,14 @@ export const ErrorHandler = {
   checkErrorThreshold(type, count) {
     const thresholds = {
       [this.ERROR_TYPES.TRANSLATION]: CONFIG.performance?.maxTranslationErrorCount || 10,
-      [this.ERROR_TYPES.DOM_OPERATION]: CONFIG.performance?.maxDomErrorCount || 20,
+      [this.ERROR_TYPES.DOM_OPERATION]: CONFIG.performance?.maxDomErrorCount || DEFAULT_THRESHOLD,
       [this.ERROR_TYPES.DICTIONARY]: CONFIG.performance?.maxDictionaryErrorCount || 5,
       [this.ERROR_TYPES.NETWORK]: CONFIG.performance?.maxNetworkErrorCount || 3,
       [this.ERROR_TYPES.PERFORMANCE]: CONFIG.performance?.maxPerformanceErrorCount || 15,
       [this.ERROR_TYPES.OTHER]: CONFIG.performance?.maxOtherErrorCount || 25,
     };
 
-    const threshold = thresholds[type] || 20;
+    const threshold = thresholds[type] || DEFAULT_THRESHOLD;
 
     if (count >= threshold) {
       this.handleErrorOverflow(type, count, threshold);
@@ -154,7 +163,7 @@ export const ErrorHandler = {
         break;
       case this.ERROR_TYPES.DOM_OPERATION:
         // 减少DOM操作频率
-        CONFIG.performance.batchDelay = Math.max(CONFIG.performance.batchDelay || 0, 50);
+        CONFIG.performance.batchDelay = Math.max(CONFIG.performance.batchDelay || 0, BATCH_DELAY_MIN_MS);
         break;
       case this.ERROR_TYPES.DICTIONARY:
         // 重新初始化词典
@@ -165,13 +174,13 @@ export const ErrorHandler = {
       case this.ERROR_TYPES.NETWORK:
         // 增加网络请求间隔
         CONFIG.performance.networkRequestInterval = Math.max(
-          CONFIG.performance.networkRequestInterval || 1000,
-          5000,
+          CONFIG.performance.networkRequestInterval || NETWORK_INTERVAL_MIN_MS,
+          NETWORK_INTERVAL_MAX_MS,
         );
         break;
       default:
         // 通用紧急措施：减少处理频率
-        CONFIG.performance.batchDelay = Math.max(CONFIG.performance.batchDelay || 0, 100);
+        CONFIG.performance.batchDelay = Math.max(CONFIG.performance.batchDelay || 0, BATCH_DELAY_FALLBACK_MS);
         break;
     }
 

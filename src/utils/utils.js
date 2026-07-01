@@ -7,6 +7,13 @@
  * @description 包含各种通用的辅助函数
  */
 
+// 工具函数常量
+const MAX_REGEX_LENGTH = 100; // 正则表达式最大长度
+const MAX_REPETITION_COUNT = 5; // 最大重复量词数
+const RADIX_16 = 16; // 十六进制基数
+const PAD_LENGTH_2 = 2; // 填充长度
+const PAD_CHAR = '0'; // 填充字符
+
 /**
  * 工具函数集合
  */
@@ -29,12 +36,14 @@ export const utils = {
       inThrottle = false;
       if (trailing && lastArgs) {
         result = func.apply(context, args);
-        lastArgs = lastThis = null;
+        lastArgs = null;
+        lastThis = null;
       }
     };
 
     return function () {
       const args = arguments;
+      // eslint-disable-next-line no-invalid-this
       const context = this;
 
       if (!inThrottle) {
@@ -75,6 +84,7 @@ export const utils = {
 
     return function () {
       const args = arguments;
+      // eslint-disable-next-line no-invalid-this
       const context = this;
       const isLeadingCall = !timeout && leading;
 
@@ -95,7 +105,9 @@ export const utils = {
    * @returns {Promise<void>}
    */
   delay(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
   },
 
   /**
@@ -129,11 +141,12 @@ export const utils = {
    * @returns {boolean} - 是否安全
    */
   isSafeRegex(pattern) {
-    if (typeof pattern === 'string') {
-      pattern = new RegExp(pattern);
+    let patternObj = pattern;
+    if (typeof patternObj === 'string') {
+      patternObj = new RegExp(patternObj);
     }
 
-    const source = pattern.source;
+    const source = patternObj.source;
     let depth = 0;
     let hasNestedRepetition = false;
 
@@ -153,8 +166,8 @@ export const utils = {
     }
 
     // 检查是否存在长时间运行的可能性
-    const longPatternWarning = source.length > 100; // 过长的正则表达式
-    const hasMultipleRepetitions = (source.match(/[*+?]/g) || []).length > 5; // 过多的重复量词
+    const longPatternWarning = source.length > MAX_REGEX_LENGTH; // 过长的正则表达式
+    const hasMultipleRepetitions = (source.match(/[*+?]/g) || []).length > MAX_REPETITION_COUNT; // 过多的重复量词
 
     return !hasNestedRepetition && !longPatternWarning && !hasMultipleRepetitions;
   },
@@ -361,6 +374,7 @@ export const utils = {
       console.warn('[GitHub 中文翻译] 深拷贝失败:', error);
       return obj;
     }
+    return null;
   },
 
   /**
@@ -421,7 +435,8 @@ export const utils = {
       const encoded = this.base64Encode(data);
       let result = '';
       for (let i = 0; i < encoded.length; i++) {
-        const charCode = encoded.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+        // eslint-disable-next-line no-bitwise
+      const charCode = encoded.charCodeAt(i) ^ key.charCodeAt(i % key.length);
         result += String.fromCharCode(charCode);
       }
       return this.base64Encode(result);
@@ -442,6 +457,7 @@ export const utils = {
       if (!decoded) return null;
       let result = '';
       for (let i = 0; i < decoded.length; i++) {
+        // eslint-disable-next-line no-bitwise
         const charCode = decoded.charCodeAt(i) ^ key.charCodeAt(i % key.length);
         result += String.fromCharCode(charCode);
       }
@@ -461,7 +477,7 @@ export const utils = {
       const msgUint8 = new TextEncoder().encode(data);
       const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+      return hashArray.map((b) => b.toString(RADIX_16).padStart(PAD_LENGTH_2, PAD_CHAR)).join('');
     } catch (_error) {
       return '';
     }

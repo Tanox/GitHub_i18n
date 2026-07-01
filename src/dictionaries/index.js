@@ -27,7 +27,9 @@ export const translationModule = {
 export function mergeAllDictionaries() {
   const merged = {};
   for (const module in translationModule) {
-    Object.assign(merged, translationModule[module]);
+    if (Object.prototype.hasOwnProperty.call(translationModule, module)) {
+      Object.assign(merged, translationModule[module]);
+    }
   }
   return merged;
 }

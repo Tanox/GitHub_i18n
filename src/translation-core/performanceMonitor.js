@@ -69,6 +69,9 @@ export const performanceMonitor = {
       case 'error':
         elementTranslator.performanceData.errorCount++;
         break;
+      default:
+        // 未知事件类型
+        break;
     }
   },
 
