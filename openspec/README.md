@@ -26,23 +26,47 @@
 | 开发指南 | [development.md](./development.md) | 分支策略、提交规范、发布流程、测试要求等 |
 | 架构文档 | [architecture.md](./architecture.md) | 系统架构、核心模块、技术选型等 |
 | 代码风格 | [coding-style.md](./coding-style.md) | 命名约定、代码格式、注释规范、最佳实践等 |
+| 原型设计 | [prototype.md](./prototype.md) | 脚本原型图、UI 设计、流程图 |
 
 ### 规范文档说明
 
 - **openspec/project.md**
-  - 包含完整的项目架构说明
+  - 包含完整的项目概述
   - 目录结构文档
-  - 编码规范和版本管理规则
   - 核心模块详细说明
-  - 开发工具与脚本说明
-  - 代码质量保障措施
+  - 开发规范和版本管理规则
+  - 构建与发布流程
+  - 项目信息
 
 - **openspec/config.yaml**
   - OpenSpec 驱动架构配置
-  - 项目上下文信息（技术栈、领域等）
-  - 提案和变更的规则定义
+  - 项目上下文信息（技术栈、领域、版本等）
+  - 提案和代码规则定义
+  - 规范目录配置
+
+- **openspec/architecture.md**
+  - 系统整体架构概述
+  - 核心模块详细说明
+  - 数据流和交互流程
+  - 技术选型说明
+  - 版本历史
+
+- **openspec/development.md**
+  - 分支策略
+  - 语义化提交规范
+  - 版本发布流程
+  - CI/CD 流程
+  - 代码质量要求
+
+- **openspec/coding-style.md**
+  - 文件和目录命名规范
+  - 变量和函数命名规范
+  - 代码风格（Prettier/ESLint）
+  - 注释规范（JSDoc）
+  - 最佳实践
 
 ### 与文档相关的变更
 
 - 旧 `docs/prototype/prototype.html` 已被 `prototype/` 替代并移除
 - 所有新增的设计 / 交互规范请直接在 `prototype/` 下维护
+- 版本号单一来源：`src/version.js`

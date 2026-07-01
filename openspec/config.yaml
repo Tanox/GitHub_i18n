@@ -2,11 +2,12 @@ schema: spec-driven
 
 # Project context
 context: |
-  技术栈: JavaScript, Node.js
-  使用语义化提交
+  技术栈: JavaScript, Node.js, ES Modules
+  使用语义化提交 (Conventional Commits)
   领域: GitHub中文本地化插件
   规范文档: docs/ 目录存放正式规范文档（原型设计、架构文档、开发指南等）
   设计系统: prototype/ 目录存放设计系统和高保真原型
+  单一版本源: src/version.js
   当前版本: 1.9.20
 
 # Per-artifact rules
@@ -14,6 +15,12 @@ rules:
   proposal:
     - 保持提案在500字以内
     - 始终包含'非目标'部分
+  code:
+    - 遵循 ESLint 规则
+    - 函数复杂度不超过 20
+    - 单函数不超过 100 行
+    - 使用 ES6+ 语法
+    - 使用 ES Modules
 
 # Specification directories
 specDirectories:
@@ -30,3 +37,11 @@ specDirectories:
     purpose: OpenSpec规范和项目配置
     description: |
       包含OpenSpec相关配置、项目规范和变更管理。
+      主要文档：
+      - project.md: 项目规范（项目概述、目录结构、核心模块）
+      - architecture.md: 架构文档
+      - development.md: 开发指南
+      - coding-style.md: 代码风格
+      - prototype.md: 原型设计
+      - config.yaml: OpenSpec 配置
+      - README.md: 规范文档索引

@@ -4,8 +4,9 @@
 
 [![GitHub license](https://img.shields.io/github/license/Tanox/GitHub_i18n?color=blue)](LICENSE)
 [![GitHub release](https://img.shields.io/github/v/release/Tanox/GitHub_i18n?display_name=tag&color=green)](https://github.com/Tanox/GitHub_i18n/releases)
+[![GitHub stars](https://img.shields.io/github/stars/Tanox/GitHub_i18n?style=social)](https://github.com/Tanox/GitHub_i18n/stargazers)
 
-## 功能介绍
+## ✨ 功能介绍
 
 - **即时翻译**：本地词典，无需联网，瞬间生效
 - **覆盖全面**：仓库、Issues、PR、设置、通知、Codespaces、Explore、Wiki、Actions、Projects 等页面
@@ -15,8 +16,9 @@
 - **配置面板**：内置配置界面，可调整翻译行为
 - **性能监控**：实时查看翻译统计数据
 - **自动升级**：Tampermonkey 自动检测新版本
+- **预检查优化**：无匹配翻译时不修改 DOM，减少不必要的操作
 
-## 安装说明
+## 🚀 安装说明
 
 ### 1. 安装浏览器扩展
 
@@ -30,9 +32,9 @@
 
 ### 3. 开始使用
 
-刷新 GitHub 页面，界面就会变成中文。页面右下角的绿色浮动按钮可打开配置面板。
+刷新 GitHub 页面，界面就会变成中文。页面右下角的浮动按钮可打开配置面板。
 
-## 设计系统与原型
+## 🎨 设计系统与原型
 
 本项目维护一套统一的设计系统与高保真原型，方便设计师与开发者协作：
 
@@ -45,30 +47,34 @@
 
 **快速入口**：在浏览器中打开 [prototype/index.html](prototype/index.html) 即可浏览完整的原型设计。
 
-## 项目结构
+## 📁 项目结构
 
 ```
 src/
 ├── core/                    # 核心模块 (cacheManager/errorHandler/trie/virtualDom)
-├── dictionaries/            # 翻译词典 (common/codespaces/explore)
+├── dictionaries/            # 翻译词典 (common/codespaces/explore/notifications/settings)
 ├── page-monitor/            # 页面监控 (DOM 监听、路径监听、翻译触发)
 ├── translation-core/        # 翻译核心 (词典管理、元素翻译、性能监控)
-├── ui/                      # UI 组件 (配置面板)
+├── ui/                      # UI 组件 (配置面板、性能监控)
+│   ├── components/          # UI 组件
+│   └── styles/              # UI 样式
 ├── utils/                   # 工具函数
-├── config.js                 # 配置
+├── config.js                # 全局配置
 ├── main.js                  # 主入口
-└── version.js              # 版本信息
-prototype/                    # 设计系统与高保真原型
-├── assets/                   # 共享 CSS
-├── design-system/         # 设计系统规范
-├── components/            # 组件库规范
+├── version.js               # 版本信息（单一版本源）
+└── versionChecker.js        # 版本检查器
+prototype/                   # 设计系统与高保真原型
+├── assets/                  # 共享资源
+├── design-system/           # 设计系统规范
+├── components/              # 组件库规范
 ├── interaction/             # 交互标准
 └── prototypes/              # 高保真原型
-build/                         # 构建产物
-openspec/                      # 项目规范 (架构 / 代码风格 / 开发流程)
+build/                        # 构建产物
+openspec/                     # 项目规范 (架构 / 代码风格 / 开发流程)
+docs/                         # 正式规范文档
 ```
 
-## 参与开发
+## 🛠️ 参与开发
 
 克隆本仓库：
 
@@ -81,11 +87,41 @@ npm run build
 
 ### 开发命令
 
-- `npm run build` — 构建用户脚本
-- `npm run lint` — 代码检查
-- `npm run format` — 代码格式化
-- `npm run validate` — 验证构建产物
+| 命令 | 说明 |
+|------|------|
+| `npm run build` | 构建用户脚本 |
+| `npm run lint` | 代码检查 |
+| `npm run format` | 代码格式化 |
+| `npm run validate` | 验证构建产物 |
+| `npm test` | 运行完整测试流水线（lint → build → validate） |
+| `npm run clean` | 清理构建产物 |
 
-## 许可证
+### 代码规范
+
+- 使用 ES6+ 语法
+- 遵循 ESLint 规则
+- Prettier 代码格式化
+- 函数复杂度不超过 20
+- 单函数不超过 100 行
+- 提交遵循 Conventional Commits 规范
+
+## 📚 规范文档
+
+| 文档 | 说明 |
+|------|------|
+| [项目规范](openspec/project.md) | 项目概述、目录结构、开发规范 |
+| [架构文档](openspec/architecture.md) | 系统架构、核心模块、技术选型 |
+| [开发指南](openspec/development.md) | 分支策略、提交规范、发布流程 |
+| [代码风格](openspec/coding-style.md) | 命名约定、代码格式、注释规范 |
+| [原型设计](openspec/prototype.md) | 脚本原型图、UI设计、流程图 |
+| [贡献指南](CONTRIBUTING.md) | 贡献代码的流程和要求 |
+
+## 🔄 版本管理
+
+- **当前版本**：1.9.20
+- **版本格式**：SemVer（主版本.次版本.修订号）
+- **版本源**：`src/version.js` 是项目的单一版本源
+
+## 📄 许可证
 
 GNU General Public License v2.0

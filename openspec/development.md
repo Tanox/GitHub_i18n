@@ -18,17 +18,18 @@
 | 分支名称 | 用途 | 说明 |
 |---------|------|------|
 | `main` | 主分支 | 稳定版本，随时可发布生产环境 |
-| `develop` | 开发分支 | 集成下一个版本的所有功能开发 |
 
 ### 1.2 功能分支
 
-功能分支从 `develop` 分支创建，开发完成后合并回 `develop`。
+功能分支从 `main` 分支创建，开发完成后通过 Pull Request 合并回 `main`。
 
 **命名格式**：
 - `feature/<功能描述>` - 新功能开发
 - `fix/<问题描述>` - Bug 修复
 - `refactor/<重构内容>` - 代码重构
 - `docs/<文档变更>` - 文档更新
+- `chore/<杂项内容>` - 杂项变更
+- `trae/solo-agent-*` - 自动化 Agent 工作分支
 
 **示例**：
 ```
@@ -36,6 +37,7 @@ feature/add-github-projects-translation
 fix/dropdown-menu-translation
 refactor/cache-manager
 docs/update-installation-guide
+trae/solo-agent-avGb2v
 ```
 
 ### 1.3 分支工作流
@@ -43,22 +45,19 @@ docs/update-installation-guide
 ```
 main (稳定版本)
   ↑
-  │  发布新版本时合并
-  │
-develop (开发集成分支)
-  ↑
-  │  开发完成后合并
+  │  开发完成后通过 PR 合并
   │
 feature/* (功能分支) ← 从这里开始开发
 ```
 
 **流程步骤**：
-1. 从 `develop` 创建功能分支
+1. 从 `main` 创建功能分支
 2. 在功能分支上进行开发
 3. 提交代码（遵循语义化提交规范）
-4. 推送分支并创建 Pull Request
-5. 代码审查通过后合并到 `develop`
-6. 发布时，将 `develop` 合并到 `main` 并打标签
+4. 运行 `npm test` 验证代码
+5. 推送分支并创建 Pull Request
+6. 代码审查通过后合并到 `main`
+7. 发布时，在 `main` 打标签
 
 ---
 
@@ -146,10 +145,7 @@ MAJOR.MINOR.PATCH
 
 #### 3.2.2 版本号更新
 
-更新以下文件中的版本号：
-- `package.json`
-- `src/version.js`
-- 所有源代码文件中的版本注释
+版本号只需要在 `src/version.js` 中更新，这是项目的单一版本源。
 
 #### 3.2.3 CHANGELOG 更新
 
@@ -173,33 +169,34 @@ MAJOR.MINOR.PATCH
 
 #### 3.2.4 发布步骤
 
-1. 将 `develop` 合并到 `main`
-2. 创建 Git 标签：`git tag -a v<版本号> -m "Release v<版本号>"`
-3. 推送标签：`git push origin v<版本号>`
-4. 在 GitHub 创建 Release
-5. CI/CD 自动触发发布流程
+1. 确保 `main` 分支代码最新
+2. 在 `src/version.js` 中更新版本号
+3. 运行 `npm test` 验证构建
+4. 提交版本号更新
+5. 创建 Git 标签：`git tag -a v<版本号> -m "Release v<版本号>"`
+6. 推送标签：`git push origin v<版本号>`
+7. 在 GitHub 创建 Release
 
 ### 3.3 CI/CD 发布流程
 
 项目使用 GitHub Actions 自动化发布：
 
 **触发条件**：
-- 推送到 `main` 或 `develop` 分支 → 运行 CI 检查
+- 推送到 `main` 分支 → 运行 CI 检查
 - 创建 Pull Request 到 `main` → 运行 CI 检查
 - 发布 GitHub Release → 执行发布流程
 
 **CI/CD 作业**：
 1. **lint** - 代码质量检查
-2. **test** - 单元测试（Node.js 18.x 和 20.x）
-3. **build** - 构建项目并验证产物
-4. **security** - 安全审计
-5. **release** - 发布到 GitHub Releases（仅在发布时）
+2. **build** - 构建项目并验证产物
+3. **security** - 安全审计
+4. **release** - 发布到 GitHub Releases（仅在发布时）
 
 ---
 
 ## 4. 测试要求
 
-### 4.1 测试框架
+### 4.1 代码质量检查
 
 项目使用 **ESLint** 和 **Prettier** 进行代码质量检查和格式化。
 
@@ -242,52 +239,28 @@ npm run build
 npm run validate
 ```
 
-### 4.4 覆盖率要求
+### 4.4 代码质量要求
 
-项目要求最低测试覆盖率：
+项目通过以下方式保障代码质量：
+- ESLint 代码检查（0 错误）
+- Prettier 代码格式化
+- 构建产物验证
+- 完整的测试流水线（lint → build → validate）
 
-| 指标 | 最低要求 |
-|------|---------|
-| 分支覆盖率 (branches) | 50% |
-| 函数覆盖率 (functions) | 50% |
-| 行覆盖率 (lines) | 50% |
-| 语句覆盖率 (statements) | 50% |
+### 4.5 开发规范
 
-覆盖率报告生成在 `coverage/` 目录下。
+1. **代码质量**：
+   - ESLint 检查必须通过（0 错误）
+   - Prettier 格式化必须通过
+   - 构建必须成功
 
-### 4.5 测试规范
+2. **提交规范**：
+   - 使用语义化提交（Conventional Commits）
+   - 提交信息清晰明了
 
-1. **单元测试覆盖核心功能**：
-   - 所有工具函数必须有测试
-   - 核心业务逻辑必须有测试
-   - 词典文件除外（`src/dictionaries/*.js`）
-   - 主入口文件除外（`src/main.js`）
-
-2. **测试命名规范**：
-   - 使用 `describe` 组织测试套件
-   - 使用 `it` 或 `test` 定义测试用例
-   - 测试描述清晰说明测试内容
-
-   **示例**：
-   ```javascript
-   describe('cacheManager', () => {
-     describe('get', () => {
-       it('should return cached value when key exists', () => {
-         // 测试代码
-       });
-     });
-   });
-   ```
-
-3. **测试隔离**：
-   - 每个测试用例独立运行
-   - 使用 `beforeEach` 和 `afterEach` 清理环境
-   - 合理使用 Mock 避免外部依赖
-
-4. **CI/CD 要求**：
-   - 所有测试必须通过才能合并代码
+3. **CI/CD 要求**：
+   - 所有 CI 检查必须通过才能合并代码
    - Pull Request 必须通过 CI 检查
-   - 发布前确保测试覆盖率达标
 
 ---
 
