@@ -7,6 +7,8 @@
  * @description 性能监控区域组件
  */
 
+import { VERSION } from '../../version.js';
+
 /**
  * 创建性能监控区域
  * @returns {HTMLElement} 性能监控区域元素
@@ -16,38 +18,38 @@ export function createPerformanceMonitoringSection() {
   section.className = 'github-i18n-config-section';
 
   const sectionTitle = document.createElement('h4');
-  sectionTitle.textContent = '性能监控';
+  sectionTitle.innerHTML = '<span style="color: #d29922;">📊</span> 性能监控';
   section.appendChild(sectionTitle);
 
-  const contentDiv = document.createElement('div');
-  contentDiv.className = 'github-i18n-config-content';
+  const perfGrid = document.createElement('div');
+  perfGrid.className = 'github-i18n-perf-grid';
+  perfGrid.id = 'github-i18n-performance-stats';
 
-  const statsContainer = document.createElement('div');
-  statsContainer.id = 'github-i18n-performance-stats';
-
-  const basicStats = [
-    { label: '总耗时:', id: 'github-i18n-stat-duration' },
-    { label: '元素处理:', id: 'github-i18n-stat-elements' },
-    { label: '文本翻译:', id: 'github-i18n-stat-texts' },
-    { label: '缓存命中率:', id: 'github-i18n-stat-cache-rate' },
+  const stats = [
+    { key: 'duration', label: '总耗时', unit: 'ms', id: 'github-i18n-stat-duration' },
+    { key: 'elements', label: '翻译项', unit: '', id: 'github-i18n-stat-elements' },
+    { key: 'cacheRate', label: '命中率', unit: '%', id: 'github-i18n-stat-cache-rate' },
   ];
 
-  basicStats.forEach((stat) => {
-    const itemDiv = document.createElement('div');
-    itemDiv.className = 'github-i18n-config-item';
+  stats.forEach((stat) => {
+    const statDiv = document.createElement('div');
+    statDiv.className = 'github-i18n-perf-stat';
 
-    const label = document.createElement('span');
-    label.className = 'github-i18n-config-label';
-    label.textContent = stat.label;
+    const k = document.createElement('div');
+    k.className = 'k';
+    k.textContent = stat.label;
 
-    const value = document.createElement('span');
-    value.id = stat.id;
-    value.textContent = '-';
+    const v = document.createElement('div');
+    v.className = 'v';
+    v.id = stat.id;
+    v.textContent = '-';
 
-    itemDiv.appendChild(label);
-    itemDiv.appendChild(value);
-    statsContainer.appendChild(itemDiv);
+    statDiv.appendChild(k);
+    statDiv.appendChild(v);
+    perfGrid.appendChild(statDiv);
   });
+
+  section.appendChild(perfGrid);
 
   const advancedStatsDiv = document.createElement('div');
   advancedStatsDiv.className = 'github-i18n-advanced-stats';
@@ -70,6 +72,8 @@ export function createPerformanceMonitoringSection() {
 
     const value = document.createElement('span');
     value.id = stat.id;
+    value.style.fontFamily = '"JetBrains Mono", "SF Mono", SFMono-Regular, Menlo, Consolas, "Courier New", monospace';
+    value.style.color = '#8b949e';
     value.textContent = '-';
 
     itemDiv.appendChild(label);
@@ -77,27 +81,23 @@ export function createPerformanceMonitoringSection() {
     advancedStatsDiv.appendChild(itemDiv);
   });
 
-  statsContainer.appendChild(advancedStatsDiv);
+  section.appendChild(advancedStatsDiv);
 
   const actionsDiv = document.createElement('div');
   actionsDiv.className = 'github-i18n-config-actions';
 
   const refreshBtn = document.createElement('button');
-  refreshBtn.className = 'github-i18n-config-save';
   refreshBtn.id = 'github-i18n-refresh-stats';
   refreshBtn.textContent = '刷新性能数据';
 
   const exportBtn = document.createElement('button');
-  exportBtn.className = 'github-i18n-config-reset';
   exportBtn.id = 'github-i18n-export-stats';
   exportBtn.textContent = '导出性能数据';
 
   actionsDiv.appendChild(refreshBtn);
   actionsDiv.appendChild(exportBtn);
 
-  statsContainer.appendChild(actionsDiv);
-  contentDiv.appendChild(statsContainer);
-  section.appendChild(contentDiv);
+  section.appendChild(actionsDiv);
 
   return section;
 }
@@ -149,7 +149,7 @@ export function exportPerformanceStats() {
     const stats = window.translationCore.getPerformanceStats();
     const exportData = {
       timestamp: new Date().toISOString(),
-      version: '1.9.19',
+      version: VERSION,
       ...stats,
     };
 
