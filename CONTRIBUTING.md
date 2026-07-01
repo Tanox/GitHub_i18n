@@ -84,6 +84,9 @@ npm run build
 ### 开发命令
 
 ```bash
+# 运行完整测试流水线（lint → build → validate）
+npm test
+
 # 运行代码检查
 npm run lint
 
@@ -93,11 +96,14 @@ npm run lint:fix
 # 格式化代码
 npm run format
 
-# 运行测试并监视文件变化
-npm run test:watch
+# 检查代码格式
+npm run format:check
 
-# 生成测试覆盖率报告
-npm run test:coverage
+# 构建项目
+npm run build
+
+# 验证构建产物
+npm run validate
 ```
 
 ## 代码规范
@@ -117,7 +123,7 @@ npm run test:coverage
 - 使用有意义的变量名
 - 函数长度不超过 100 行
 - 函数参数不超过 4 个
-- 复杂度不超过 15
+- 复杂度不超过 20（与 ESLint 规则一致）
 
 ### 注释规范
 
