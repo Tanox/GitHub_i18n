@@ -1,13 +1,14 @@
 /**
  * GitHub 中文翻译性能监控组件
  * @file performanceMonitor.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 性能监控区域组件
  */
 
 import { VERSION } from '../../version.js';
+import { translationCore } from '../../translation-core/index.js';
 
 /**
  * 创建性能监控区域
@@ -18,7 +19,12 @@ export function createPerformanceMonitoringSection() {
   section.className = 'github-i18n-config-section';
 
   const sectionTitle = document.createElement('h4');
-  sectionTitle.innerHTML = '<span style="color: #d29922;">📊</span> 性能监控';
+  // 使用安全的 DOM 操作构建标题，避免 innerHTML 引入 XSS 风险
+  const iconSpan = document.createElement('span');
+  iconSpan.style.color = '#d29922';
+  iconSpan.textContent = '📊';
+  sectionTitle.appendChild(iconSpan);
+  sectionTitle.appendChild(document.createTextNode(' 性能监控'));
   section.appendChild(sectionTitle);
 
   const perfGrid = document.createElement('div');
@@ -106,10 +112,12 @@ export function createPerformanceMonitoringSection() {
  * 更新性能统计数据显示
  */
 export function updatePerformanceStats() {
-  if (window.isPageUnloading) return;
+  // 直接通过模块引用获取 translationCore，避免依赖 window 全局变量
+  // （CONFIG.debugMode 为 false 时 main.js 不会将 translationCore 挂到 window）
+  if (translationCore.isPageUnloading) return;
 
-  if (window.translationCore && window.translationCore.getPerformanceStats) {
-    const stats = window.translationCore.getPerformanceStats();
+  if (translationCore && typeof translationCore.getPerformanceStats === 'function') {
+    const stats = translationCore.getPerformanceStats();
 
     const durationEl = document.getElementById('github-i18n-stat-duration');
     if (durationEl) durationEl.textContent = `${stats.totalDuration} ms`;
@@ -145,8 +153,8 @@ export function updatePerformanceStats() {
  * @returns {Object} 性能数据对象
  */
 export function exportPerformanceStats() {
-  if (window.translationCore && window.translationCore.getPerformanceStats) {
-    const stats = window.translationCore.getPerformanceStats();
+  if (translationCore && typeof translationCore.getPerformanceStats === 'function') {
+    const stats = translationCore.getPerformanceStats();
     const exportData = {
       timestamp: new Date().toISOString(),
       version: VERSION,

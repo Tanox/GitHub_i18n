@@ -1,8 +1,8 @@
 /**
  * 元素翻译模块
  * @file translationCore/elementTranslator.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 实际翻译DOM元素的模块
  */
@@ -34,20 +34,7 @@ export const elementTranslator = {
   },
 
   translateElement(element) {
-    if (!element || !(element instanceof HTMLElement)) {
-      return false;
-    }
-
-    if (!elementSelector.shouldTranslate(element)) {
-      return false;
-    }
-
-    if (elementSelector.elementCache.has(element)) {
-      return false;
-    }
-
-    if (element.hasAttribute('data-github-zh-translated')) {
-      elementSelector.elementCache.set(element, true);
+    if (!this.shouldProcessElement(element)) {
       return false;
     }
 
@@ -58,88 +45,149 @@ export const elementTranslator = {
     }
 
     const fragment = document.createDocumentFragment();
-    let hasTranslation = false;
-    let hasTranslatableContent = false;
-
-    const childNodes = Array.from(element.childNodes);
-    const textNodesToProcess = [];
-
-    for (const node of childNodes) {
-      if (node.nodeType === Node.TEXT_NODE) {
-        const trimmedText = node.nodeValue.trim();
-        if (trimmedText && trimmedText.length >= CONFIG.performance?.minTextLengthToTranslate) {
-          // 预先检查是否有对应的翻译
-          const translatedText = dictionaryManager.getTranslatedText(trimmedText);
-          if (translatedText && translatedText !== trimmedText) {
-            textNodesToProcess.push({ node, originalText: node.nodeValue });
-            hasTranslatableContent = true;
-          }
-        }
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        try {
-          element.removeChild(node);
-          fragment.appendChild(node);
-          const childTranslated = this.translateElement(node);
-          hasTranslatableContent = hasTranslatableContent || childTranslated;
-        } catch (e) {
-          if (CONFIG.debugMode) {
-            console.error('[GitHub 中文翻译] 处理子元素失败:', e, '元素:', node);
-          }
-          try {
-            if (!node.parentNode) {
-              element.appendChild(node);
-            }
-          } catch (addBackError) {
-            if (CONFIG.debugMode) {
-              console.error('[GitHub 中文翻译] 将子元素添加回原始位置失败:', addBackError);
-            }
-          }
-        }
-      }
-    }
+    const { textNodesToProcess, hasTranslatableContent } = this.collectChildNodes(
+      element,
+      fragment,
+    );
 
     // 如果没有任何可翻译的内容，直接返回false，不修改DOM
     if (!hasTranslatableContent) {
       return false;
     }
 
-    // 只有在有可翻译内容时才进行文本节点处理
+    const hasTranslation = this.applyTextTranslations(textNodesToProcess, fragment);
+    this.appendFragmentToElement(fragment, element);
+
+    if (hasTranslation) {
+      virtualDomManager.markElementAsTranslated(element);
+    }
+
+    elementSelector.elementCache.set(element, true);
+
+    return hasTranslation;
+  },
+
+  // 检查元素是否需要处理（缓存/标记/类型校验）
+  shouldProcessElement(element) {
+    if (!element || !(element instanceof HTMLElement)) {
+      return false;
+    }
+    if (!elementSelector.shouldTranslate(element)) {
+      return false;
+    }
+    if (elementSelector.elementCache.has(element)) {
+      return false;
+    }
+    if (element.hasAttribute('data-github-zh-translated')) {
+      elementSelector.elementCache.set(element, true);
+      return false;
+    }
+    return true;
+  },
+
+  // 遍历子节点：收集可翻译文本节点，并将元素节点移入 fragment
+  collectChildNodes(element, fragment) {
+    const textNodesToProcess = [];
+    let hasTranslatableContent = false;
+    const minLen = CONFIG.performance?.minTextLengthToTranslate;
+
+    for (const node of Array.from(element.childNodes)) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const trimmed = node.nodeValue.trim();
+        if (trimmed && trimmed.length >= minLen) {
+          // 预检查翻译匹配，无匹配则跳过，避免不必要的 DOM 操作
+          const translated = dictionaryManager.getTranslatedText(trimmed);
+          if (translated && translated !== trimmed) {
+            textNodesToProcess.push({ node, originalText: node.nodeValue });
+            hasTranslatableContent = true;
+          }
+        }
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const moved = this.moveChildToFragment(element, node, fragment);
+        hasTranslatableContent = hasTranslatableContent || moved;
+      }
+    }
+
+    return { textNodesToProcess, hasTranslatableContent };
+  },
+
+  // 将子元素移入 fragment 并递归翻译
+  moveChildToFragment(parent, node, fragment) {
+    try {
+      parent.removeChild(node);
+      fragment.appendChild(node);
+      return this.translateElement(node);
+    } catch (e) {
+      if (CONFIG.debugMode) {
+        console.error('[GitHub 中文翻译] 处理子元素失败:', e, '元素:', node);
+      }
+      try {
+        if (!node.parentNode) {
+          parent.appendChild(node);
+        }
+      } catch (addBackError) {
+        if (CONFIG.debugMode) {
+          console.error('[GitHub 中文翻译] 将子元素添加回原始位置失败:', addBackError);
+        }
+      }
+      return false;
+    }
+  },
+
+  // 处理文本节点翻译并追加到 fragment
+  applyTextTranslations(textNodesToProcess, fragment) {
+    let hasTranslation = false;
+
     textNodesToProcess.forEach(({ node, originalText }) => {
-      const parentNode = node.parentNode;
-      if (parentNode) {
-        parentNode.removeChild(node);
+      // 先从父节点移除原文本节点，避免重复残留
+      if (node.parentNode) {
+        node.parentNode.removeChild(node);
       }
 
-      const translatedText = dictionaryManager.getTranslatedText(originalText.trim());
+      const trimmed = originalText.trim();
+      const translatedText = dictionaryManager.getTranslatedText(trimmed);
 
-      if (
-        translatedText &&
-        typeof translatedText === 'string' &&
-        translatedText !== originalText.trim()
-      ) {
-        try {
-          const safeTranslatedText =
-            typeof translatedText === 'string'
-              ? [...translatedText]
-                  .filter((c) => c.charCodeAt(0) > 31 && c.charCodeAt(0) !== 127)
-                  .join('')
-              : String(translatedText || '');
-          const translatedNode = document.createTextNode(safeTranslatedText);
+      if (this.isValidTranslation(translatedText, trimmed)) {
+        const translatedNode = this.createTranslatedNode(translatedText);
+        if (translatedNode) {
           fragment.appendChild(translatedNode);
-
           hasTranslation = true;
           this.performanceData.textsTranslated++;
-        } catch (e) {
-          if (CONFIG.debugMode) {
-            console.error('[GitHub 中文翻译] 创建翻译节点失败:', e, '翻译文本:', translatedText);
-          }
-          fragment.appendChild(node);
+          return;
         }
-      } else {
-        fragment.appendChild(node);
       }
+      fragment.appendChild(node);
     });
 
+    return hasTranslation;
+  },
+
+  // 校验翻译结果是否可用
+  isValidTranslation(translatedText, originalText) {
+    return (
+      translatedText &&
+      typeof translatedText === 'string' &&
+      translatedText !== originalText
+    );
+  },
+
+  // 创建翻译后的文本节点（过滤控制字符），失败时返回 null
+  createTranslatedNode(translatedText) {
+    try {
+      const safeText = [...translatedText]
+        .filter((c) => c.charCodeAt(0) > 31 && c.charCodeAt(0) !== 127)
+        .join('');
+      return document.createTextNode(safeText);
+    } catch (e) {
+      if (CONFIG.debugMode) {
+        console.error('[GitHub 中文翻译] 创建翻译节点失败:', e, '翻译文本:', translatedText);
+      }
+      return null;
+    }
+  },
+
+  // 将文档片段插入回元素
+  appendFragmentToElement(fragment, element) {
     try {
       if (fragment && fragment.hasChildNodes()) {
         if (element.firstChild) {
@@ -153,14 +201,6 @@ export const elementTranslator = {
         console.error('[GitHub 中文翻译] 添加文档片段失败:', appendError, '元素:', element);
       }
     }
-
-    if (hasTranslation) {
-      virtualDomManager.markElementAsTranslated(element);
-    }
-
-    elementSelector.elementCache.set(element, true);
-
-    return hasTranslation;
   },
 
   async translateCriticalElementsOnly() {

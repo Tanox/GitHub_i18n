@@ -1,8 +1,8 @@
 /**
  * DOM观察器工具函数模块
  * @file domObserver.utils.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description DOM变化观察的工具函数集合
  */

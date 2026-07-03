@@ -282,7 +282,7 @@ function processData(data)
 /**
  * GitHub 中文翻译主入口文件
  * @file main.js
- * @version 1.9.20
+ * @version 1.9.21
  * @date 2026-06-10
  * @author Sut
  * @description 整合所有模块并初始化脚本
@@ -583,7 +583,7 @@ npm run format:check
 
 ### Git 钩子
 
-项目使用 Husky 和 lint-staged 自动在提交前运行检查，确保代码符合规范。
+项目使用 lint-staged 自动在提交前运行检查，确保代码符合规范。
 
 ---
 

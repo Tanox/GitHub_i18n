@@ -1,8 +1,8 @@
 /**
  * 翻译触发模块
  * @file pageMonitor/translationTrigger.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 管理翻译触发和节流
  */
@@ -13,6 +13,16 @@ import { pageAnalyzer } from './pageAnalyzer.js';
 export const translationTrigger = {
   lastTranslateTimestamp: 0,
   scheduledTranslate: null,
+
+  /**
+   * 清理定时器，防止页面卸载后定时器仍触发操作已销毁的 DOM
+   */
+  cleanup() {
+    if (this.scheduledTranslate) {
+      clearTimeout(this.scheduledTranslate);
+      this.scheduledTranslate = null;
+    }
+  },
 
   translateWithThrottle() {
     try {

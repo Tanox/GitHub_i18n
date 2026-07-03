@@ -8,7 +8,7 @@ GitHub_i18n 是一个浏览器用户脚本项目，为 GitHub 网站提供中文
 - **静态文本翻译**：将 GitHub 界面的英文文本翻译为中文
 - **动态内容监控**：监听 DOM 变化，自动翻译新增内容
 - **多模式支持**：支持 Issue、PR、Code 等不同页面的智能翻译
-- **性能优化**：采用 Trie 树和 LRU 缓存提升翻译效率
+- **性能优化**：采用 LRU 缓存、虚拟 DOM、预检查匹配提升翻译效率
 - **预检查优化**：无匹配翻译时不修改 DOM，减少不必要操作
 
 ### 技术栈
@@ -48,7 +48,6 @@ GitHub_i18n/
 │   │   ├── elementTranslator.js  # 元素翻译器
 │   │   ├── index.js              # 翻译核心入口
 │   │   ├── pageModeDetector.js   # 页面模式检测
-│   │   ├── partialTranslator.js  # 部分翻译器
 │   │   └── performanceMonitor.js # 性能监控
 │   ├── ui/                       # 用户界面模块
 │   │   ├── components/           # UI 组件
@@ -155,7 +154,7 @@ docs: 更新项目文档
 
 ### 版本号管理
 - **版本号格式**：SemVer（主版本.次版本.修订号）
-- **当前版本**：1.9.20（定义于 `src/version.js`）
+- **当前版本**：1.9.21（定义于 `src/version.js`）
 - **单一版本源**：`src/version.js` 是项目的唯一版本源
 - **更新时机**：
   - 修订号：文档完善、代码注释更新、Bug 修复
@@ -185,7 +184,7 @@ npm test           # 完整测试流水线（lint → build → validate）
 ### 发布流程
 1. 在 `src/version.js` 更新版本号
 2. 运行 `npm test` 验证构建
-3. 创建 Git Tag：`git tag v1.9.20`
+3. 创建 Git Tag：`git tag v1.9.21`
 4. 推送 Tag 触发 CI/CD 发布流程
 
 ---
@@ -196,7 +195,7 @@ npm test           # 完整测试流水线（lint → build → validate）
 |------|------|
 | **项目名称** | GitHub_i18n |
 | **项目 URL** | https://github.com/Tanox/GitHub_i18n |
-| **当前版本** | 1.9.20 |
+| **当前版本** | 1.9.21 |
 | **核心语言** | JavaScript (ES6+) |
 | **模块系统** | ES Modules |
 | **目标平台** | 浏览器用户脚本 |

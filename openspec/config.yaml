@@ -8,7 +8,7 @@ context: |
   规范文档: docs/ 目录存放正式规范文档（原型设计、架构文档、开发指南等）
   设计系统: prototype/ 目录存放设计系统和高保真原型
   单一版本源: src/version.js
-  当前版本: 1.9.20
+  当前版本: 1.9.21
 
 # Per-artifact rules
 rules:

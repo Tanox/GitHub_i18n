@@ -1,8 +1,8 @@
 /**
  * GitHub 中文翻译主入口文件
  * @file main.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 整合所有模块并初始化脚本
  */
@@ -13,6 +13,7 @@ import { versionChecker } from './versionChecker.js';
 import { translationCore } from './translation-core/index.js';
 import { pageMonitor } from './page-monitor/index.js';
 import { configUI } from './ui/configUI.js';
+import virtualDomManager from './core/virtualDom.js';
 
 /**
  * 清理资源
@@ -28,6 +29,11 @@ function cleanup() {
     // 清理翻译缓存
     if (translationCore && typeof translationCore.clearCache === 'function') {
       translationCore.clearCache();
+    }
+
+    // 销毁虚拟 DOM 管理器，移除事件监听器和定时器
+    if (virtualDomManager && typeof virtualDomManager.destroy === 'function') {
+      virtualDomManager.destroy();
     }
 
     // 清理配置界面

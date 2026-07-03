@@ -51,18 +51,20 @@
 
 ```
 src/
-├── core/                    # 核心模块 (cacheManager/errorHandler/trie/virtualDom)
-├── dictionaries/            # 翻译词典 (common/codespaces/explore/notifications/settings)
+├── core/                    # 核心模块 (cacheManager/errorHandler/virtualDom + virtualNode/Cleanup/Processor)
+├── dictionaries/            # 翻译词典 (common/codespaces/explore)
 ├── page-monitor/            # 页面监控 (DOM 监听、路径监听、翻译触发)
 ├── translation-core/        # 翻译核心 (词典管理、元素翻译、性能监控)
 ├── ui/                      # UI 组件 (配置面板、性能监控)
 │   ├── components/          # UI 组件
 │   └── styles/              # UI 样式
-├── utils/                   # 工具函数
+├── utils/                   # 工具函数 (门面 + functionUtils/stringUtils/urlUtils/domUtils/objectUtils/cryptoUtils)
 ├── config.js                # 全局配置
 ├── main.js                  # 主入口
 ├── version.js               # 版本信息（单一版本源）
-└── versionChecker.js        # 版本检查器
+├── versionChecker.js        # 版本检查器（委托 updateNotification/versionStorage）
+├── updateNotification.js    # 更新通知 UI 模块
+└── versionStorage.js        # 版本历史存储模块
 prototype/                   # 设计系统与高保真原型
 ├── assets/                  # 共享资源
 ├── design-system/           # 设计系统规范
@@ -117,7 +119,7 @@ npm run build
 
 ## 🔄 版本管理
 
-- **当前版本**：1.9.20
+- **当前版本**：1.9.21
 - **版本格式**：SemVer（主版本.次版本.修订号）
 - **版本源**：`src/version.js` 是项目的单一版本源
 

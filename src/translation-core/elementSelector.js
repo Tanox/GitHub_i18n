@@ -1,8 +1,8 @@
 /**
  * 翻译元素选择模块
  * @file translationCore/elementSelector.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 选择需要翻译的DOM元素
  */
@@ -240,13 +240,30 @@ function hasSkipId(id) {
 }
 
 function isHiddenElement(element) {
-  const computedStyle = window.getComputedStyle(element);
-  return (
-    computedStyle.display === 'none' ||
-    computedStyle.visibility === 'hidden' ||
-    computedStyle.opacity === '0' ||
-    (computedStyle.position === 'absolute' && computedStyle.left === '-9999px')
-  );
+  // 快速路径：offsetParent 为 null 表示 display:none 或祖先隐藏
+  // （position:fixed 元素 offsetParent 也为 null，需进一步检查）
+  if (element.offsetParent === null) {
+    // 仅对非 fixed 元素可直接判定为隐藏
+    if (element.style.position !== 'fixed') {
+      return true;
+    }
+  }
+
+  // 检查 hidden 属性和 style 内联隐藏（避免强制布局回流的 getComputedStyle 调用）
+  if (
+    element.style.display === 'none' ||
+    element.style.visibility === 'hidden' ||
+    element.style.opacity === '0'
+  ) {
+    return true;
+  }
+
+  // 检查 rect 是否为零尺寸（同样避免 getComputedStyle 的开销）
+  if (element.getClientRects().length === 0) {
+    return true;
+  }
+
+  return false;
 }
 
 function isNumericOrSpecialOnly(text) {

@@ -1,8 +1,8 @@
 /**
  * 错误处理模块
  * @file errorHandler.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 负责统一管理所有错误处理和恢复机制
  */
@@ -16,12 +16,27 @@ export const ErrorHandler = {
 
   // 错误类型定义
   ERROR_TYPES: {
+    INITIALIZATION: 'initialization',
     TRANSLATION: 'translation',
     DOM_OPERATION: 'dom_operation',
     DICTIONARY: 'dictionary',
     NETWORK: 'network',
     PERFORMANCE: 'performance',
     OTHER: 'other',
+  },
+
+  // 词典恢复回调（由上层模块通过 setDictionaryRecoveryHandler 注册）
+  _dictionaryRecoveryFn: null,
+
+  /**
+   * 注册词典恢复处理函数
+   * 由 translationCore 在初始化时注册，避免 core 层反向依赖 translation-core 层
+   * @param {Function} fn - 恢复函数
+   */
+  setDictionaryRecoveryHandler(fn) {
+    if (typeof fn === 'function') {
+      this._dictionaryRecoveryFn = fn;
+    }
   },
 
   /**
@@ -120,6 +135,7 @@ export const ErrorHandler = {
    */
   checkErrorThreshold(type, count) {
     const thresholds = {
+      [this.ERROR_TYPES.INITIALIZATION]: CONFIG.performance?.maxInitializationErrorCount || 3,
       [this.ERROR_TYPES.TRANSLATION]: CONFIG.performance?.maxTranslationErrorCount || 10,
       [this.ERROR_TYPES.DOM_OPERATION]: CONFIG.performance?.maxDomErrorCount || 20,
       [this.ERROR_TYPES.DICTIONARY]: CONFIG.performance?.maxDictionaryErrorCount || 5,
@@ -157,9 +173,15 @@ export const ErrorHandler = {
         CONFIG.performance.batchDelay = Math.max(CONFIG.performance.batchDelay || 0, 50);
         break;
       case this.ERROR_TYPES.DICTIONARY:
-        // 重新初始化词典
-        if (typeof window.GitHub_i18n !== 'undefined' && window.GitHub_i18n.translationCore) {
-          window.GitHub_i18n.translationCore.initDictionary();
+        // 通过注册的恢复回调重新初始化词典
+        if (this._dictionaryRecoveryFn) {
+          try {
+            this._dictionaryRecoveryFn();
+          } catch (recoveryError) {
+            if (CONFIG.debugMode) {
+              console.error('[GitHub 中文翻译] 词典恢复失败:', recoveryError);
+            }
+          }
         }
         break;
       case this.ERROR_TYPES.NETWORK:

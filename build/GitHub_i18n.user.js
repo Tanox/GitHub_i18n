@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GitHub 中文翻译
 // @namespace    https://github.com/Tanox/GitHub_i18n
-// @version      1.9.20
+// @version      1.9.21
 // @description  GitHub页面自动翻译为中文
 // @author       Sut
 // @match        https://github.com/*
@@ -26,8 +26,8 @@
 /**
  * 版本信息模块
  * @file version.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 统一管理GitHub自动化字符串更新工具的版本信息
  */
@@ -36,12 +36,12 @@
  * @type {string}
  * @description 这是项目的单一版本源，所有其他版本号引用都应从此处获取
  */
-const VERSION = '1.9.20';
+const VERSION = '1.9.21';
 /**
  * GitHub 中文翻译配置文件
  * @file config.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 包含脚本所有可配置项
  */
@@ -286,17 +286,17 @@ const CONFIG = {
   },
 };
 /**
- * 工具函数模块
- * @file utils.js
- * @version 1.9.20
- * @date 2026-06-10
+ * 函数控制工具模块
+ * @file functionUtils.js
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
- * @description 包含各种通用的辅助函数
+ * @description 包含节流、防抖、延迟、安全执行等函数控制相关辅助函数
  */
 /**
- * 工具函数集合
+ * 函数控制工具集合
  */
-const utils = {
+const functionUtils = {
   /**
    * 节流函数，用于限制高频操作的执行频率
    * 支持返回Promise
@@ -371,6 +371,38 @@ const utils = {
   delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   },
+  /**
+   * 安全地执行函数，捕获可能的异常
+   * @param {Function} fn - 要执行的函数
+   * @param {*} defaultValue - 执行失败时的默认返回值
+   * @param {Object} context - 函数执行上下文
+   * @param {...*} args - 函数参数
+   * @returns {*} 函数返回值或默认值
+   */
+  safeExecute(fn, defaultValue = null, context = null, ...args) {
+    try {
+      if (typeof fn === 'function') {
+        return fn.apply(context, args);
+      }
+      return defaultValue;
+    } catch (error) {
+      console.error('[GitHub 中文翻译] 安全执行函数失败:', error);
+      return defaultValue;
+    }
+  },
+};
+/**
+ * 字符串与正则工具模块
+ * @file stringUtils.js
+ * @version 1.9.21
+ * @date 2026-07-03
+ * @author Sut
+ * @description 包含正则转义、安全正则、JSON安全解析与序列化等辅助函数
+ */
+/**
+ * 字符串与正则工具集合
+ */
+const stringUtils = {
   /**
    * 转义正则表达式中的特殊字符
    * @param {string} string - 要转义的字符串
@@ -457,6 +489,19 @@ const utils = {
       return defaultValue;
     }
   },
+};
+/**
+ * URL与页面路径工具模块
+ * @file urlUtils.js
+ * @version 1.9.21
+ * @date 2026-07-03
+ * @author Sut
+ * @description 包含页面路径获取、URL匹配、查询参数解析等辅助函数
+ */
+/**
+ * URL与页面路径工具集合
+ */
+const urlUtils = {
   /**
    * 获取当前页面路径
    * @returns {string} 当前页面的路径
@@ -506,6 +551,19 @@ const utils = {
     }
     return params;
   },
+};
+/**
+ * DOM文本节点工具模块
+ * @file domUtils.js
+ * @version 1.9.21
+ * @date 2026-07-03
+ * @author Sut
+ * @description 包含DOM文本节点收集、可收集文本判断等辅助函数
+ */
+/**
+ * DOM文本节点工具集合
+ */
+const domUtils = {
   /**
    * 收集DOM树中的所有文本节点内容
    * @param {HTMLElement} element - 要收集文本的起始元素
@@ -544,17 +602,7 @@ const utils = {
       for (const node of childNodes) {
         if (node.nodeType === Node.TEXT_NODE) {
           const text = node.nodeValue ? node.nodeValue.trim() : '';
-          // 只收集符合条件的文本
-          if (
-            text &&
-            text.length > 0 &&
-            text.length < maxLength &&
-            !/^\d+$/.test(text) &&
-            // 使用基础字符类替代Unicode属性转义，避免构建过程中的解析问题
-            !/^[\s\u0021-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E\u00A1-\u00BF\u2000-\u206F\u3000-\u303F]+$/.test(
-              text,
-            )
-          ) {
+          if (this.isCollectibleText(text, maxLength)) {
             resultSet.add(text);
           }
         } else if (node.nodeType === Node.ELEMENT_NODE) {
@@ -566,6 +614,33 @@ const utils = {
       console.error('[GitHub 中文翻译] 收集文本节点时出错:', error);
     }
   },
+  // 判断文本是否可收集：非空、未超长、非纯数字、非纯标点符号
+  isCollectibleText(text, maxLength) {
+    if (!text || text.length === 0 || text.length >= maxLength) {
+      return false;
+    }
+    if (/^\d+$/.test(text)) {
+      return false;
+    }
+    // 使用基础字符类替代 Unicode 属性转义，避免构建过程中的解析问题
+    if (/^[\s\u0021-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E\u00A1-\u00BF\u2000-\u206F\u3000-\u303F]+$/.test(text)) {
+      return false;
+    }
+    return true;
+  },
+};
+/**
+ * 对象操作工具模块
+ * @file objectUtils.js
+ * @version 1.9.21
+ * @date 2026-07-03
+ * @author Sut
+ * @description 包含嵌套属性安全访问、深拷贝等辅助函数
+ */
+/**
+ * 对象操作工具集合
+ */
+const objectUtils = {
   /**
    * 安全地访问对象属性，避免嵌套属性访问出错
    * @param {Object} obj - 目标对象
@@ -612,25 +687,19 @@ const utils = {
       return obj;
     }
   },
-  /**
-   * 安全地执行函数，捕获可能的异常
-   * @param {Function} fn - 要执行的函数
-   * @param {*} defaultValue - 执行失败时的默认返回值
-   * @param {Object} context - 函数执行上下文
-   * @param {...*} args - 函数参数
-   * @returns {*} 函数返回值或默认值
-   */
-  safeExecute(fn, defaultValue = null, context = null, ...args) {
-    try {
-      if (typeof fn === 'function') {
-        return fn.apply(context, args);
-      }
-      return defaultValue;
-    } catch (error) {
-      console.error('[GitHub 中文翻译] 安全执行函数失败:', error);
-      return defaultValue;
-    }
-  },
+};
+/**
+ * 编码与加密工具模块
+ * @file cryptoUtils.js
+ * @version 1.9.21
+ * @date 2026-07-03
+ * @author Sut
+ * @description 包含Base64编解码、数据混淆还原、SHA-256哈希、错误信息脱敏等辅助函数
+ */
+/**
+ * 编码与加密工具集合
+ */
+const cryptoUtils = {
   /**
    * 对数据进行Base64编码（用于轻量级数据混淆，非加密）
    * @param {string} data - 要编码的数据
@@ -736,10 +805,31 @@ const utils = {
   },
 };
 /**
+ * 工具函数模块（门面模式）
+ * @file utils.js
+ * @version 1.9.21
+ * @date 2026-07-03
+ * @author Sut
+ * @description 工具函数统一入口，委托给各子模块，保持 utils 对象 API 不变
+ */
+/**
+ * 工具函数集合（门面）
+ * 通过展开各子模块，保持 utils.methodName() 调用方式不变
+ * this 引用在合并后仍指向 utils，跨方法调用可正常解析
+ */
+const utils = {
+  ...functionUtils,
+  ...stringUtils,
+  ...urlUtils,
+  ...domUtils,
+  ...objectUtils,
+  ...cryptoUtils,
+};
+/**
  * LRU缓存管理模块
  * @file cacheManager.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 实现LRU缓存策略，用于翻译结果缓存
  */
@@ -831,8 +921,8 @@ class CacheManager {
 /**
  * 错误处理模块
  * @file errorHandler.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 负责统一管理所有错误处理和恢复机制
  */
@@ -841,12 +931,25 @@ const ErrorHandler = {
   errorCounts: new Map(),
   // 错误类型定义
   ERROR_TYPES: {
+    INITIALIZATION: 'initialization',
     TRANSLATION: 'translation',
     DOM_OPERATION: 'dom_operation',
     DICTIONARY: 'dictionary',
     NETWORK: 'network',
     PERFORMANCE: 'performance',
     OTHER: 'other',
+  },
+  // 词典恢复回调（由上层模块通过 setDictionaryRecoveryHandler 注册）
+  _dictionaryRecoveryFn: null,
+  /**
+   * 注册词典恢复处理函数
+   * 由 translationCore 在初始化时注册，避免 core 层反向依赖 translation-core 层
+   * @param {Function} fn - 恢复函数
+   */
+  setDictionaryRecoveryHandler(fn) {
+    if (typeof fn === 'function') {
+      this._dictionaryRecoveryFn = fn;
+    }
   },
   /**
    * 初始化错误处理器
@@ -935,6 +1038,7 @@ const ErrorHandler = {
    */
   checkErrorThreshold(type, count) {
     const thresholds = {
+      [this.ERROR_TYPES.INITIALIZATION]: CONFIG.performance?.maxInitializationErrorCount || 3,
       [this.ERROR_TYPES.TRANSLATION]: CONFIG.performance?.maxTranslationErrorCount || 10,
       [this.ERROR_TYPES.DOM_OPERATION]: CONFIG.performance?.maxDomErrorCount || 20,
       [this.ERROR_TYPES.DICTIONARY]: CONFIG.performance?.maxDictionaryErrorCount || 5,
@@ -968,9 +1072,15 @@ const ErrorHandler = {
         CONFIG.performance.batchDelay = Math.max(CONFIG.performance.batchDelay || 0, 50);
         break;
       case this.ERROR_TYPES.DICTIONARY:
-        // 重新初始化词典
-        if (typeof window.GitHub_i18n !== 'undefined' && window.GitHub_i18n.translationCore) {
-          window.GitHub_i18n.translationCore.initDictionary();
+        // 通过注册的恢复回调重新初始化词典
+        if (this._dictionaryRecoveryFn) {
+          try {
+            this._dictionaryRecoveryFn();
+          } catch (recoveryError) {
+            if (CONFIG.debugMode) {
+              console.error('[GitHub 中文翻译] 词典恢复失败:', recoveryError);
+            }
+          }
         }
         break;
       case this.ERROR_TYPES.NETWORK:
@@ -1016,8 +1126,8 @@ ErrorHandler.init();
 /**
  * 开发工具模块
  * @file tools.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 包含字符串提取、自动更新和词典处理等开发工具
  */
@@ -1162,8 +1272,8 @@ function loadTools() {
 /**
  * 页面监控缓存管理模块
  * @file pageMonitor/cacheManager.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 管理页面监控中的缓存
  */
@@ -1227,8 +1337,8 @@ const pageMonitorCache = {
 /**
  * 页面分析模块
  * @file pageMonitor/pageAnalyzer.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 分析页面类型和关键区域
  */
@@ -1358,42 +1468,63 @@ const pageAnalyzer = {
 /**
  * 路径变化监听模块
  * @file pageMonitor/pathListener.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 监听URL路径变化
  */
 const pathListener = {
   lastPath: '',
   onPathChange: null,
+  originalPushState: null,
+  originalReplaceState: null,
+  popstateHandler: null,
   init(pathChangeCallback) {
     this.onPathChange = pathChangeCallback;
     this.lastPath = window.location.pathname + window.location.search;
     this.setupPathListener();
   },
   setupPathListener() {
-    const popstateHandler = utils.debounce(() => {
+    this.popstateHandler = utils.debounce(() => {
       const currentPath = window.location.pathname + window.location.search;
       if (currentPath !== this.lastPath) {
         this.handlePathChange();
       }
     }, CONFIG.routeChangeDelay || 500);
-    window.addEventListener('popstate', popstateHandler);
+    // 仅通过 pageMonitorCache 注册一次，避免重复绑定
     pageMonitorCache.addEventListener({
       target: window,
       type: 'popstate',
-      handler: popstateHandler,
+      handler: this.popstateHandler,
     });
-    const originalPushState = history.pushState;
-    const originalReplaceState = history.replaceState;
+    // 保存原始引用，便于 cleanup 还原
+    this.originalPushState = history.pushState;
+    this.originalReplaceState = history.replaceState;
     history.pushState = function (...args) {
-      originalPushState.apply(this, args);
+      pathListener.originalPushState.apply(this, args);
       pathListener.handlePathChange();
     };
     history.replaceState = function (...args) {
-      originalReplaceState.apply(this, args);
+      pathListener.originalReplaceState.apply(this, args);
       pathListener.handlePathChange();
     };
+  },
+  /**
+   * 还原 history 方法并清理，防止脚本卸载后仍触发翻译
+   */
+  cleanup() {
+    if (this.originalPushState) {
+      history.pushState = this.originalPushState;
+      this.originalPushState = null;
+    }
+    if (this.originalReplaceState) {
+      history.replaceState = this.originalReplaceState;
+      this.originalReplaceState = null;
+    }
+    if (this.popstateHandler) {
+      window.removeEventListener('popstate', this.popstateHandler);
+      this.popstateHandler = null;
+    }
   },
   handlePathChange() {
     try {
@@ -1415,18 +1546,11 @@ const pathListener = {
 /**
  * DOM变化观察器模块
  * @file pageMonitor/domObserver.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 观察DOM变化并触发翻译
  */
-import {
-  isElementImportant,
-  isElementIgnored,
-  isMutationContentRelated,
-  processMutationBatch,
-  checkWeightedThreshold,
-} from './domObserver.utils.js';
 const domObserver = {
   observer: null,
   onTranslationTrigger: null,
@@ -1454,10 +1578,12 @@ const domObserver = {
       if (CONFIG.debugMode) {
         console.log('[GitHub 中文翻译] 当前页面模式:', pageMode);
       }
+      // 缓存页面模式到闭包，避免每次 mutation 都重新检测；
+      // 路由变化由 pathListener 处理，会触发 observer 重建。
+      const cachedPageMode = pageMode;
       const handleMutations = (mutations) => {
         try {
-          const pageMode = translationCore.detectPageMode();
-          if (this.shouldTriggerTranslation(mutations, pageMode)) {
+          if (this.shouldTriggerTranslation(mutations, cachedPageMode)) {
             if (this.onTranslationTrigger) {
               this.onTranslationTrigger();
             }
@@ -1495,7 +1621,7 @@ const domObserver = {
             }
           }
         };
-        document.addEventListener('DOMContentLoaded', domLoadedHandler);
+        // 仅通过 pageMonitorCache 注册一次，避免重复绑定
         pageMonitorCache.addEventListener({
           target: document,
           type: 'DOMContentLoaded',
@@ -1647,9 +1773,12 @@ const domObserver = {
     }
   },
   detectImportantChanges(mutations, pageMode) {
+    // 透传 CONFIG 中配置的重要元素选择器，避免传入空数组导致配置失效
+    const importantElements = CONFIG.performance?.importantElements || [];
+    const elementCheckCache = new WeakMap();
     for (const mutation of mutations) {
       if (mutation.target && mutation.target.nodeType === Node.ELEMENT_NODE) {
-        if (isElementImportant(mutation.target, [], new WeakMap(), pageMode)) {
+        if (isElementImportant(mutation.target, importantElements, elementCheckCache, pageMode)) {
           return true;
         }
       }
@@ -1696,14 +1825,23 @@ const domObserver = {
 /**
  * 翻译触发模块
  * @file pageMonitor/translationTrigger.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 管理翻译触发和节流
  */
 const translationTrigger = {
   lastTranslateTimestamp: 0,
   scheduledTranslate: null,
+  /**
+   * 清理定时器，防止页面卸载后定时器仍触发操作已销毁的 DOM
+   */
+  cleanup() {
+    if (this.scheduledTranslate) {
+      clearTimeout(this.scheduledTranslate);
+      this.scheduledTranslate = null;
+    }
+  },
   translateWithThrottle() {
     try {
       const now = Date.now();
@@ -1784,8 +1922,8 @@ const translationTrigger = {
 /**
  * 页面监控主模块
  * @file pageMonitor/index.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 页面监控主入口，整合所有子模块
  */
@@ -1837,6 +1975,7 @@ const pageMonitor = {
   stop() {
     try {
       domObserver.stop();
+      translationTrigger.cleanup();
       pageMonitorCache.stopCacheCleanupTimer();
       if (CONFIG.debugMode) {
         console.log('[GitHub 中文翻译] 页面监控已停止');
@@ -1850,6 +1989,8 @@ const pageMonitor = {
   cleanup() {
     try {
       this.stop();
+      // 还原 history.pushState/replaceState，移除 popstate 监听器
+      pathListener.cleanup();
       pageMonitorCache.cleanupNodeCheckCache();
       pageMonitorCache.cleanupEventListeners();
       if (CONFIG.debugMode) {
@@ -1871,8 +2012,8 @@ const pageMonitor = {
 /**
  * 通用翻译词典
  * @file common.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 包含所有页面共用的翻译字符串，使用 GitHub 实际界面文本作为键
  */
@@ -2318,8 +2459,8 @@ const commonDictionary = {
 /**
  * Codespaces 页面翻译词典
  * @file codespaces.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 包含 GitHub Codespaces 页面的翻译词典
  */
@@ -2348,8 +2489,8 @@ const codespacesDictionary = {
 /**
  * Explore 页面翻译词典
  * @file explore.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 包含 GitHub Explore 页面的翻译词典
  */
@@ -2506,8 +2647,8 @@ const exploreDictionary = {
 /**
  * 翻译词典合并模块
  * @file index.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 整合所有页面的翻译词典
  */
@@ -2534,8 +2675,8 @@ function mergeAllDictionaries() {
 /**
  * 翻译词典管理模块
  * @file translationCore/dictionaryManager.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 管理翻译词典的加载和查询
  */
@@ -2660,8 +2801,8 @@ const dictionaryManager = {
 /**
  * 页面模式检测模块
  * @file translationCore/pageModeDetector.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 检测当前页面的模式
  */
@@ -2727,8 +2868,8 @@ const pageModeDetector = {
 /**
  * 翻译元素选择模块
  * @file translationCore/elementSelector.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 选择需要翻译的DOM元素
  */
@@ -2957,13 +3098,27 @@ function hasSkipId(id) {
   return SKIP_ID_PATTERNS.some((pattern) => pattern.test(id));
 }
 function isHiddenElement(element) {
-  const computedStyle = window.getComputedStyle(element);
-  return (
-    computedStyle.display === 'none' ||
-    computedStyle.visibility === 'hidden' ||
-    computedStyle.opacity === '0' ||
-    (computedStyle.position === 'absolute' && computedStyle.left === '-9999px')
-  );
+  // 快速路径：offsetParent 为 null 表示 display:none 或祖先隐藏
+  // （position:fixed 元素 offsetParent 也为 null，需进一步检查）
+  if (element.offsetParent === null) {
+    // 仅对非 fixed 元素可直接判定为隐藏
+    if (element.style.position !== 'fixed') {
+      return true;
+    }
+  }
+  // 检查 hidden 属性和 style 内联隐藏（避免强制布局回流的 getComputedStyle 调用）
+  if (
+    element.style.display === 'none' ||
+    element.style.visibility === 'hidden' ||
+    element.style.opacity === '0'
+  ) {
+    return true;
+  }
+  // 检查 rect 是否为零尺寸（同样避免 getComputedStyle 的开销）
+  if (element.getClientRects().length === 0) {
+    return true;
+  }
+  return false;
 }
 function isNumericOrSpecialOnly(text) {
   return /^[0-9.,\s()[\]{}/*^$#@!~`|:;"'?>+-]+$/i.test(text);
@@ -3053,8 +3208,8 @@ const elementSelector = {
 /**
  * 元素翻译模块
  * @file translationCore/elementTranslator.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 实际翻译DOM元素的模块
  */
@@ -3079,6 +3234,32 @@ const elementTranslator = {
     totalMemory: 0,
   },
   translateElement(element) {
+    if (!this.shouldProcessElement(element)) {
+      return false;
+    }
+    this.performanceData.elementsProcessed++;
+    if (!elementSelector.shouldTranslateElement(element)) {
+      return false;
+    }
+    const fragment = document.createDocumentFragment();
+    const { textNodesToProcess, hasTranslatableContent } = this.collectChildNodes(
+      element,
+      fragment,
+    );
+    // 如果没有任何可翻译的内容，直接返回false，不修改DOM
+    if (!hasTranslatableContent) {
+      return false;
+    }
+    const hasTranslation = this.applyTextTranslations(textNodesToProcess, fragment);
+    this.appendFragmentToElement(fragment, element);
+    if (hasTranslation) {
+      virtualDomManager.markElementAsTranslated(element);
+    }
+    elementSelector.elementCache.set(element, true);
+    return hasTranslation;
+  },
+  // 检查元素是否需要处理（缓存/标记/类型校验）
+  shouldProcessElement(element) {
     if (!element || !(element instanceof HTMLElement)) {
       return false;
     }
@@ -3092,85 +3273,100 @@ const elementTranslator = {
       elementSelector.elementCache.set(element, true);
       return false;
     }
-    this.performanceData.elementsProcessed++;
-    if (!elementSelector.shouldTranslateElement(element)) {
-      return false;
-    }
-    const fragment = document.createDocumentFragment();
-    let hasTranslation = false;
-    let hasTranslatableContent = false;
-    const childNodes = Array.from(element.childNodes);
+    return true;
+  },
+  // 遍历子节点：收集可翻译文本节点，并将元素节点移入 fragment
+  collectChildNodes(element, fragment) {
     const textNodesToProcess = [];
-    for (const node of childNodes) {
+    let hasTranslatableContent = false;
+    const minLen = CONFIG.performance?.minTextLengthToTranslate;
+    for (const node of Array.from(element.childNodes)) {
       if (node.nodeType === Node.TEXT_NODE) {
-        const trimmedText = node.nodeValue.trim();
-        if (trimmedText && trimmedText.length >= CONFIG.performance?.minTextLengthToTranslate) {
-          // 预先检查是否有对应的翻译
-          const translatedText = dictionaryManager.getTranslatedText(trimmedText);
-          if (translatedText && translatedText !== trimmedText) {
+        const trimmed = node.nodeValue.trim();
+        if (trimmed && trimmed.length >= minLen) {
+          // 预检查翻译匹配，无匹配则跳过，避免不必要的 DOM 操作
+          const translated = dictionaryManager.getTranslatedText(trimmed);
+          if (translated && translated !== trimmed) {
             textNodesToProcess.push({ node, originalText: node.nodeValue });
             hasTranslatableContent = true;
           }
         }
       } else if (node.nodeType === Node.ELEMENT_NODE) {
-        try {
-          element.removeChild(node);
-          fragment.appendChild(node);
-          const childTranslated = this.translateElement(node);
-          hasTranslatableContent = hasTranslatableContent || childTranslated;
-        } catch (e) {
-          if (CONFIG.debugMode) {
-            console.error('[GitHub 中文翻译] 处理子元素失败:', e, '元素:', node);
-          }
-          try {
-            if (!node.parentNode) {
-              element.appendChild(node);
-            }
-          } catch (addBackError) {
-            if (CONFIG.debugMode) {
-              console.error('[GitHub 中文翻译] 将子元素添加回原始位置失败:', addBackError);
-            }
-          }
+        const moved = this.moveChildToFragment(element, node, fragment);
+        hasTranslatableContent = hasTranslatableContent || moved;
+      }
+    }
+    return { textNodesToProcess, hasTranslatableContent };
+  },
+  // 将子元素移入 fragment 并递归翻译
+  moveChildToFragment(parent, node, fragment) {
+    try {
+      parent.removeChild(node);
+      fragment.appendChild(node);
+      return this.translateElement(node);
+    } catch (e) {
+      if (CONFIG.debugMode) {
+        console.error('[GitHub 中文翻译] 处理子元素失败:', e, '元素:', node);
+      }
+      try {
+        if (!node.parentNode) {
+          parent.appendChild(node);
+        }
+      } catch (addBackError) {
+        if (CONFIG.debugMode) {
+          console.error('[GitHub 中文翻译] 将子元素添加回原始位置失败:', addBackError);
         }
       }
-    }
-    // 如果没有任何可翻译的内容，直接返回false，不修改DOM
-    if (!hasTranslatableContent) {
       return false;
     }
-    // 只有在有可翻译内容时才进行文本节点处理
+  },
+  // 处理文本节点翻译并追加到 fragment
+  applyTextTranslations(textNodesToProcess, fragment) {
+    let hasTranslation = false;
     textNodesToProcess.forEach(({ node, originalText }) => {
-      const parentNode = node.parentNode;
-      if (parentNode) {
-        parentNode.removeChild(node);
+      // 先从父节点移除原文本节点，避免重复残留
+      if (node.parentNode) {
+        node.parentNode.removeChild(node);
       }
-      const translatedText = dictionaryManager.getTranslatedText(originalText.trim());
-      if (
-        translatedText &&
-        typeof translatedText === 'string' &&
-        translatedText !== originalText.trim()
-      ) {
-        try {
-          const safeTranslatedText =
-            typeof translatedText === 'string'
-              ? [...translatedText]
-                  .filter((c) => c.charCodeAt(0) > 31 && c.charCodeAt(0) !== 127)
-                  .join('')
-              : String(translatedText || '');
-          const translatedNode = document.createTextNode(safeTranslatedText);
+      const trimmed = originalText.trim();
+      const translatedText = dictionaryManager.getTranslatedText(trimmed);
+      if (this.isValidTranslation(translatedText, trimmed)) {
+        const translatedNode = this.createTranslatedNode(translatedText);
+        if (translatedNode) {
           fragment.appendChild(translatedNode);
           hasTranslation = true;
           this.performanceData.textsTranslated++;
-        } catch (e) {
-          if (CONFIG.debugMode) {
-            console.error('[GitHub 中文翻译] 创建翻译节点失败:', e, '翻译文本:', translatedText);
-          }
-          fragment.appendChild(node);
+          return;
         }
-      } else {
-        fragment.appendChild(node);
       }
+      fragment.appendChild(node);
     });
+    return hasTranslation;
+  },
+  // 校验翻译结果是否可用
+  isValidTranslation(translatedText, originalText) {
+    return (
+      translatedText &&
+      typeof translatedText === 'string' &&
+      translatedText !== originalText
+    );
+  },
+  // 创建翻译后的文本节点（过滤控制字符），失败时返回 null
+  createTranslatedNode(translatedText) {
+    try {
+      const safeText = [...translatedText]
+        .filter((c) => c.charCodeAt(0) > 31 && c.charCodeAt(0) !== 127)
+        .join('');
+      return document.createTextNode(safeText);
+    } catch (e) {
+      if (CONFIG.debugMode) {
+        console.error('[GitHub 中文翻译] 创建翻译节点失败:', e, '翻译文本:', translatedText);
+      }
+      return null;
+    }
+  },
+  // 将文档片段插入回元素
+  appendFragmentToElement(fragment, element) {
     try {
       if (fragment && fragment.hasChildNodes()) {
         if (element.firstChild) {
@@ -3184,11 +3380,6 @@ const elementTranslator = {
         console.error('[GitHub 中文翻译] 添加文档片段失败:', appendError, '元素:', element);
       }
     }
-    if (hasTranslation) {
-      virtualDomManager.markElementAsTranslated(element);
-    }
-    elementSelector.elementCache.set(element, true);
-    return hasTranslation;
   },
   async translateCriticalElementsOnly() {
     const criticalSelectors = ['.Header', '.repository-content', '.js-repo-pjax-container', 'main'];
@@ -3235,108 +3426,10 @@ const elementTranslator = {
   },
 };
 /**
- * 部分匹配翻译模块
- * @file translationCore/partialTranslator.js
- * @version 1.9.20
- * @date 2026-06-10
- * @author Sut
- * @description 使用Trie树进行部分匹配翻译
- */
-const partialTranslator = {
-  performPartialTranslation(text, enablePartialMatch = false) {
-    if (!enablePartialMatch) {
-      return null;
-    }
-    const textLen = text.length;
-    if (textLen < 5) {
-      return null;
-    }
-    const matches = [];
-    const minKeyLength = Math.min(4, Math.floor(textLen / 2));
-    const potentialMatches = dictionaryManager.dictionaryTrie.findAllMatches(text, minKeyLength);
-    for (const match of potentialMatches) {
-      const key = match.key;
-      if (
-        !Object.prototype.hasOwnProperty.call(dictionaryManager.dictionary, key) ||
-        dictionaryManager.dictionary[key].startsWith('待翻译: ')
-      ) {
-        continue;
-      }
-      const value = dictionaryManager.dictionary[key];
-      if (/^[0-9.,\s()[\]{}/*^$#@!~`|:;"'?>+-]+$/i.test(key)) {
-        continue;
-      }
-      const wordRegexKey = `word_${key}`;
-      let wordRegex;
-      if (dictionaryManager.regexCache.has(wordRegexKey)) {
-        wordRegex = dictionaryManager.regexCache.get(wordRegexKey);
-      } else {
-        wordRegex = utils.safeRegExp('\\b' + utils.escapeRegExp(key) + '\\b', 'gi');
-        if (wordRegex) {
-          dictionaryManager.regexCache.set(wordRegexKey, wordRegex);
-        } else {
-          continue;
-        }
-      }
-      const wordMatches = text.match(wordRegex);
-      if (wordMatches && wordMatches.length > 0) {
-        matches.push({
-          key,
-          value,
-          length: key.length,
-          matches: wordMatches.length,
-          regex: wordRegex,
-        });
-      } else {
-        const nonWordRegexKey = `nonword_${key}`;
-        let nonWordRegex;
-        if (dictionaryManager.regexCache.has(nonWordRegexKey)) {
-          nonWordRegex = dictionaryManager.regexCache.get(nonWordRegexKey);
-        } else {
-          nonWordRegex = utils.safeRegExp(utils.escapeRegExp(key), 'g');
-          if (nonWordRegex) {
-            dictionaryManager.regexCache.set(nonWordRegexKey, nonWordRegex);
-          } else {
-            continue;
-          }
-        }
-        matches.push({
-          key,
-          value,
-          length: key.length,
-          matches: 1,
-          regex: nonWordRegex,
-        });
-      }
-    }
-    if (matches.length === 0) {
-      return null;
-    }
-    matches.sort((a, b) => {
-      if (b.length !== a.length) {
-        return b.length - a.length;
-      }
-      return b.matches - a.matches;
-    });
-    let result = text;
-    let hasReplaced = false;
-    const maxReplacements = Math.min(5, matches.length);
-    for (let i = 0; i < maxReplacements; i++) {
-      const match = matches[i];
-      const newResult = result.replace(match.regex, match.value);
-      if (newResult !== result) {
-        result = newResult;
-        hasReplaced = true;
-      }
-    }
-    return hasReplaced ? result : null;
-  },
-};
-/**
  * 性能监控模块
  * @file translationCore/performanceMonitor.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 监控翻译性能数据
  */
@@ -3433,8 +3526,8 @@ const performanceMonitor = {
 /**
  * 翻译核心主模块
  * @file translationCore/index.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 翻译核心主入口，整合所有子模块
  */
@@ -3445,6 +3538,10 @@ const translationCore = {
   init() {
     try {
       dictionaryManager.init();
+      // 注册词典恢复回调，供 ErrorHandler 在词典错误超阈值时调用
+      ErrorHandler.setDictionaryRecoveryHandler(() => {
+        dictionaryManager.init();
+      });
       this.setupPageUnloadHandler();
       this.startCacheCleanupTimer();
       this.warmUpCache();
@@ -3767,229 +3864,907 @@ const translationCore = {
   exportPerformanceData: () => performanceMonitor.exportPerformanceData(),
 };
 /**
+ * GitHub 中文翻译配置界面样式模块
+ * @file configUI.styles.js
+ * @version 1.9.21
+ * @date 2026-07-03
+ * @author Sut
+ * @description 配置界面的CSS样式定义，遵循原型设计系统的深色主题规范
+ */
+// 配置面板容器与主体样式
+function getPanelContainerStyles() {
+  return `
+    /* ========== 配置面板容器 ========== */
+    .github-i18n-config-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.55);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2147483200;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial,
+        sans-serif;
+    }
+    /* ========== 配置面板主体 ========== */
+    .github-i18n-config-panel {
+      background-color: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      width: 560px;
+      max-width: 90%;
+      max-height: 80vh;
+      overflow: hidden;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+    }
+  `;
+}
+// 面板头部与关闭按钮样式
+function getHeaderStyles() {
+  return `
+    /* ========== 面板头部 ========== */
+    .github-i18n-config-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      background-color: #0d1117;
+      border-bottom: 1px solid #21262d;
+    }
+    .github-i18n-config-header h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #e6edf3;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .github-i18n-config-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #8b949e;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      transition: all 0.12s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .github-i18n-config-close:hover {
+      background-color: #21262d;
+      color: #e6edf3;
+    }
+  `;
+}
+// 内容区与滚动条样式
+function getContentAreaStyles() {
+  return `
+    /* ========== 面板内容区 ========== */
+    .github-i18n-config-content {
+      padding: 24px;
+      max-height: calc(80vh - 120px);
+      overflow-y: auto;
+      display: grid;
+      gap: 20px;
+    }
+    /* 滚动条样式 */
+    .github-i18n-config-content::-webkit-scrollbar {
+      width: 8px;
+    }
+    .github-i18n-config-content::-webkit-scrollbar-track {
+      background: #010409;
+    }
+    .github-i18n-config-content::-webkit-scrollbar-thumb {
+      background: #30363d;
+      border-radius: 4px;
+    }
+    .github-i18n-config-content::-webkit-scrollbar-thumb:hover {
+      background: #484f58;
+    }
+  `;
+}
+// 配置分组与配置项样式
+function getConfigItemStyles() {
+  return `
+    /* ========== 配置分组 ========== */
+    .github-i18n-config-section {
+      background-color: #0d1117;
+      border: 1px solid #21262d;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .github-i18n-config-section h4 {
+      margin: 0 0 12px 0;
+      font-size: 15px;
+      font-weight: 600;
+      color: #e6edf3;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    /* ========== 配置项行 ========== */
+    .github-i18n-config-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px dashed #21262d;
+    }
+    .github-i18n-config-item:last-child {
+      border-bottom: none;
+    }
+    .github-i18n-config-label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      font-size: 14px;
+      color: #e6edf3;
+      gap: 8px;
+      flex: 1;
+    }
+    .github-i18n-config-label input[type="checkbox"] {
+      margin: 0;
+      accent-color: #2ea44f;
+      width: 16px;
+      height: 16px;
+    }
+    /* ========== 配置项提示文字 ========== */
+    .github-i18n-config-hint {
+      font-size: 12px;
+      color: #6e7681;
+      margin-top: 2px;
+    }
+  `;
+}
+// 面板底部按钮样式
+function getFooterStyles() {
+  return `
+    /* ========== 面板底部 ========== */
+    .github-i18n-config-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background-color: #0d1117;
+      border-top: 1px solid #21262d;
+    }
+    .github-i18n-config-footer .github-i18n-config-footer-right {
+      display: flex;
+      gap: 8px;
+    }
+    .github-i18n-config-footer button {
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.12s cubic-bezier(0.22, 1, 0.36, 1);
+      font-family: inherit;
+    }
+    .github-i18n-config-reset {
+      background-color: transparent;
+      color: #8b949e;
+      border-color: transparent;
+    }
+    .github-i18n-config-reset:hover {
+      background-color: #21262d;
+      color: #e6edf3;
+    }
+    .github-i18n-config-cancel {
+      background-color: transparent;
+      color: #8b949e;
+      border-color: transparent;
+    }
+    .github-i18n-config-cancel:hover {
+      background-color: #21262d;
+      color: #e6edf3;
+    }
+    .github-i18n-config-save {
+      background-color: #2ea44f;
+      color: #ffffff;
+      border-color: rgba(240, 246, 252, 0.1);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 1px 2px rgba(0, 0, 0, 0.25);
+    }
+    .github-i18n-config-save:hover {
+      background-color: #2c974b;
+    }
+    .github-i18n-config-save:active {
+      background-color: #298e46;
+      transform: translateY(1px);
+    }
+  `;
+}
+// 性能监控网格与操作按钮样式
+function getPerformanceAndActionStyles() {
+  return `
+    /* ========== 性能监控网格 ========== */
+    .github-i18n-perf-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .github-i18n-perf-stat {
+      background-color: #010409;
+      border: 1px solid #21262d;
+      border-radius: 6px;
+      padding: 8px 10px;
+      text-align: left;
+    }
+    .github-i18n-perf-stat .k {
+      font-family: "JetBrains Mono", "SF Mono", SFMono-Regular, Menlo, Consolas,
+        "Courier New", monospace;
+      font-size: 11px;
+      color: #6e7681;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .github-i18n-perf-stat .v {
+      font-size: 20px;
+      font-weight: 600;
+      color: #3fb950;
+      margin-top: 4px;
+    }
+    /* ========== 高级统计区 ========== */
+    .github-i18n-advanced-stats {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed #21262d;
+    }
+    /* ========== 操作按钮区 ========== */
+    .github-i18n-config-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed #21262d;
+    }
+    .github-i18n-config-actions button {
+      flex: 1;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid #30363d;
+      background-color: #161b22;
+      color: #e6edf3;
+      transition: all 0.12s cubic-bezier(0.22, 1, 0.36, 1);
+      font-family: inherit;
+    }
+    .github-i18n-config-actions button:hover {
+      background-color: #21262d;
+      border-color: #484f58;
+    }
+  `;
+}
+// 浮动按钮样式（对齐 prototype.md 规范）
+function getFloatingButtonStyles() {
+  return `
+    /* ========== 浮动设置按钮 ========== */
+    .github-i18n-toggle-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background-color: #2ea44f !important;
+      color: #ffffff !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      border-radius: 50% !important;
+      width: 56px !important;
+      height: 56px !important;
+      font-size: 22px !important;
+      cursor: pointer !important;
+      box-shadow: 0 6px 18px rgba(46, 160, 67, 0.22), 0 2px 6px rgba(0, 0, 0, 0.35) !important;
+      z-index: 2147483000 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.2s cubic-bezier(0.22, 1, 0.36, 1) !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+    }
+    .github-i18n-toggle-btn:hover {
+      background-color: #2c974b !important;
+      transform: translateY(-2px) scale(1.05) !important;
+      box-shadow: 0 10px 28px rgba(46, 160, 67, 0.3),
+        0 4px 12px rgba(0, 0, 0, 0.35) !important;
+    }
+    .github-i18n-toggle-btn:active {
+      transform: translateY(1px) scale(0.98) !important;
+    }
+    /* ========== 浮动设置按钮（对齐 prototype.md 规范） ========== */
+    .github-i18n-floating-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background-color: #161b22;
+      border: 1px solid #30363d;
+      color: #e6edf3;
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+      z-index: 2147483000;
+      transition: transform 0.15s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.15s ease;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: inherit;
+    }
+    .github-i18n-floating-btn:hover {
+      background-color: #30363d;
+      transform: scale(1.1);
+    }
+    .github-i18n-floating-btn:active {
+      transform: scale(0.98);
+    }
+  `;
+}
+/**
+ * 获取配置界面的完整样式
+ * @returns {string} CSS样式字符串
+ */
+function getConfigUIStyles() {
+  return [
+    getPanelContainerStyles(),
+    getHeaderStyles(),
+    getContentAreaStyles(),
+    getConfigItemStyles(),
+    getFooterStyles(),
+    getPerformanceAndActionStyles(),
+    getFloatingButtonStyles(),
+  ].join('\n');
+}
+/**
+ * 将样式添加到页面
+ */
+function addConfigUIStyles() {
+  const style = document.createElement('style');
+  style.textContent = getConfigUIStyles();
+  document.head.appendChild(style);
+}
+/**
+ * GitHub 中文翻译性能监控组件
+ * @file performanceMonitor.js
+ * @version 1.9.21
+ * @date 2026-07-03
+ * @author Sut
+ * @description 性能监控区域组件
+ */
+/**
+ * 创建性能监控区域
+ * @returns {HTMLElement} 性能监控区域元素
+ */
+function createPerformanceMonitoringSection() {
+  const section = document.createElement('div');
+  section.className = 'github-i18n-config-section';
+  const sectionTitle = document.createElement('h4');
+  // 使用安全的 DOM 操作构建标题，避免 innerHTML 引入 XSS 风险
+  const iconSpan = document.createElement('span');
+  iconSpan.style.color = '#d29922';
+  iconSpan.textContent = '📊';
+  sectionTitle.appendChild(iconSpan);
+  sectionTitle.appendChild(document.createTextNode(' 性能监控'));
+  section.appendChild(sectionTitle);
+  const perfGrid = document.createElement('div');
+  perfGrid.className = 'github-i18n-perf-grid';
+  perfGrid.id = 'github-i18n-performance-stats';
+  const stats = [
+    { key: 'duration', label: '总耗时', unit: 'ms', id: 'github-i18n-stat-duration' },
+    { key: 'elements', label: '翻译项', unit: '', id: 'github-i18n-stat-elements' },
+    { key: 'cacheRate', label: '命中率', unit: '%', id: 'github-i18n-stat-cache-rate' },
+  ];
+  stats.forEach((stat) => {
+    const statDiv = document.createElement('div');
+    statDiv.className = 'github-i18n-perf-stat';
+    const k = document.createElement('div');
+    k.className = 'k';
+    k.textContent = stat.label;
+    const v = document.createElement('div');
+    v.className = 'v';
+    v.id = stat.id;
+    v.textContent = '-';
+    statDiv.appendChild(k);
+    statDiv.appendChild(v);
+    perfGrid.appendChild(statDiv);
+  });
+  section.appendChild(perfGrid);
+  const advancedStatsDiv = document.createElement('div');
+  advancedStatsDiv.className = 'github-i18n-advanced-stats';
+  const advancedStats = [
+    { label: '缓存命中:', id: 'github-i18n-stat-cache-hits' },
+    { label: '缓存未命中:', id: 'github-i18n-stat-cache-misses' },
+    { label: 'DOM操作:', id: 'github-i18n-stat-dom' },
+    { label: '网络请求:', id: 'github-i18n-stat-network' },
+    { label: '批处理次数:', id: 'github-i18n-stat-batches' },
+  ];
+  advancedStats.forEach((stat) => {
+    const itemDiv = document.createElement('div');
+    itemDiv.className = 'github-i18n-config-item';
+    const label = document.createElement('span');
+    label.className = 'github-i18n-config-label';
+    label.textContent = stat.label;
+    const value = document.createElement('span');
+    value.id = stat.id;
+    value.style.fontFamily = '"JetBrains Mono", "SF Mono", SFMono-Regular, Menlo, Consolas, "Courier New", monospace';
+    value.style.color = '#8b949e';
+    value.textContent = '-';
+    itemDiv.appendChild(label);
+    itemDiv.appendChild(value);
+    advancedStatsDiv.appendChild(itemDiv);
+  });
+  section.appendChild(advancedStatsDiv);
+  const actionsDiv = document.createElement('div');
+  actionsDiv.className = 'github-i18n-config-actions';
+  const refreshBtn = document.createElement('button');
+  refreshBtn.id = 'github-i18n-refresh-stats';
+  refreshBtn.textContent = '刷新性能数据';
+  const exportBtn = document.createElement('button');
+  exportBtn.id = 'github-i18n-export-stats';
+  exportBtn.textContent = '导出性能数据';
+  actionsDiv.appendChild(refreshBtn);
+  actionsDiv.appendChild(exportBtn);
+  section.appendChild(actionsDiv);
+  return section;
+}
+/**
+ * 更新性能统计数据显示
+ */
+function updatePerformanceStats() {
+  // 直接通过模块引用获取 translationCore，避免依赖 window 全局变量
+  // （CONFIG.debugMode 为 false 时 main.js 不会将 translationCore 挂到 window）
+  if (translationCore.isPageUnloading) return;
+  if (translationCore && typeof translationCore.getPerformanceStats === 'function') {
+    const stats = translationCore.getPerformanceStats();
+    const durationEl = document.getElementById('github-i18n-stat-duration');
+    if (durationEl) durationEl.textContent = `${stats.totalDuration} ms`;
+    const elementsEl = document.getElementById('github-i18n-stat-elements');
+    if (elementsEl) elementsEl.textContent = stats.elementsProcessed;
+    const textsEl = document.getElementById('github-i18n-stat-texts');
+    if (textsEl) textsEl.textContent = stats.textsTranslated;
+    const cacheRateEl = document.getElementById('github-i18n-stat-cache-rate');
+    if (cacheRateEl) cacheRateEl.textContent = `${stats.cacheHitRate}%`;
+    const cacheHitsEl = document.getElementById('github-i18n-stat-cache-hits');
+    if (cacheHitsEl) cacheHitsEl.textContent = stats.cacheHits;
+    const cacheMissesEl = document.getElementById('github-i18n-stat-cache-misses');
+    if (cacheMissesEl) cacheMissesEl.textContent = stats.cacheMisses;
+    const domOpsEl = document.getElementById('github-i18n-stat-dom');
+    if (domOpsEl) domOpsEl.textContent = stats.domOperations;
+    const networkEl = document.getElementById('github-i18n-stat-network');
+    if (networkEl) networkEl.textContent = stats.networkRequests;
+    const batchesEl = document.getElementById('github-i18n-stat-batches');
+    if (batchesEl) batchesEl.textContent = stats.batchProcessings;
+  }
+}
+/**
+ * 导出性能数据
+ * @returns {Object} 性能数据对象
+ */
+function exportPerformanceStats() {
+  if (translationCore && typeof translationCore.getPerformanceStats === 'function') {
+    const stats = translationCore.getPerformanceStats();
+    const exportData = {
+      timestamp: new Date().toISOString(),
+      version: VERSION,
+      ...stats,
+    };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `github-i18n-performance-${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    return exportData;
+  }
+  return null;
+}
+/**
+ * GitHub 中文翻译配置面板渲染模块
+ * @file configPanelRenderer.js
+ * @version 1.9.21
+ * @date 2026-07-03
+ * @author Sut
+ * @description 负责渲染配置面板的 UI 结构（容器、头部、内容、底部、配置项）
+ */
+/** 创建配置面板整体 UI 结构，读写 instance.container 状态 */
+function createConfigUI(instance) {
+  if (instance.container) return;
+  instance.container = document.createElement('div');
+  instance.container.className = 'github-i18n-config-container';
+  const configPanel = document.createElement('div');
+  configPanel.className = 'github-i18n-config-panel';
+  const header = createConfigHeader();
+  const content = createConfigContent(instance);
+  const footer = createConfigFooter();
+  configPanel.appendChild(header);
+  configPanel.appendChild(content);
+  configPanel.appendChild(footer);
+  instance.container.appendChild(configPanel);
+  addConfigUIStyles();
+  instance.addEventListeners();
+}
+/** 创建面板头部（标题 + 版本徽章 + 关闭按钮） */
+function createConfigHeader() {
+  const header = document.createElement('div');
+  header.className = 'github-i18n-config-header';
+  const title = document.createElement('h3');
+  title.textContent = 'GitHub 中文翻译';
+  const versionBadge = document.createElement('span');
+  versionBadge.style.fontFamily = '"JetBrains Mono", "SF Mono", SFMono-Regular, Menlo, Consolas, "Courier New", monospace';
+  versionBadge.style.fontSize = '11px';
+  versionBadge.style.color = '#6e7681';
+  versionBadge.style.padding = '2px 8px';
+  versionBadge.style.borderRadius = '4px';
+  versionBadge.style.background = '#010409';
+  versionBadge.style.border = '1px solid #21262d';
+  versionBadge.textContent = `v${VERSION}`;
+  const headerLeft = document.createElement('div');
+  headerLeft.style.display = 'flex';
+  headerLeft.style.alignItems = 'center';
+  headerLeft.style.gap = '10px';
+  headerLeft.appendChild(title);
+  headerLeft.appendChild(versionBadge);
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'github-i18n-config-close';
+  closeBtn.textContent = '×';
+  header.appendChild(headerLeft);
+  header.appendChild(closeBtn);
+  return header;
+}
+/** 创建面板内容区（基本/更新/性能/监控分区），读取 instance.config */
+function createConfigContent(instance) {
+  const content = document.createElement('div');
+  content.className = 'github-i18n-config-content';
+  const basicSection = createConfigSection('基本设置', [
+    {
+      type: 'checkbox',
+      id: 'github-i18n-debug-mode',
+      label: '启用调试模式',
+      checked: instance.config.debugMode,
+    },
+    {
+      type: 'checkbox',
+      id: 'github-i18n-enable-partial-match',
+      label: '启用部分匹配',
+      checked: instance.config.performance.enablePartialMatch,
+    },
+  ]);
+  const updateSection = createConfigSection('更新设置', [
+    {
+      type: 'checkbox',
+      id: 'github-i18n-auto-update',
+      label: '自动检查更新',
+      checked: instance.config.updateCheck.enabled,
+    },
+  ]);
+  const performanceSection = createConfigSection('性能设置', [
+    {
+      type: 'checkbox',
+      id: 'github-i18n-translation-cache',
+      label: '启用翻译缓存',
+      checked: instance.config.performance.enableTranslationCache,
+    },
+    {
+      type: 'checkbox',
+      id: 'github-i18n-virtual-dom',
+      label: '启用虚拟DOM优化',
+      checked: instance.config.performance.enableVirtualDom,
+    },
+  ]);
+  const monitoringSection = createPerformanceMonitoringSection();
+  content.appendChild(basicSection);
+  content.appendChild(updateSection);
+  content.appendChild(performanceSection);
+  content.appendChild(monitoringSection);
+  return content;
+}
+/** 创建面板底部（重置/取消/保存按钮） */
+function createConfigFooter() {
+  const footer = document.createElement('div');
+  footer.className = 'github-i18n-config-footer';
+  const resetBtn = document.createElement('button');
+  resetBtn.className = 'github-i18n-config-reset';
+  resetBtn.textContent = '重置默认';
+  const footerRight = document.createElement('div');
+  footerRight.className = 'github-i18n-config-footer-right';
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'github-i18n-config-cancel';
+  cancelBtn.textContent = '取消';
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'github-i18n-config-save';
+  saveBtn.textContent = '保存配置';
+  footerRight.appendChild(cancelBtn);
+  footerRight.appendChild(saveBtn);
+  footer.appendChild(resetBtn);
+  footer.appendChild(footerRight);
+  return footer;
+}
+/** 创建单个配置分区（标题 + 多个配置项） */
+function createConfigSection(title, items) {
+  const section = document.createElement('div');
+  section.className = 'github-i18n-config-section';
+  const sectionTitle = document.createElement('h4');
+  sectionTitle.textContent = title;
+  section.appendChild(sectionTitle);
+  items.forEach((item) => {
+    const itemDiv = document.createElement('div');
+    itemDiv.className = 'github-i18n-config-item';
+    const label = document.createElement('label');
+    label.className = 'github-i18n-config-label';
+    const input = document.createElement('input');
+    input.type = item.type;
+    input.id = item.id;
+    if (item.checked !== undefined) {
+      input.checked = item.checked;
+    }
+    const textNode = document.createTextNode(item.label);
+    label.appendChild(input);
+    label.appendChild(textNode);
+    itemDiv.appendChild(label);
+    section.appendChild(itemDiv);
+  });
+  return section;
+}
+/**
+ * GitHub 中文翻译配置管理模块
+ * @file configManager.js
+ * @version 1.9.21
+ * @date 2026-07-03
+ * @author Sut
+ * @description 负责用户配置的加载、保存、合并与重置逻辑
+ */
+// 配置存储键名
+const CONFIG_STORAGE_KEY = 'github-i18n-config';
+/** 从 localStorage 加载用户设置（带混淆解码，兼容旧格式） */
+function loadUserSettings() {
+  try {
+    const saved = localStorage.getItem(CONFIG_STORAGE_KEY);
+    if (!saved) return {};
+    // 尝试解码混淆的数据
+    const decoded = utils.deobfuscateData(saved);
+    if (decoded) {
+      return JSON.parse(decoded);
+    }
+    // 如果解码失败，尝试直接解析（兼容旧格式）
+    try {
+      return JSON.parse(saved);
+    } catch {
+      return {};
+    }
+  } catch (error) {
+    if (CONFIG.debugMode) {
+      console.error('[GitHub 中文翻译] 加载用户配置失败:', utils.sanitizeErrorMessage(error));
+    }
+    return {};
+  }
+}
+/** 保存用户设置到 localStorage（混淆存储）并触发配置合并 */
+function saveUserSettings(instance, settings) {
+  try {
+    const jsonData = JSON.stringify(settings);
+    // 混淆存储配置数据，防止恶意脚本或扩展读取
+    const obfuscatedData = utils.obfuscateData(jsonData);
+    localStorage.setItem(CONFIG_STORAGE_KEY, obfuscatedData);
+    instance.userConfig = { ...settings };
+    instance.mergeUserConfig();
+  } catch (error) {
+    if (CONFIG.debugMode) {
+      console.error('[GitHub 中文翻译] 保存用户配置失败:', utils.sanitizeErrorMessage(error));
+    }
+  }
+}
+/** 将用户配置深度合并到全局 CONFIG */
+function mergeUserConfig(instance) {
+  const merge = (target, source) => {
+    for (const key in source) {
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
+        if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+          if (!target[key]) target[key] = {};
+          merge(target[key], source[key]);
+        } else {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  merge(CONFIG, instance.userConfig);
+}
+/** 处理保存按钮点击：收集表单值并保存 */
+function handleSave(instance) {
+  const newSettings = {
+    debugMode: document.getElementById('github-i18n-debug-mode')?.checked || false,
+    enablePartialMatch:
+      document.getElementById('github-i18n-enable-partial-match')?.checked || false,
+    autoUpdate: document.getElementById('github-i18n-auto-update')?.checked || false,
+    enableTranslationCache:
+      document.getElementById('github-i18n-translation-cache')?.checked || false,
+    enableVirtualDom: document.getElementById('github-i18n-virtual-dom')?.checked || false,
+  };
+  instance.saveUserSettings(newSettings);
+  instance.hide();
+}
+/** 处理重置按钮点击：清除存储并重置状态 */
+function handleReset(instance) {
+  localStorage.removeItem(CONFIG_STORAGE_KEY);
+  instance.userConfig = {};
+  instance.settings = {};
+  instance.hide();
+}
+/**
+ * GitHub 中文翻译配置面板事件模块
+ * @file configPanelEvents.js
+ * @version 1.9.21
+ * @date 2026-07-03
+ * @author Sut
+ * @description 负责配置面板的事件绑定与清理
+ */
+/** 为配置面板绑定关闭/保存/重置/取消/刷新/导出/容器点击事件 */
+function addConfigPanelEventListeners(instance) {
+  if (!instance.container) return;
+  const closeBtn = instance.container.querySelector('.github-i18n-config-close');
+  const saveBtn = instance.container.querySelector('.github-i18n-config-save');
+  const resetBtn = instance.container.querySelector('.github-i18n-config-reset');
+  const cancelBtn = instance.container.querySelector('.github-i18n-config-cancel');
+  const refreshBtn = instance.container.querySelector('#github-i18n-refresh-stats');
+  const exportBtn = instance.container.querySelector('#github-i18n-export-stats');
+  const handleClose = () => instance.hide();
+  const handleSaveClick = () => instance.handleSave();
+  const handleResetClick = () => instance.handleReset();
+  const handleRefresh = () => updatePerformanceStats();
+  const handleExport = () => exportPerformanceStats();
+  const handleContainerClick = (e) => {
+    if (e.target === instance.container) {
+      instance.hide();
+    }
+  };
+  closeBtn?.addEventListener('click', handleClose);
+  saveBtn?.addEventListener('click', handleSaveClick);
+  resetBtn?.addEventListener('click', handleResetClick);
+  cancelBtn?.addEventListener('click', handleClose);
+  refreshBtn?.addEventListener('click', handleRefresh);
+  exportBtn?.addEventListener('click', handleExport);
+  instance.container?.addEventListener('click', handleContainerClick);
+  instance.eventListeners.push(
+    { element: closeBtn, event: 'click', handler: handleClose },
+    { element: saveBtn, event: 'click', handler: handleSaveClick },
+    { element: resetBtn, event: 'click', handler: handleResetClick },
+    { element: cancelBtn, event: 'click', handler: handleClose },
+    { element: refreshBtn, event: 'click', handler: handleRefresh },
+    { element: exportBtn, event: 'click', handler: handleExport },
+    { element: instance.container, event: 'click', handler: handleContainerClick },
+  );
+}
+/** 清理已绑定的事件监听器 */
+function cleanupConfigPanelEventListeners(instance) {
+  instance.eventListeners.forEach(({ element, event, handler }) => {
+    element?.removeEventListener(event, handler);
+  });
+  instance.eventListeners = [];
+}
+/**
  * GitHub 中文翻译配置界面模块
  * @file configUI.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 提供用户友好的配置界面，允许用户调整插件参数
  */
-import {
-  createPerformanceMonitoringSection,
-  updatePerformanceStats,
-  exportPerformanceStats,
-} from './components/performanceMonitor.js';
-// 配置存储键名
-const CONFIG_STORAGE_KEY = 'github-i18n-config';
 class ConfigUI {
   constructor() {
     this.config = CONFIG;
     this.userConfig = {};
     this.isOpen = false;
     this.container = null;
+    this.floatingButton = null;
     this.settings = this.loadUserSettings();
     this.isPageUnloading = false;
     this.eventListeners = [];
+    this.initialized = false;
     this.setupPageUnloadHandler();
   }
-  loadUserSettings() {
-    try {
-      const saved = localStorage.getItem(CONFIG_STORAGE_KEY);
-      if (!saved) return {};
-      // 尝试解码混淆的数据
-      const decoded = utils.deobfuscateData(saved);
-      if (decoded) {
-        return JSON.parse(decoded);
-      }
-      // 如果解码失败，尝试直接解析（兼容旧格式）
-      try {
-        return JSON.parse(saved);
-      } catch {
-        return {};
-      }
-    } catch (error) {
-      if (CONFIG.debugMode) {
-        console.error('[GitHub 中文翻译] 加载用户配置失败:', utils.sanitizeErrorMessage(error));
-      }
-      return {};
+  /**
+   * 初始化配置界面
+   * 合并用户配置、创建浮动按钮、注册 Tampermonkey 菜单命令
+   */
+  init() {
+    if (this.initialized) return;
+    this.mergeUserConfig();
+    this.createFloatingButton();
+    this.registerMenuCommands();
+    this.initialized = true;
+    if (CONFIG.debugMode) {
+      console.log('[GitHub 中文翻译] 配置界面已初始化');
     }
   }
-  setupPageUnloadHandler() {
-    const handlePageUnload = () => {
-      this.isPageUnloading = true;
-      this.cleanup();
-    };
-    window.addEventListener('beforeunload', handlePageUnload, { once: true });
-    window.addEventListener('unload', handlePageUnload, { once: true });
+  /**
+   * 创建右下角浮动设置按钮（对齐 prototype.md 规范）
+   */
+  createFloatingButton() {
+    if (this.floatingButton) return;
+    const btn = document.createElement('button');
+    btn.className = 'github-i18n-floating-btn';
+    btn.type = 'button';
+    btn.setAttribute('aria-label', 'GitHub 中文翻译设置');
+    btn.textContent = '⚙';
+    btn.addEventListener('click', () => {
+      this.toggle();
+    });
+    addConfigUIStyles();
+    if (document.body) {
+      document.body.appendChild(btn);
+    } else {
+      document.addEventListener('DOMContentLoaded', () => {
+        document.body.appendChild(btn);
+      });
+    }
+    this.floatingButton = btn;
   }
-  cleanup() {
-    this.hide();
-    this.cleanupEventListeners();
-    this.container = null;
+  /**
+   * 注册 Tampermonkey 菜单命令（对齐 prototype.md 规范）
+   */
+  registerMenuCommands() {
+    if (typeof GM_registerMenuCommand === 'function') {
+      try {
+        GM_registerMenuCommand('⚙ 打开 GitHub 中文翻译设置', () => this.show());
+        GM_registerMenuCommand('🔄 立即翻译当前页面', () => {
+          if (typeof window !== 'undefined' && window.translationCore) {
+            window.translationCore.translate();
+          }
+        });
+      } catch (_error) {
+        // 非 GM 环境下静默忽略
+      }
+    }
+  }
+  loadUserSettings() {
+    return loadUserSettings();
   }
   saveUserSettings(settings) {
-    try {
-      const jsonData = JSON.stringify(settings);
-      // 混淆存储配置数据，防止恶意脚本或扩展读取
-      const obfuscatedData = utils.obfuscateData(jsonData);
-      localStorage.setItem(CONFIG_STORAGE_KEY, obfuscatedData);
-      this.userConfig = { ...settings };
-      this.mergeUserConfig();
-    } catch (error) {
-      if (CONFIG.debugMode) {
-        console.error('[GitHub 中文翻译] 保存用户配置失败:', utils.sanitizeErrorMessage(error));
-      }
-    }
+    saveUserSettings(this, settings);
   }
   mergeUserConfig() {
-    const merge = (target, source) => {
-      for (const key in source) {
-        if (Object.prototype.hasOwnProperty.call(source, key)) {
-          if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-            if (!target[key]) target[key] = {};
-            merge(target[key], source[key]);
-          } else {
-            target[key] = source[key];
-          }
-        }
-      }
-      return target;
-    };
-    merge(CONFIG, this.userConfig);
+    mergeUserConfig(this);
   }
   createUI() {
-    if (this.container) return;
-    this.container = document.createElement('div');
-    this.container.className = 'github-i18n-config-container';
-    const configPanel = document.createElement('div');
-    configPanel.className = 'github-i18n-config-panel';
-    const header = this.createHeader();
-    const content = this.createContent();
-    const footer = this.createFooter();
-    configPanel.appendChild(header);
-    configPanel.appendChild(content);
-    configPanel.appendChild(footer);
-    this.container.appendChild(configPanel);
-    addConfigUIStyles();
-    this.addEventListeners();
+    createConfigUI(this);
   }
   createHeader() {
-    const header = document.createElement('div');
-    header.className = 'github-i18n-config-header';
-    const title = document.createElement('h3');
-    title.textContent = 'GitHub 中文翻译';
-    const versionBadge = document.createElement('span');
-    versionBadge.style.fontFamily = '"JetBrains Mono", "SF Mono", SFMono-Regular, Menlo, Consolas, "Courier New", monospace';
-    versionBadge.style.fontSize = '11px';
-    versionBadge.style.color = '#6e7681';
-    versionBadge.style.padding = '2px 8px';
-    versionBadge.style.borderRadius = '4px';
-    versionBadge.style.background = '#010409';
-    versionBadge.style.border = '1px solid #21262d';
-    versionBadge.textContent = `v${VERSION}`;
-    const headerLeft = document.createElement('div');
-    headerLeft.style.display = 'flex';
-    headerLeft.style.alignItems = 'center';
-    headerLeft.style.gap = '10px';
-    headerLeft.appendChild(title);
-    headerLeft.appendChild(versionBadge);
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'github-i18n-config-close';
-    closeBtn.textContent = '×';
-    header.appendChild(headerLeft);
-    header.appendChild(closeBtn);
-    return header;
+    return createConfigHeader();
   }
   createContent() {
-    const content = document.createElement('div');
-    content.className = 'github-i18n-config-content';
-    const basicSection = this.createConfigSection('基本设置', [
-      {
-        type: 'checkbox',
-        id: 'github-i18n-debug-mode',
-        label: '启用调试模式',
-        checked: this.config.debugMode,
-      },
-      {
-        type: 'checkbox',
-        id: 'github-i18n-enable-partial-match',
-        label: '启用部分匹配',
-        checked: this.config.performance.enablePartialMatch,
-      },
-    ]);
-    const updateSection = this.createConfigSection('更新设置', [
-      {
-        type: 'checkbox',
-        id: 'github-i18n-auto-update',
-        label: '自动检查更新',
-        checked: this.config.updateCheck.enabled,
-      },
-    ]);
-    const performanceSection = this.createConfigSection('性能设置', [
-      {
-        type: 'checkbox',
-        id: 'github-i18n-translation-cache',
-        label: '启用翻译缓存',
-        checked: this.config.performance.enableTranslationCache,
-      },
-      {
-        type: 'checkbox',
-        id: 'github-i18n-virtual-dom',
-        label: '启用虚拟DOM优化',
-        checked: this.config.performance.enableVirtualDom,
-      },
-    ]);
-    const monitoringSection = createPerformanceMonitoringSection();
-    content.appendChild(basicSection);
-    content.appendChild(updateSection);
-    content.appendChild(performanceSection);
-    content.appendChild(monitoringSection);
-    return content;
+    return createConfigContent(this);
   }
   createFooter() {
-    const footer = document.createElement('div');
-    footer.className = 'github-i18n-config-footer';
-    const resetBtn = document.createElement('button');
-    resetBtn.className = 'github-i18n-config-reset';
-    resetBtn.textContent = '重置默认';
-    const footerRight = document.createElement('div');
-    footerRight.className = 'github-i18n-config-footer-right';
-    const cancelBtn = document.createElement('button');
-    cancelBtn.className = 'github-i18n-config-cancel';
-    cancelBtn.textContent = '取消';
-    const saveBtn = document.createElement('button');
-    saveBtn.className = 'github-i18n-config-save';
-    saveBtn.textContent = '保存配置';
-    footerRight.appendChild(cancelBtn);
-    footerRight.appendChild(saveBtn);
-    footer.appendChild(resetBtn);
-    footer.appendChild(footerRight);
-    return footer;
+    return createConfigFooter();
   }
   createConfigSection(title, items) {
-    const section = document.createElement('div');
-    section.className = 'github-i18n-config-section';
-    const sectionTitle = document.createElement('h4');
-    sectionTitle.textContent = title;
-    section.appendChild(sectionTitle);
-    items.forEach((item) => {
-      const itemDiv = document.createElement('div');
-      itemDiv.className = 'github-i18n-config-item';
-      const label = document.createElement('label');
-      label.className = 'github-i18n-config-label';
-      const input = document.createElement('input');
-      input.type = item.type;
-      input.id = item.id;
-      if (item.checked !== undefined) {
-        input.checked = item.checked;
-      }
-      const textNode = document.createTextNode(item.label);
-      label.appendChild(input);
-      label.appendChild(textNode);
-      itemDiv.appendChild(label);
-      section.appendChild(itemDiv);
-    });
-    return section;
+    return createConfigSection(title, items);
+  }
+  addEventListeners() {
+    addConfigPanelEventListeners(this);
+  }
+  cleanupEventListeners() {
+    cleanupConfigPanelEventListeners(this);
   }
   show() {
     if (!this.container) {
@@ -4014,304 +4789,52 @@ class ConfigUI {
       this.show();
     }
   }
-  addEventListeners() {
-    if (!this.container) return;
-    const closeBtn = this.container.querySelector('.github-i18n-config-close');
-    const saveBtn = this.container.querySelector('.github-i18n-config-save');
-    const resetBtn = this.container.querySelector('.github-i18n-config-reset');
-    const cancelBtn = this.container.querySelector('.github-i18n-config-cancel');
-    const refreshBtn = this.container.querySelector('#github-i18n-refresh-stats');
-    const exportBtn = this.container.querySelector('#github-i18n-export-stats');
-    const handleClose = () => this.hide();
-    const handleSave = () => this.handleSave();
-    const handleReset = () => this.handleReset();
-    const handleRefresh = () => updatePerformanceStats();
-    const handleExport = () => exportPerformanceStats();
-    const handleContainerClick = (e) => {
-      if (e.target === this.container) {
-        this.hide();
-      }
+  setupPageUnloadHandler() {
+    const handlePageUnload = () => {
+      this.isPageUnloading = true;
+      this.cleanup();
     };
-    closeBtn?.addEventListener('click', handleClose);
-    saveBtn?.addEventListener('click', handleSave);
-    resetBtn?.addEventListener('click', handleReset);
-    cancelBtn?.addEventListener('click', handleClose);
-    refreshBtn?.addEventListener('click', handleRefresh);
-    exportBtn?.addEventListener('click', handleExport);
-    this.container?.addEventListener('click', handleContainerClick);
-    this.eventListeners.push(
-      { element: closeBtn, event: 'click', handler: handleClose },
-      { element: saveBtn, event: 'click', handler: handleSave },
-      { element: resetBtn, event: 'click', handler: handleReset },
-      { element: cancelBtn, event: 'click', handler: handleClose },
-      { element: refreshBtn, event: 'click', handler: handleRefresh },
-      { element: exportBtn, event: 'click', handler: handleExport },
-      { element: this.container, event: 'click', handler: handleContainerClick },
-    );
+    window.addEventListener('beforeunload', handlePageUnload, { once: true });
+    window.addEventListener('unload', handlePageUnload, { once: true });
   }
-  cleanupEventListeners() {
-    this.eventListeners.forEach(({ element, event, handler }) => {
-      element?.removeEventListener(event, handler);
-    });
-    this.eventListeners = [];
+  cleanup() {
+    this.hide();
+    this.cleanupEventListeners();
+    if (this.floatingButton && this.floatingButton.parentNode) {
+      this.floatingButton.parentNode.removeChild(this.floatingButton);
+    }
+    this.floatingButton = null;
+    this.container = null;
+    this.initialized = false;
   }
   handleSave() {
-    const newSettings = {
-      debugMode: document.getElementById('github-i18n-debug-mode')?.checked || false,
-      enablePartialMatch:
-        document.getElementById('github-i18n-enable-partial-match')?.checked || false,
-      autoUpdate: document.getElementById('github-i18n-auto-update')?.checked || false,
-      enableTranslationCache:
-        document.getElementById('github-i18n-translation-cache')?.checked || false,
-      enableVirtualDom: document.getElementById('github-i18n-virtual-dom')?.checked || false,
-    };
-    this.saveUserSettings(newSettings);
-    this.hide();
+    handleSave(this);
   }
   handleReset() {
-    localStorage.removeItem(CONFIG_STORAGE_KEY);
-    this.userConfig = {};
-    this.settings = {};
-    this.hide();
+    handleReset(this);
   }
 }
+// 创建单例实例，供 main.js 直接导入使用
+const configUI = new ConfigUI();
+configUI;
 /**
- * 版本更新检查模块
- * @file versionChecker.js
- * @version 1.9.20
- * @date 2026-06-10
+ * 更新通知 UI 模块
+ * @file updateNotification.js
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
- * @description 负责检查和处理脚本更新
+ * @description 负责渲染和隐藏脚本更新通知（安全 DOM 操作，不使用 innerHTML）
  */
-/**
- * 远程脚本的已知哈希值（用于完整性验证）
- * 在发布新版本时更新此值
- */
-const KNOWN_SCRIPT_HASHES = {
-  'https://github.com/Tanox/GitHub_i18n/raw/main/build/GitHub_i18n.user.js':
-    'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456',
-};
-/**
- * 版本检查器对象
- */
-const versionChecker = {
-  /**
-   * 检查版本更新
-   * 支持重试机制和更详细的错误处理
-   * @returns {Promise<boolean>} 检查完成的Promise，resolve为是否发现更新
-   */
-  async checkForUpdates() {
-    // 检查是否启用了更新检查
-    if (!CONFIG.updateCheck.enabled) {
-      if (CONFIG.debugMode) {
-        console.log('[GitHub 中文翻译] 已禁用更新检查');
-      }
-      return false;
-    }
-    // 检查是否达到检查间隔
-    const lastCheck = localStorage.getItem('githubZhLastUpdateCheck');
-    const now = Date.now();
-    const intervalMs = (CONFIG.updateCheck.intervalHours || 24) * 60 * 60 * 1000;
-    if (lastCheck && now - parseInt(lastCheck) < intervalMs) {
-      if (CONFIG.debugMode) {
-        console.log(
-          `[GitHub 中文翻译] 未达到更新检查间隔，跳过检查 (上次检查: ${new Date(parseInt(lastCheck)).toLocaleString()})`,
-        );
-      }
-      return false;
-    }
-    try {
-      // 记录本次检查时间
-      localStorage.setItem('githubZhLastUpdateCheck', now.toString());
-      // 使用带重试的获取方法
-      const scriptContent = await this.fetchWithRetry(CONFIG.updateCheck.scriptUrl);
-      // 提取远程版本号 - 支持多种格式
-      const remoteVersion = this.extractVersion(scriptContent);
-      if (!remoteVersion) {
-        throw new Error('无法从远程脚本提取有效的版本号');
-      }
-      if (CONFIG.debugMode) {
-        console.log(`[GitHub 中文翻译] 当前版本: ${CONFIG.version}, 远程版本: ${remoteVersion}`);
-      }
-      // 比较版本号
-      if (this.isNewerVersion(remoteVersion, CONFIG.version)) {
-        // 显示更新通知
-        this.showUpdateNotification(remoteVersion);
-        // 如果启用了自动更新版本号
-        if (CONFIG.updateCheck.autoUpdateVersion) {
-          this.updateVersionInStorage(remoteVersion);
-        }
-        // 记录版本历史
-        this.recordVersionHistory(remoteVersion);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      const sanitizedError = utils.sanitizeErrorMessage(error);
-      const errorMsg = `[GitHub 中文翻译] 检查更新时发生错误: ${sanitizedError}`;
-      if (CONFIG.debugMode) {
-        console.error(errorMsg);
-      }
-      // 记录错误日志
-      try {
-        localStorage.setItem(
-          'githubZhUpdateError',
-          JSON.stringify({
-            message: sanitizedError,
-            timestamp: now,
-          }),
-        );
-      } catch (_e) {
-        // 忽略存储错误
-      }
-      return false;
-    }
-  },
-  /**
-   * 带重试机制的网络请求
-   * @param {string} url - 请求URL
-   * @param {number} maxRetries - 最大重试次数
-   * @param {number} retryDelay - 重试间隔（毫秒）
-   * @returns {Promise<string>} 响应文本
-   */
-  async fetchWithRetry(url, maxRetries = 2, retryDelay = 1000) {
-    let lastError;
-    for (let attempt = 0; attempt <= maxRetries; attempt++) {
-      try {
-        if (CONFIG.debugMode && attempt > 0) {
-          console.log(`[GitHub 中文翻译] 重试更新检查 (${attempt}/${maxRetries})...`);
-        }
-        // 自定义超时控制
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8秒超时
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Cache-Control': 'no-cache',
-            Accept: 'text/javascript, text/plain, */*',
-          },
-          signal: controller.signal,
-          credentials: 'omit', // 不发送凭证信息
-        });
-        clearTimeout(timeoutId);
-        if (!response.ok) {
-          throw new Error(`HTTP错误! 状态码: ${response.status}`);
-        }
-        const scriptContent = await response.text();
-        // 验证脚本完整性（如果已知哈希值存在）
-        if (KNOWN_SCRIPT_HASHES[url]) {
-          const isValid = await this.verifyScriptIntegrity(scriptContent, url);
-          if (!isValid) {
-            if (CONFIG.debugMode) {
-              console.warn('[GitHub 中文翻译] 脚本完整性验证失败，可能存在安全风险');
-            }
-            // 不阻止更新，但记录警告
-          }
-        }
-        return scriptContent;
-      } catch (error) {
-        lastError = error;
-        // 如果是最后一次尝试，则抛出错误
-        if (attempt === maxRetries) {
-          throw error;
-        }
-        // 等待后重试
-        await utils.delay(retryDelay * Math.pow(2, attempt)); // 指数退避策略
-      }
-    }
-    throw lastError;
-  },
-  /**
-   * 验证脚本完整性
-   * @param {string} scriptContent - 脚本内容
-   * @param {string} url - 脚本URL
-   * @returns {Promise<boolean>} 验证是否通过
-   */
-  async verifyScriptIntegrity(scriptContent, url) {
-    try {
-      const expectedHash = KNOWN_SCRIPT_HASHES[url];
-      if (!expectedHash) {
-        return true; // 没有已知哈希，跳过验证
-      }
-      const actualHash = await utils.sha256Hash(scriptContent);
-      const isValid = actualHash === expectedHash;
-      if (CONFIG.debugMode) {
-        console.log(`[GitHub 中文翻译] 脚本完整性验证: ${isValid ? '通过' : '失败'}`);
-        if (!isValid) {
-          console.log(`[GitHub 中文翻译] 期望哈希: ${expectedHash.substring(0, 16)}...`);
-          console.log(`[GitHub 中文翻译] 实际哈希: ${actualHash.substring(0, 16)}...`);
-        }
-      }
-      return isValid;
-    } catch (error) {
-      if (CONFIG.debugMode) {
-        console.error('[GitHub 中文翻译] 脚本完整性验证出错:', utils.sanitizeErrorMessage(error));
-      }
-      return false;
-    }
-  },
-  /**
-   * 从脚本内容中提取版本号
-   * 支持多种版本号格式
-   * @param {string} content - 脚本内容
-   * @returns {string|null} 提取的版本号或null
-   */
-  extractVersion(content) {
-    // 尝试多种版本号格式
-    const patterns = [
-      // UserScript多行注释格式
-      /\/\*\s*@version\s+(\d+\.\d+\.\d+)\s*\*\//i,
-      // UserScript单行注释格式
-      /\/\/\s*@version\s+(\d+\.\d+\.\d+)/i,
-      // JavaScript注释格式
-      /\/\/\s*version\s*:\s*(\d+\.\d+\.\d+)/i,
-      // 变量赋值格式
-      /version\s*=\s*['"](\d+\.\d+\.\d+)['"]/i,
-      // 对象属性格式
-      /version:\s*['"](\d+\.\d+\.\d+)['"]/i,
-    ];
-    for (const pattern of patterns) {
-      const match = content.match(pattern);
-      if (match && match[1]) {
-        return match[1];
-      }
-    }
-    return null;
-  },
-  /**
-   * 比较版本号，判断是否有新版本
-   * @param {string} newVersion - 新版本号
-   * @param {string} currentVersion - 当前版本号
-   * @returns {boolean} 是否有新版本
-   */
-  isNewerVersion(newVersion, currentVersion) {
-    // 将版本号转换为数组进行比较
-    const newParts = newVersion.split('.').map(Number);
-    const currentParts = currentVersion.split('.').map(Number);
-    // 比较每个部分
-    for (let i = 0; i < Math.max(newParts.length, currentParts.length); i++) {
-      const newPart = newParts[i] || 0;
-      const currentPart = currentParts[i] || 0;
-      if (newPart > currentPart) {
-        return true;
-      } else if (newPart < currentPart) {
-        return false;
-      }
-    }
-    // 版本号相同
-    return false;
-  },
+const updateNotification = {
   /**
    * 显示更新通知
-   * 使用安全的DOM操作而不是innerHTML
    * @param {string} newVersion - 新版本号
    */
   showUpdateNotification(newVersion) {
     const notificationKey = 'githubZhUpdateNotificationDismissed';
     const notificationVersionKey = 'githubZhLastNotifiedVersion';
-    // 获取最后通知的版本
     const lastNotifiedVersion = localStorage.getItem(notificationVersionKey);
-    // 如果用户已经关闭过通知，或者已经通知过相同版本，则不显示
+    // 已关闭通知或已通知过相同版本，则不显示
     if (
       localStorage.getItem(notificationKey) === 'dismissed' ||
       lastNotifiedVersion === newVersion
@@ -4322,101 +4845,108 @@ const versionChecker = {
       return;
     }
     try {
-      // 创建通知元素 - 安全的DOM操作
-      const notification = document.createElement('div');
-      notification.className =
-        'fixed bottom-4 right-4 bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-lg z-50 max-w-md transform transition-all duration-300 translate-y-0 opacity-100';
-      // 生成唯一的ID
-      const notificationId = `github-zh-update-${Date.now()}`;
-      notification.id = notificationId;
-      // 创建flex容器
-      const flexContainer = document.createElement('div');
-      flexContainer.className = 'flex items-start';
-      notification.appendChild(flexContainer);
-      // 创建图标容器
-      const iconContainer = document.createElement('div');
-      iconContainer.className = 'flex-shrink-0 bg-blue-100 rounded-full p-2';
-      flexContainer.appendChild(iconContainer);
-      // 创建SVG图标
-      const svgIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      svgIcon.setAttribute('class', 'h-6 w-6 text-blue-600');
-      svgIcon.setAttribute('fill', 'none');
-      svgIcon.setAttribute('viewBox', '0 0 24 24');
-      svgIcon.setAttribute('stroke', 'currentColor');
-      iconContainer.appendChild(svgIcon);
-      // 创建SVG路径
-      const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      pathElement.setAttribute('stroke-linecap', 'round');
-      pathElement.setAttribute('stroke-linejoin', 'round');
-      pathElement.setAttribute('stroke-width', '2');
-      pathElement.setAttribute('d', 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z');
-      svgIcon.appendChild(pathElement);
-      // 创建内容容器
-      const contentContainer = document.createElement('div');
-      contentContainer.className = 'ml-3 flex-1';
-      flexContainer.appendChild(contentContainer);
-      // 创建标题
-      const titleElement = document.createElement('p');
-      titleElement.className = 'text-sm font-medium text-blue-800';
-      titleElement.textContent = 'GitHub 中文翻译脚本更新';
-      contentContainer.appendChild(titleElement);
-      // 创建消息文本 - 安全地设置文本内容
-      const messageElement = document.createElement('p');
-      messageElement.className = 'text-sm text-blue-700 mt-1';
-      messageElement.textContent = `发现新版本 ${newVersion}，建议更新以获得更好的翻译体验。`;
-      contentContainer.appendChild(messageElement);
-      // 创建按钮容器
-      const buttonsContainer = document.createElement('div');
-      buttonsContainer.className = 'mt-3 flex space-x-2';
-      contentContainer.appendChild(buttonsContainer);
-      // 创建更新按钮 - 安全地设置URL
-      const updateButton = document.createElement('a');
-      updateButton.id = `${notificationId}-update-btn`;
-      updateButton.href = CONFIG.updateCheck.scriptUrl || '#';
-      updateButton.target = '_blank';
-      updateButton.rel = 'noopener noreferrer';
-      updateButton.className =
-        'inline-flex items-center px-3 py-1.5 border border-blue-300 text-sm leading-4 font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 transition-colors';
-      updateButton.textContent = '立即更新';
-      buttonsContainer.appendChild(updateButton);
-      // 创建稍后按钮
-      const laterButton = document.createElement('button');
-      laterButton.id = `${notificationId}-later-btn`;
-      laterButton.className =
-        'inline-flex items-center px-3 py-1.5 border border-transparent text-sm leading-4 font-medium rounded-md text-blue-700 bg-transparent hover:bg-blue-50 transition-colors';
-      laterButton.textContent = '稍后';
-      laterButton.addEventListener('click', () => {
-        this.hideNotification(notification, false);
-      });
-      buttonsContainer.appendChild(laterButton);
-      // 创建不再提醒按钮
-      const dismissButton = document.createElement('button');
-      dismissButton.id = `${notificationId}-dismiss-btn`;
-      dismissButton.className =
-        'inline-flex items-center px-2 py-1 border border-transparent text-sm font-medium rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors';
-      dismissButton.textContent = '不再提醒';
-      dismissButton.addEventListener('click', () => {
-        this.hideNotification(notification, true);
-      });
-      buttonsContainer.appendChild(dismissButton);
-      // 添加到DOM
-      if (document.body) {
-        document.body.appendChild(notification);
-        // 记录本次通知的版本
-        localStorage.setItem(notificationVersionKey, newVersion);
-        // 自动隐藏（可选）
-        if (CONFIG.updateCheck.autoHideNotification !== false) {
-          setTimeout(() => {
-            this.hideNotification(notification, false);
-          }, 20000); // 20秒后自动隐藏
-        }
-        if (CONFIG.debugMode) {
-          console.log(`[GitHub 中文翻译] 显示更新通知: 版本 ${newVersion}`);
-        }
+      const notification = this.buildNotificationElement(newVersion, notificationId());
+      if (!document.body) {
+        return;
+      }
+      document.body.appendChild(notification);
+      localStorage.setItem(notificationVersionKey, newVersion);
+      if (CONFIG.updateCheck.autoHideNotification !== false) {
+        setTimeout(() => {
+          this.hideNotification(notification, false);
+        }, 20000);
+      }
+      if (CONFIG.debugMode) {
+        console.log(`[GitHub 中文翻译] 显示更新通知: 版本 ${newVersion}`);
       }
     } catch (error) {
       console.error('[GitHub 中文翻译] 创建更新通知失败:', error);
     }
+  },
+  // 构建通知元素（含图标、文案、按钮）
+  buildNotificationElement(newVersion, notificationId) {
+    const notification = document.createElement('div');
+    notification.className =
+      'fixed bottom-4 right-4 bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-lg z-50 max-w-md transform transition-all duration-300 translate-y-0 opacity-100';
+    notification.id = notificationId;
+    const flex = document.createElement('div');
+    flex.className = 'flex items-start';
+    notification.appendChild(flex);
+    flex.appendChild(this.buildIcon());
+    flex.appendChild(this.buildContent(newVersion, notificationId));
+    return notification;
+  },
+  // 构建图标容器与 SVG
+  buildIcon() {
+    const iconContainer = document.createElement('div');
+    iconContainer.className = 'flex-shrink-0 bg-blue-100 rounded-full p-2';
+    const svgIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svgIcon.setAttribute('class', 'h-6 w-6 text-blue-600');
+    svgIcon.setAttribute('fill', 'none');
+    svgIcon.setAttribute('viewBox', '0 0 24 24');
+    svgIcon.setAttribute('stroke', 'currentColor');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('stroke-linecap', 'round');
+    path.setAttribute('stroke-linejoin', 'round');
+    path.setAttribute('stroke-width', '2');
+    path.setAttribute('d', 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z');
+    svgIcon.appendChild(path);
+    iconContainer.appendChild(svgIcon);
+    return iconContainer;
+  },
+  // 构建文案与按钮区
+  buildContent(newVersion, notificationId) {
+    const container = document.createElement('div');
+    container.className = 'ml-3 flex-1';
+    const title = document.createElement('p');
+    title.className = 'text-sm font-medium text-blue-800';
+    title.textContent = 'GitHub 中文翻译脚本更新';
+    container.appendChild(title);
+    const message = document.createElement('p');
+    message.className = 'text-sm text-blue-700 mt-1';
+    message.textContent = `发现新版本 ${newVersion}，建议更新以获得更好的翻译体验。`;
+    container.appendChild(message);
+    const buttons = document.createElement('div');
+    buttons.className = 'mt-3 flex space-x-2';
+    buttons.appendChild(this.buildUpdateButton(notificationId));
+    buttons.appendChild(this.buildLaterButton());
+    buttons.appendChild(this.buildDismissButton());
+    container.appendChild(buttons);
+    return container;
+  },
+  // 构建立即更新按钮
+  buildUpdateButton(notificationId) {
+    const btn = document.createElement('a');
+    btn.id = `${notificationId}-update-btn`;
+    btn.href = CONFIG.updateCheck.scriptUrl || '#';
+    btn.target = '_blank';
+    btn.rel = 'noopener noreferrer';
+    btn.className =
+      'inline-flex items-center px-3 py-1.5 border border-blue-300 text-sm leading-4 font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 transition-colors';
+    btn.textContent = '立即更新';
+    return btn;
+  },
+  // 构建"稍后"按钮
+  buildLaterButton() {
+    const btn = document.createElement('button');
+    btn.className =
+      'inline-flex items-center px-3 py-1.5 border border-transparent text-sm leading-4 font-medium rounded-md text-blue-700 bg-transparent hover:bg-blue-50 transition-colors';
+    btn.textContent = '稍后';
+    btn.addEventListener('click', () => {
+      this.hideNotification(btn.closest('div.fixed'), false);
+    });
+    return btn;
+  },
+  // 构建"不再提醒"按钮
+  buildDismissButton() {
+    const btn = document.createElement('button');
+    btn.className =
+      'inline-flex items-center px-2 py-1 border border-transparent text-sm font-medium rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors';
+    btn.textContent = '不再提醒';
+    btn.addEventListener('click', () => {
+      this.hideNotification(btn.closest('div.fixed'), true);
+    });
+    return btn;
   },
   /**
    * 隐藏通知元素（带动画效果）
@@ -4424,8 +4954,10 @@ const versionChecker = {
    * @param {boolean} permanently - 是否永久隐藏
    */
   hideNotification(notification, permanently = false) {
+    if (!notification) {
+      return;
+    }
     try {
-      // 添加动画效果
       notification.style.transform = 'translateY(20px)';
       notification.style.opacity = '0';
       setTimeout(() => {
@@ -4433,7 +4965,6 @@ const versionChecker = {
           notification.parentNode.removeChild(notification);
         }
       }, 300);
-      // 如果是永久隐藏，记录到localStorage
       if (permanently) {
         localStorage.setItem('githubZhUpdateNotificationDismissed', 'dismissed');
         if (CONFIG.debugMode) {
@@ -4444,6 +4975,20 @@ const versionChecker = {
       console.error('[GitHub 中文翻译] 隐藏通知失败:', error);
     }
   },
+};
+// 生成唯一通知 ID
+function notificationId() {
+  return `github-zh-update-${Date.now()}`;
+}
+/**
+ * 版本存储模块
+ * @file versionStorage.js
+ * @version 1.9.21
+ * @date 2026-07-03
+ * @author Sut
+ * @description 版本检查相关的本地存储读写（历史记录、缓存版本、通知状态）
+ */
+const versionStorage = {
   /**
    * 记录版本历史
    * @param {string} version - 版本号
@@ -4452,11 +4997,9 @@ const versionChecker = {
     try {
       const historyKey = 'githubZhVersionHistory';
       let history = utils.safeJSONParse(localStorage.getItem(historyKey), []);
-      // 确保是数组
       if (!Array.isArray(history)) {
         history = [];
       }
-      // 添加新版本记录
       history.push({
         version,
         detectedAt: Date.now(),
@@ -4501,8 +5044,7 @@ const versionChecker = {
    */
   getCachedVersion() {
     try {
-      const cachedData = utils.safeJSONParse(localStorage.getItem('githubZhCachedVersion'));
-      return cachedData;
+      return utils.safeJSONParse(localStorage.getItem('githubZhCachedVersion'));
     } catch (_error) {
       return null;
     }
@@ -4528,12 +5070,231 @@ const versionChecker = {
   },
 };
 /**
- * 虚拟DOM模块
- * @file virtualDom.js
- * @version 1.9.20
- * @date 2026-06-10
+ * 版本更新检查模块
+ * @file versionChecker.js
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
- * @description 用于跟踪已翻译元素的状态，避免重复翻译和不必要的DOM操作
+ * @description 负责检查和处理脚本更新，UI 与存储委托给独立模块
+ */
+/**
+ * 远程脚本的已知哈希值（用于完整性验证）
+ * 在发布新版本时通过 collect-dict.cjs 或手动计算 SHA-256 后填入。
+ * 留空对象表示跳过完整性校验（仅发出未验证警告）。
+ */
+const KNOWN_SCRIPT_HASHES = {};
+/**
+ * 版本检查器对象
+ */
+const versionChecker = {
+  /**
+   * 检查版本更新
+   * 支持重试机制和更详细的错误处理
+   * @returns {Promise<boolean>} 检查完成的Promise，resolve为是否发现更新
+   */
+  async checkForUpdates() {
+    if (!CONFIG.updateCheck.enabled) {
+      if (CONFIG.debugMode) {
+        console.log('[GitHub 中文翻译] 已禁用更新检查');
+      }
+      return false;
+    }
+    // 检查是否达到检查间隔
+    const lastCheck = localStorage.getItem('githubZhLastUpdateCheck');
+    const now = Date.now();
+    const intervalMs = (CONFIG.updateCheck.intervalHours || 24) * 60 * 60 * 1000;
+    if (lastCheck && now - parseInt(lastCheck) < intervalMs) {
+      if (CONFIG.debugMode) {
+        console.log(
+          `[GitHub 中文翻译] 未达到更新检查间隔，跳过检查 (上次检查: ${new Date(parseInt(lastCheck)).toLocaleString()})`,
+        );
+      }
+      return false;
+    }
+    try {
+      localStorage.setItem('githubZhLastUpdateCheck', now.toString());
+      const scriptContent = await this.fetchWithRetry(CONFIG.updateCheck.scriptUrl);
+      const remoteVersion = this.extractVersion(scriptContent);
+      if (!remoteVersion) {
+        throw new Error('无法从远程脚本提取有效的版本号');
+      }
+      if (CONFIG.debugMode) {
+        console.log(`[GitHub 中文翻译] 当前版本: ${CONFIG.version}, 远程版本: ${remoteVersion}`);
+      }
+      if (this.isNewerVersion(remoteVersion, CONFIG.version)) {
+        this.showUpdateNotification(remoteVersion);
+        if (CONFIG.updateCheck.autoUpdateVersion) {
+          this.updateVersionInStorage(remoteVersion);
+        }
+        this.recordVersionHistory(remoteVersion);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      const sanitizedError = utils.sanitizeErrorMessage(error);
+      const errorMsg = `[GitHub 中文翻译] 检查更新时发生错误: ${sanitizedError}`;
+      if (CONFIG.debugMode) {
+        console.error(errorMsg);
+      }
+      try {
+        localStorage.setItem(
+          'githubZhUpdateError',
+          JSON.stringify({
+            message: sanitizedError,
+            timestamp: now,
+          }),
+        );
+      } catch (_e) {
+        // 忽略存储错误
+      }
+      return false;
+    }
+  },
+  /**
+   * 带重试机制的网络请求
+   * @param {string} url - 请求URL
+   * @param {number} maxRetries - 最大重试次数
+   * @param {number} retryDelay - 重试间隔（毫秒）
+   * @returns {Promise<string>} 响应文本
+   */
+  async fetchWithRetry(url, maxRetries = 2, retryDelay = 1000) {
+    let lastError;
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        if (CONFIG.debugMode && attempt > 0) {
+          console.log(`[GitHub 中文翻译] 重试更新检查 (${attempt}/${maxRetries})...`);
+        }
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Cache-Control': 'no-cache',
+            Accept: 'text/javascript, text/plain, */*',
+          },
+          signal: controller.signal,
+          credentials: 'omit',
+        });
+        clearTimeout(timeoutId);
+        if (!response.ok) {
+          throw new Error(`HTTP错误! 状态码: ${response.status}`);
+        }
+        const scriptContent = await response.text();
+        if (KNOWN_SCRIPT_HASHES[url]) {
+          const isValid = await this.verifyScriptIntegrity(scriptContent, url);
+          if (!isValid && CONFIG.debugMode) {
+            console.warn('[GitHub 中文翻译] 脚本完整性验证失败，可能存在安全风险');
+          }
+        }
+        return scriptContent;
+      } catch (error) {
+        lastError = error;
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        await utils.delay(retryDelay * Math.pow(2, attempt));
+      }
+    }
+    throw lastError;
+  },
+  /**
+   * 验证脚本完整性
+   * @param {string} scriptContent - 脚本内容
+   * @param {string} url - 脚本URL
+   * @returns {Promise<boolean>} 验证是否通过
+   */
+  async verifyScriptIntegrity(scriptContent, url) {
+    try {
+      const expectedHash = KNOWN_SCRIPT_HASHES[url];
+      if (!expectedHash) {
+        return true;
+      }
+      const actualHash = await utils.sha256Hash(scriptContent);
+      const isValid = actualHash === expectedHash;
+      if (CONFIG.debugMode) {
+        console.log(`[GitHub 中文翻译] 脚本完整性验证: ${isValid ? '通过' : '失败'}`);
+        if (!isValid) {
+          console.log(`[GitHub 中文翻译] 期望哈希: ${expectedHash.substring(0, 16)}...`);
+          console.log(`[GitHub 中文翻译] 实际哈希: ${actualHash.substring(0, 16)}...`);
+        }
+      }
+      return isValid;
+    } catch (error) {
+      if (CONFIG.debugMode) {
+        console.error('[GitHub 中文翻译] 脚本完整性验证出错:', utils.sanitizeErrorMessage(error));
+      }
+      return false;
+    }
+  },
+  /**
+   * 从脚本内容中提取版本号
+   * @param {string} content - 脚本内容
+   * @returns {string|null} 提取的版本号或null
+   */
+  extractVersion(content) {
+    const patterns = [
+      /\/\*\s*@version\s+(\d+\.\d+\.\d+)\s*\*\//i,
+      /\/\/\s*@version\s+(\d+\.\d+\.\d+)/i,
+      /\/\/\s*version\s*:\s*(\d+\.\d+\.\d+)/i,
+      /version\s*=\s*['"](\d+\.\d+\.\d+)['"]/i,
+      /version:\s*['"](\d+\.\d+\.\d+)['"]/i,
+    ];
+    for (const pattern of patterns) {
+      const match = content.match(pattern);
+      if (match && match[1]) {
+        return match[1];
+      }
+    }
+    return null;
+  },
+  /**
+   * 比较版本号，判断是否有新版本
+   * @param {string} newVersion - 新版本号
+   * @param {string} currentVersion - 当前版本号
+   * @returns {boolean} 是否有新版本
+   */
+  isNewerVersion(newVersion, currentVersion) {
+    const newParts = newVersion.split('.').map(Number);
+    const currentParts = currentVersion.split('.').map(Number);
+    for (let i = 0; i < Math.max(newParts.length, currentParts.length); i++) {
+      const newPart = newParts[i] || 0;
+      const currentPart = currentParts[i] || 0;
+      if (newPart > currentPart) {
+        return true;
+      } else if (newPart < currentPart) {
+        return false;
+      }
+    }
+    return false;
+  },
+  // 委托给 updateNotification 模块
+  showUpdateNotification(newVersion) {
+    return updateNotification.showUpdateNotification(newVersion);
+  },
+  hideNotification(notification, permanently = false) {
+    return updateNotification.hideNotification(notification, permanently);
+  },
+  // 委托给 versionStorage 模块
+  recordVersionHistory(version) {
+    return versionStorage.recordVersionHistory(version);
+  },
+  updateVersionInStorage(newVersion) {
+    return versionStorage.updateVersionInStorage(newVersion);
+  },
+  getCachedVersion() {
+    return versionStorage.getCachedVersion();
+  },
+  clearNotificationDismissal() {
+    return versionStorage.clearNotificationDismissal();
+  },
+};
+/**
+ * 虚拟DOM节点模块
+ * @file virtualNode.js
+ * @version 1.9.21
+ * @date 2026-07-03
+ * @author Sut
+ * @description 虚拟DOM节点类，表示一个DOM元素的虚拟映射，包含其状态和内容哈希
  */
 /**
  * 虚拟DOM节点类
@@ -4697,6 +5458,282 @@ class VirtualNode {
   }
 }
 /**
+ * 虚拟DOM清理模块
+ * @file virtualDomCleanup.js
+ * @version 1.9.21
+ * @date 2026-07-03
+ * @author Sut
+ * @description 提供虚拟DOM管理器的清理、定时器和页面卸载处理功能
+ */
+/**
+ * 设置页面卸载处理器
+ * @param {Object} manager - 虚拟DOM管理器实例
+ */
+function setupVdomUnloadHandler(manager) {
+  // 保存卸载处理器引用，便于后续 removeEventListener
+  manager.unloadHandler = () => {
+    manager.isPageUnloading = true;
+    manager.cleanup();
+  };
+  // 监听多种卸载事件以确保兼容性
+  window.addEventListener('beforeunload', manager.unloadHandler);
+  window.addEventListener('unload', manager.unloadHandler);
+  window.addEventListener('pagehide', manager.unloadHandler);
+}
+/**
+ * 开始自动清理
+ * @param {Object} manager - 虚拟DOM管理器实例
+ */
+function startVdomAutoCleanup(manager) {
+  stopVdomAutoCleanup(manager);
+  manager.cleanupTimer = setInterval(() => {
+    // 如果页面正在卸载，停止清理
+    if (manager.isPageUnloading) {
+      stopVdomAutoCleanup(manager);
+      return;
+    }
+    manager.cleanup();
+  }, manager.cleanupInterval);
+}
+/**
+ * 停止自动清理
+ * @param {Object} manager - 虚拟DOM管理器实例
+ */
+function stopVdomAutoCleanup(manager) {
+  if (manager.cleanupTimer) {
+    clearInterval(manager.cleanupTimer);
+    manager.cleanupTimer = null;
+  }
+}
+/**
+ * 清理无效的虚拟节点
+ * @param {Object} manager - 虚拟DOM管理器实例
+ * @param {boolean} force - 是否强制清理所有节点
+ */
+function cleanupVdomNodes(manager, force = false) {
+  try {
+    const now = Date.now();
+    // 如果不是强制清理且距离上次清理时间不足，则跳过
+    if (!force && now - manager.lastCleanupTime < manager.cleanupInterval) {
+      return;
+    }
+    manager.lastCleanupTime = now;
+    let removedCount = 0;
+    // 如果页面正在卸载或强制清理，删除所有节点
+    if (force || manager.isPageUnloading) {
+      removedCount = manager.nodes.size;
+      manager.nodes.clear();
+      manager.nodeCache.clear();
+      if (CONFIG.debugMode) {
+        console.log(`[GitHub 中文翻译] 强制清理了${removedCount}个虚拟节点`);
+      }
+      return;
+    }
+    // 正常清理：删除DOM中不存在的节点或长时间未更新的节点
+    const nodesToRemove = [];
+    for (const [id, node] of manager.nodes) {
+      // 检查节点是否仍在DOM中
+      if (!document.contains(node.element)) {
+        nodesToRemove.push(id);
+        continue;
+      }
+      // 检查节点是否长时间未更新
+      const timeSinceUpdate = now - node.lastUpdated;
+      const maxAge = 60 * 60 * 1000; // 1小时
+      if (timeSinceUpdate > maxAge) {
+        nodesToRemove.push(id);
+      }
+    }
+    // 删除需要清理的节点
+    for (const id of nodesToRemove) {
+      manager.nodes.delete(id);
+      manager.nodeCache.delete(id);
+      removedCount++;
+    }
+    if (CONFIG.debugMode && removedCount > 0) {
+      console.log(
+        `[GitHub 中文翻译] 清理了${removedCount}个无效虚拟节点，当前节点数：${manager.nodes.size}`,
+      );
+    }
+  } catch (error) {
+    if (CONFIG.debugMode) {
+      console.error('[GitHub 中文翻译] 清理虚拟节点失败:', error);
+    }
+  }
+}
+/**
+ * 清空所有虚拟节点
+ * @param {Object} manager - 虚拟DOM管理器实例
+ */
+function clearVdomNodes(manager) {
+  manager.nodes.clear();
+  manager.nodeCache.clear();
+  manager.lastCleanupTime = Date.now();
+}
+/**
+ * 销毁管理器，移除所有事件监听器和定时器，防止内存泄漏
+ * @param {Object} manager - 虚拟DOM管理器实例
+ */
+function destroyVdomManager(manager) {
+  stopVdomAutoCleanup(manager);
+  if (manager.unloadHandler) {
+    window.removeEventListener('beforeunload', manager.unloadHandler);
+    window.removeEventListener('unload', manager.unloadHandler);
+    window.removeEventListener('pagehide', manager.unloadHandler);
+    manager.unloadHandler = null;
+  }
+  manager.clear();
+}
+/**
+ * 虚拟DOM处理器模块
+ * @file virtualDomProcessor.js
+ * @version 1.9.21
+ * @date 2026-07-03
+ * @author Sut
+ * @description 提供虚拟DOM节点的创建、查找、翻译状态检查和批量处理功能
+ */
+/**
+ * 为元素获取或创建虚拟节点
+ * @param {Object} manager - 虚拟DOM管理器实例
+ * @param {HTMLElement} element - DOM元素
+ * @returns {VirtualNode|null} 虚拟节点
+ */
+function getOrCreateVdomNode(manager, element) {
+  try {
+    // 检查页面是否正在卸载
+    if (manager.isPageUnloading) {
+      return null;
+    }
+    // 先尝试从缓存查找
+    if (element.dataset && element.dataset.virtualDomId) {
+      const cachedNode = manager.nodeCache.get(element.dataset.virtualDomId);
+      if (cachedNode && cachedNode.element === element) {
+        return cachedNode;
+      }
+    }
+    // 检查节点数量限制
+    if (manager.nodes.size >= manager.maxNodes) {
+      // 强制清理一次
+      manager.cleanup(true);
+      // 如果清理后仍然超过限制，删除最旧的节点
+      if (manager.nodes.size >= manager.maxNodes) {
+        const nodesToRemove = Math.floor(manager.maxNodes * 0.2); // 删除20%的节点
+        const entries = Array.from(manager.nodes.entries());
+        // 按最后更新时间排序，删除最旧的
+        entries.sort((a, b) => a[1].lastUpdated - b[1].lastUpdated);
+        for (let i = 0; i < nodesToRemove; i++) {
+          const [id] = entries[i];
+          manager.nodes.delete(id);
+          manager.nodeCache.delete(id);
+        }
+        if (CONFIG.debugMode) {
+          console.log(`[GitHub 中文翻译] 强制清理了${nodesToRemove}个虚拟节点`);
+        }
+      }
+    }
+    // 创建新节点
+    const node = new VirtualNode(element);
+    manager.nodes.set(node.elementId, node);
+    manager.nodeCache.set(node.elementId, node);
+    return node;
+  } catch (error) {
+    if (CONFIG.debugMode) {
+      console.error('[GitHub 中文翻译] 获取或创建虚拟节点失败:', error);
+    }
+    return null;
+  }
+}
+/**
+ * 通过ID查找虚拟节点
+ * @param {Object} manager - 虚拟DOM管理器实例
+ * @param {string} elementId - 元素ID
+ * @returns {VirtualNode|null} 虚拟节点
+ */
+function findVdomNodeById(manager, elementId) {
+  return manager.nodes.get(elementId) || null;
+}
+/**
+ * 检查元素是否需要翻译
+ * @param {Object} manager - 虚拟DOM管理器实例
+ * @param {HTMLElement} element - 要检查的元素
+ * @returns {boolean} 是否需要翻译
+ */
+function shouldTranslateVdom(manager, element) {
+  try {
+    const node = getOrCreateVdomNode(manager, element);
+    if (!node) {
+      return true; // 如果无法创建虚拟节点，默认需要翻译
+    }
+    // 检查内容是否变化
+    const contentChanged = node.hasContentChanged();
+    // 检查属性是否变化
+    const attributesChanged = node.hasAttributesChanged();
+    // 如果内容或属性变化，需要重新翻译
+    if (contentChanged || attributesChanged) {
+      node.resetTranslation();
+      return true;
+    }
+    // 如果已经翻译过且内容没有变化，不需要再次翻译
+    if (node.isTranslated) {
+      return false;
+    }
+    // 其他情况需要翻译
+    return true;
+  } catch (error) {
+    if (CONFIG.debugMode) {
+      console.error('[GitHub 中文翻译] 检查翻译状态失败:', error);
+    }
+    // 出错时默认需要翻译
+    return true;
+  }
+}
+/**
+ * 标记元素为已翻译
+ * @param {Object} manager - 虚拟DOM管理器实例
+ * @param {HTMLElement} element - 已翻译的元素
+ */
+function markVdomTranslated(manager, element) {
+  try {
+    const node = getOrCreateVdomNode(manager, element);
+    if (node) {
+      node.markAsTranslated();
+    }
+  } catch (_error) {
+    // 忽略错误
+  }
+}
+/**
+ * 批量处理元素
+ * @param {Object} manager - 虚拟DOM管理器实例
+ * @param {NodeList|Array} elements - 要处理的元素列表
+ * @returns {Array} 需要翻译的元素列表
+ */
+function processVdomElements(manager, elements) {
+  const elementsToTranslate = [];
+  try {
+    elements.forEach((element) => {
+      if (shouldTranslateVdom(manager, element)) {
+        elementsToTranslate.push(element);
+      }
+    });
+  } catch (error) {
+    if (CONFIG.debugMode) {
+      console.error('[GitHub 中文翻译] 批量处理元素失败:', error);
+    }
+    // 出错时返回原始元素列表
+    elementsToTranslate.push(...elements);
+  }
+  return elementsToTranslate;
+}
+/**
+ * 虚拟DOM模块
+ * @file virtualDom.js
+ * @version 1.9.21
+ * @date 2026-07-03
+ * @author Sut
+ * @description 用于跟踪已翻译元素的状态，避免重复翻译和不必要的DOM操作
+ */
+/**
  * 虚拟DOM管理器
  * 负责管理所有虚拟节点，提供查找、更新和清理功能
  */
@@ -4711,25 +5748,12 @@ class VirtualDomManager {
     this.cleanupInterval = 30000; // 30秒清理一次，提高清理频率
     this.maxNodes = 5000; // 最大节点数限制
     this.cleanupTimer = null;
+    this.unloadHandler = null; // 保存卸载处理器引用，便于 cleanup 移除
     this.isPageUnloading = false;
     // 设置页面卸载处理
-    this.setupPageUnloadHandler();
+    setupVdomUnloadHandler(this);
     // 自动清理定时器
-    this.startAutoCleanup();
-  }
-  /**
-   * 设置页面卸载处理器
-   */
-  setupPageUnloadHandler() {
-    // 监听页面卸载事件
-    const unloadHandler = () => {
-      this.isPageUnloading = true;
-      this.cleanup();
-    };
-    // 监听多种卸载事件以确保兼容性
-    window.addEventListener('beforeunload', unloadHandler);
-    window.addEventListener('unload', unloadHandler);
-    window.addEventListener('pagehide', unloadHandler);
+    startVdomAutoCleanup(this);
   }
   /**
    * 为元素获取或创建虚拟节点
@@ -4737,49 +5761,7 @@ class VirtualDomManager {
    * @returns {VirtualNode|null} 虚拟节点
    */
   getOrCreateNode(element) {
-    try {
-      // 检查页面是否正在卸载
-      if (this.isPageUnloading) {
-        return null;
-      }
-      // 先尝试从缓存查找
-      if (element.dataset && element.dataset.virtualDomId) {
-        const cachedNode = this.nodeCache.get(element.dataset.virtualDomId);
-        if (cachedNode && cachedNode.element === element) {
-          return cachedNode;
-        }
-      }
-      // 检查节点数量限制
-      if (this.nodes.size >= this.maxNodes) {
-        // 强制清理一次
-        this.cleanup(true);
-        // 如果清理后仍然超过限制，删除最旧的节点
-        if (this.nodes.size >= this.maxNodes) {
-          const nodesToRemove = Math.floor(this.maxNodes * 0.2); // 删除20%的节点
-          const entries = Array.from(this.nodes.entries());
-          // 按最后更新时间排序，删除最旧的
-          entries.sort((a, b) => a[1].lastUpdated - b[1].lastUpdated);
-          for (let i = 0; i < nodesToRemove; i++) {
-            const [id] = entries[i];
-            this.nodes.delete(id);
-            this.nodeCache.delete(id);
-          }
-          if (CONFIG.debugMode) {
-            console.log(`[GitHub 中文翻译] 强制清理了${nodesToRemove}个虚拟节点`);
-          }
-        }
-      }
-      // 创建新节点
-      const node = new VirtualNode(element);
-      this.nodes.set(node.elementId, node);
-      this.nodeCache.set(node.elementId, node);
-      return node;
-    } catch (error) {
-      if (CONFIG.debugMode) {
-        console.error('[GitHub 中文翻译] 获取或创建虚拟节点失败:', error);
-      }
-      return null;
-    }
+    return getOrCreateVdomNode(this, element);
   }
   /**
    * 通过ID查找虚拟节点
@@ -4787,7 +5769,7 @@ class VirtualDomManager {
    * @returns {VirtualNode|null} 虚拟节点
    */
   findNodeById(elementId) {
-    return this.nodes.get(elementId) || null;
+    return findVdomNodeById(this, elementId);
   }
   /**
    * 检查元素是否需要翻译
@@ -4795,47 +5777,14 @@ class VirtualDomManager {
    * @returns {boolean} 是否需要翻译
    */
   shouldTranslate(element) {
-    try {
-      const node = this.getOrCreateNode(element);
-      if (!node) {
-        return true; // 如果无法创建虚拟节点，默认需要翻译
-      }
-      // 检查内容是否变化
-      const contentChanged = node.hasContentChanged();
-      // 检查属性是否变化
-      const attributesChanged = node.hasAttributesChanged();
-      // 如果内容或属性变化，需要重新翻译
-      if (contentChanged || attributesChanged) {
-        node.resetTranslation();
-        return true;
-      }
-      // 如果已经翻译过且内容没有变化，不需要再次翻译
-      if (node.isTranslated) {
-        return false;
-      }
-      // 其他情况需要翻译
-      return true;
-    } catch (error) {
-      if (CONFIG.debugMode) {
-        console.error('[GitHub 中文翻译] 检查翻译状态失败:', error);
-      }
-      // 出错时默认需要翻译
-      return true;
-    }
+    return shouldTranslateVdom(this, element);
   }
   /**
    * 标记元素为已翻译
    * @param {HTMLElement} element - 已翻译的元素
    */
   markElementAsTranslated(element) {
-    try {
-      const node = this.getOrCreateNode(element);
-      if (node) {
-        node.markAsTranslated();
-      }
-    } catch (_error) {
-      // 忽略错误
-    }
+    markVdomTranslated(this, element);
   }
   /**
    * 批量处理元素
@@ -4843,107 +5792,38 @@ class VirtualDomManager {
    * @returns {Array} 需要翻译的元素列表
    */
   processElements(elements) {
-    const elementsToTranslate = [];
-    try {
-      elements.forEach((element) => {
-        if (this.shouldTranslate(element)) {
-          elementsToTranslate.push(element);
-        }
-      });
-    } catch (error) {
-      if (CONFIG.debugMode) {
-        console.error('[GitHub 中文翻译] 批量处理元素失败:', error);
-      }
-      // 出错时返回原始元素列表
-      elementsToTranslate.push(...elements);
-    }
-    return elementsToTranslate;
+    return processVdomElements(this, elements);
   }
   /**
    * 开始自动清理
    */
   startAutoCleanup() {
-    this.stopAutoCleanup();
-    this.cleanupTimer = setInterval(() => {
-      // 如果页面正在卸载，停止清理
-      if (this.isPageUnloading) {
-        this.stopAutoCleanup();
-        return;
-      }
-      this.cleanup();
-    }, this.cleanupInterval);
+    startVdomAutoCleanup(this);
   }
   /**
    * 停止自动清理
    */
   stopAutoCleanup() {
-    if (this.cleanupTimer) {
-      clearInterval(this.cleanupTimer);
-      this.cleanupTimer = null;
-    }
+    stopVdomAutoCleanup(this);
   }
   /**
    * 清理无效的虚拟节点
    * @param {boolean} force - 是否强制清理所有节点
    */
   cleanup(force = false) {
-    try {
-      const now = Date.now();
-      // 如果不是强制清理且距离上次清理时间不足，则跳过
-      if (!force && now - this.lastCleanupTime < this.cleanupInterval) {
-        return;
-      }
-      this.lastCleanupTime = now;
-      let removedCount = 0;
-      // 如果页面正在卸载或强制清理，删除所有节点
-      if (force || this.isPageUnloading) {
-        removedCount = this.nodes.size;
-        this.nodes.clear();
-        this.nodeCache.clear();
-        if (CONFIG.debugMode) {
-          console.log(`[GitHub 中文翻译] 强制清理了${removedCount}个虚拟节点`);
-        }
-        return;
-      }
-      // 正常清理：删除DOM中不存在的节点或长时间未更新的节点
-      const nodesToRemove = [];
-      for (const [id, node] of this.nodes) {
-        // 检查节点是否仍在DOM中
-        if (!document.contains(node.element)) {
-          nodesToRemove.push(id);
-          continue;
-        }
-        // 检查节点是否长时间未更新
-        const timeSinceUpdate = now - node.lastUpdated;
-        const maxAge = 60 * 60 * 1000; // 1小时
-        if (timeSinceUpdate > maxAge) {
-          nodesToRemove.push(id);
-        }
-      }
-      // 删除需要清理的节点
-      for (const id of nodesToRemove) {
-        this.nodes.delete(id);
-        this.nodeCache.delete(id);
-        removedCount++;
-      }
-      if (CONFIG.debugMode && removedCount > 0) {
-        console.log(
-          `[GitHub 中文翻译] 清理了${removedCount}个无效虚拟节点，当前节点数：${this.nodes.size}`,
-        );
-      }
-    } catch (error) {
-      if (CONFIG.debugMode) {
-        console.error('[GitHub 中文翻译] 清理虚拟节点失败:', error);
-      }
-    }
+    cleanupVdomNodes(this, force);
   }
   /**
    * 清空所有虚拟节点
    */
   clear() {
-    this.nodes.clear();
-    this.nodeCache.clear();
-    this.lastCleanupTime = Date.now();
+    clearVdomNodes(this);
+  }
+  /**
+   * 销毁管理器，移除所有事件监听器和定时器，防止内存泄漏
+   */
+  destroy() {
+    destroyVdomManager(this);
   }
   /**
    * 获取统计信息
@@ -4962,8 +5842,8 @@ virtualDomManager;
 /**
  * GitHub 中文翻译主入口文件
  * @file main.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 整合所有模块并初始化脚本
  */
@@ -4981,6 +5861,10 @@ function cleanup() {
     // 清理翻译缓存
     if (translationCore && typeof translationCore.clearCache === 'function') {
       translationCore.clearCache();
+    }
+    // 销毁虚拟 DOM 管理器，移除事件监听器和定时器
+    if (virtualDomManager && typeof virtualDomManager.destroy === 'function') {
+      virtualDomManager.destroy();
     }
     // 清理配置界面
     if (configUI && typeof configUI.cleanup === 'function') {

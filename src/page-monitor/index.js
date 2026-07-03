@@ -1,8 +1,8 @@
 /**
  * 页面监控主模块
  * @file pageMonitor/index.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 页面监控主入口，整合所有子模块
  */
@@ -69,6 +69,7 @@ export const pageMonitor = {
   stop() {
     try {
       domObserver.stop();
+      translationTrigger.cleanup();
       pageMonitorCache.stopCacheCleanupTimer();
 
       if (CONFIG.debugMode) {
@@ -84,6 +85,8 @@ export const pageMonitor = {
   cleanup() {
     try {
       this.stop();
+      // 还原 history.pushState/replaceState，移除 popstate 监听器
+      pathListener.cleanup();
       pageMonitorCache.cleanupNodeCheckCache();
       pageMonitorCache.cleanupEventListeners();
 

@@ -114,7 +114,7 @@ fix(pageMonitor): 修复 DOM 变化监听问题
 
 ### 2.5 Git 钩子
 
-项目使用 Husky 和 lint-staged 进行提交前检查：
+项目使用 lint-staged 进行提交前检查：
 - 自动运行 ESLint 检查
 - 自动运行 Prettier 格式化
 - 确保代码符合规范才能提交
@@ -139,8 +139,8 @@ MAJOR.MINOR.PATCH
 
 #### 3.2.1 准备发布
 
-1. 确保 `develop` 分支所有代码已合并
-2. 运行测试确保所有测试通过
+1. 确保 `main` 分支所有代码已合并
+2. 运行 `npm test` 确保 lint + build + validate 通过
 3. 更新版本号和 CHANGELOG
 
 #### 3.2.2 版本号更新
@@ -202,7 +202,7 @@ MAJOR.MINOR.PATCH
 
 ### 4.2 测试文件组织
 
-测试文件放在：
+项目当前以 `npm test`（lint → build → validate）作为主要质量门禁。如需补充单元测试，测试文件放在：
 - `__tests__/` 目录下，或
 - 与源码文件同级，命名为 `<文件名>.test.js`
 

@@ -1,8 +1,8 @@
 /**
  * GitHub 中文翻译插件构建脚本
  * @file build.cjs
- * @version 1.9.19
- * @date 2026-06-08
+ * @version 1.9.21
+ * @date 2026-07-03
  * @description 简化的单文件构建脚本
  */
 
@@ -17,6 +17,12 @@ const OUTPUT_FILE = path.join(BUILD_DIR, 'GitHub_i18n.user.js');
 const SOURCE_ORDER = [
   'version.js',
   'config.js',
+  'utils/functionUtils.js',
+  'utils/stringUtils.js',
+  'utils/urlUtils.js',
+  'utils/domUtils.js',
+  'utils/objectUtils.js',
+  'utils/cryptoUtils.js',
   'utils/utils.js',
   'core/cacheManager.js',
   'core/errorHandler.js',
@@ -35,11 +41,20 @@ const SOURCE_ORDER = [
   'translation-core/pageModeDetector.js',
   'translation-core/elementSelector.js',
   'translation-core/elementTranslator.js',
-  'translation-core/partialTranslator.js',
   'translation-core/performanceMonitor.js',
   'translation-core/index.js',
+  'ui/styles/configUI.styles.js',
+  'ui/components/performanceMonitor.js',
+  'ui/configPanelRenderer.js',
+  'ui/configManager.js',
+  'ui/configPanelEvents.js',
   'ui/configUI.js',
+  'updateNotification.js',
+  'versionStorage.js',
   'versionChecker.js',
+  'core/virtualNode.js',
+  'core/virtualDomCleanup.js',
+  'core/virtualDomProcessor.js',
   'core/virtualDom.js',
   'main.js',
 ];
@@ -92,10 +107,14 @@ function mergeSourceFiles() {
       continue;
     }
     let content = fs.readFileSync(filePath, 'utf-8');
+    // 剥离 import 语句：单行与多行均处理
     content = content.replace(/^import\s+.*from\s+['"].+['"];?\s*$/gm, '');
+    content = content.replace(/import\s*\{[\s\S]*?\}\s*from\s*['"][^'"]+['"];?/g, '');
+    // 剥离 export 语句：单行与多行均处理
     content = content.replace(/^export\s+default\s+(\w+);?\s*$/gm, '$1;');
     content = content.replace(/^export\s+default\s+/gm, '');
     content = content.replace(/^export\s+{\s*([^}]+)\s*};?\s*$/gm, '');
+    content = content.replace(/export\s*\{[\s\S]*?\};?/g, '');
     content = content.replace(/^export\s+/gm, '');
     mergedParts.push(content.trim());
   }

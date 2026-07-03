@@ -1,8 +1,8 @@
 /**
  * DOM变化观察器模块
  * @file pageMonitor/domObserver.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 观察DOM变化并触发翻译
  */
@@ -52,10 +52,12 @@ export const domObserver = {
         console.log('[GitHub 中文翻译] 当前页面模式:', pageMode);
       }
 
+      // 缓存页面模式到闭包，避免每次 mutation 都重新检测；
+      // 路由变化由 pathListener 处理，会触发 observer 重建。
+      const cachedPageMode = pageMode;
       const handleMutations = (mutations) => {
         try {
-          const pageMode = translationCore.detectPageMode();
-          if (this.shouldTriggerTranslation(mutations, pageMode)) {
+          if (this.shouldTriggerTranslation(mutations, cachedPageMode)) {
             if (this.onTranslationTrigger) {
               this.onTranslationTrigger();
             }
@@ -95,7 +97,7 @@ export const domObserver = {
             }
           }
         };
-        document.addEventListener('DOMContentLoaded', domLoadedHandler);
+        // 仅通过 pageMonitorCache 注册一次，避免重复绑定
         pageMonitorCache.addEventListener({
           target: document,
           type: 'DOMContentLoaded',
@@ -266,9 +268,12 @@ export const domObserver = {
   },
 
   detectImportantChanges(mutations, pageMode) {
+    // 透传 CONFIG 中配置的重要元素选择器，避免传入空数组导致配置失效
+    const importantElements = CONFIG.performance?.importantElements || [];
+    const elementCheckCache = new WeakMap();
     for (const mutation of mutations) {
       if (mutation.target && mutation.target.nodeType === Node.ELEMENT_NODE) {
-        if (isElementImportant(mutation.target, [], new WeakMap(), pageMode)) {
+        if (isElementImportant(mutation.target, importantElements, elementCheckCache, pageMode)) {
           return true;
         }
       }

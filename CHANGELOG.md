@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.9.21] - 2026-07-03
+
+### Added
+- 新增模块拆分：updateNotification、versionStorage、virtualNode、virtualDomCleanup、virtualDomProcessor、functionUtils、stringUtils、urlUtils、domUtils、objectUtils、cryptoUtils、configPanelRenderer、configManager、configPanelEvents
+- 构建脚本新增多行 import/export 剥离正则，并集成 `node --check` 语法验证到 `npm run validate`
+
+### Changed
+- 更新版本号至 1.9.21，统一所有源文件、文档与原型的版本号
+- 大文件模块化拆分：versionChecker(529→266)、virtualDom(509→134)、utils(503→29 门面)、configUI(453→197)、elementTranslator 重构、configUI.styles 拆分为 7 个子函数
+- elementTranslator.translateElement 拆分为 8 个小方法（shouldProcessElement、collectChildNodes、moveChildToFragment、applyTextTranslations、isValidTranslation、createTranslatedNode、appendFragmentToElement）
+- domObserver 优化：缓存 pageMode 到闭包，避免每次 mutation 重复调用 detectPageMode()
+- 同步 openspec 规范文档（移除 trie、Jest、Husky、develop 分支、partialTranslator 等过时引用）
+- 同步 README 文档至当前功能与版本
+
+### Fixed
+- 修复 build.cjs 多行 import/export 未剥离导致的构建产物语法错误（SyntaxError: Unexpected token '{'）
+- 修复 versionChecker 占位哈希值导致的误报完整性验证失败
+- 修复 elementTranslator applyTextTranslations 遗漏移除原文本节点的问题
+- 清零所有 ESLint 警告（elementTranslator 复杂度/行数、configUI.styles 行数、utils 复杂度）
+
+---
+
+## [1.9.20] - 2026-07-01
+
+### Changed
+- 完善原型设计系统、规范文档和代码对齐，UI 深色主题重构
+
+---
+
 ## [1.9.19] - 2026-06-08
 
 ### Changed

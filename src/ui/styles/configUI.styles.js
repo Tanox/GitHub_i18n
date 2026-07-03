@@ -1,17 +1,14 @@
 /**
  * GitHub 中文翻译配置界面样式模块
  * @file configUI.styles.js
- * @version 1.9.20
- * @date 2026-06-10
+ * @version 1.9.21
+ * @date 2026-07-03
  * @author Sut
  * @description 配置界面的CSS样式定义，遵循原型设计系统的深色主题规范
  */
 
-/**
- * 获取配置界面的完整样式
- * @returns {string} CSS样式字符串
- */
-export function getConfigUIStyles() {
+// 配置面板容器与主体样式
+function getPanelContainerStyles() {
   return `
     /* ========== 配置面板容器 ========== */
     .github-i18n-config-container {
@@ -41,7 +38,12 @@ export function getConfigUIStyles() {
       overflow: hidden;
       box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
     }
+  `;
+}
 
+// 面板头部与关闭按钮样式
+function getHeaderStyles() {
+  return `
     /* ========== 面板头部 ========== */
     .github-i18n-config-header {
       display: flex;
@@ -82,7 +84,12 @@ export function getConfigUIStyles() {
       background-color: #21262d;
       color: #e6edf3;
     }
+  `;
+}
 
+// 内容区与滚动条样式
+function getContentAreaStyles() {
+  return `
     /* ========== 面板内容区 ========== */
     .github-i18n-config-content {
       padding: 24px;
@@ -106,7 +113,12 @@ export function getConfigUIStyles() {
     .github-i18n-config-content::-webkit-scrollbar-thumb:hover {
       background: #484f58;
     }
+  `;
+}
 
+// 配置分组与配置项样式
+function getConfigItemStyles() {
+  return `
     /* ========== 配置分组 ========== */
     .github-i18n-config-section {
       background-color: #0d1117;
@@ -161,7 +173,12 @@ export function getConfigUIStyles() {
       color: #6e7681;
       margin-top: 2px;
     }
+  `;
+}
 
+// 面板底部按钮样式
+function getFooterStyles() {
+  return `
     /* ========== 面板底部 ========== */
     .github-i18n-config-footer {
       display: flex;
@@ -225,43 +242,12 @@ export function getConfigUIStyles() {
       background-color: #298e46;
       transform: translateY(1px);
     }
+  `;
+}
 
-    /* ========== 浮动设置按钮 ========== */
-    .github-i18n-toggle-btn {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background-color: #2ea44f !important;
-      color: #ffffff !important;
-      border: 1px solid rgba(255, 255, 255, 0.15) !important;
-      border-radius: 50% !important;
-      width: 56px !important;
-      height: 56px !important;
-      font-size: 22px !important;
-      cursor: pointer !important;
-      box-shadow: 0 6px 18px rgba(46, 160, 67, 0.22), 0 2px 6px rgba(0, 0, 0, 0.35) !important;
-      z-index: 2147483000 !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
-        box-shadow 0.2s cubic-bezier(0.22, 1, 0.36, 1) !important;
-      opacity: 1 !important;
-      visibility: visible !important;
-      pointer-events: auto !important;
-    }
-
-    .github-i18n-toggle-btn:hover {
-      background-color: #2c974b !important;
-      transform: translateY(-2px) scale(1.05) !important;
-      box-shadow: 0 10px 28px rgba(46, 160, 67, 0.3),
-        0 4px 12px rgba(0, 0, 0, 0.35) !important;
-    }
-
-    .github-i18n-toggle-btn:active {
-      transform: translateY(1px) scale(0.98) !important;
-    }
-
+// 性能监控网格与操作按钮样式
+function getPerformanceAndActionStyles() {
+  return `
     /* ========== 性能监控网格 ========== */
     .github-i18n-perf-grid {
       display: grid;
@@ -329,6 +315,96 @@ export function getConfigUIStyles() {
       border-color: #484f58;
     }
   `;
+}
+
+// 浮动按钮样式（对齐 prototype.md 规范）
+function getFloatingButtonStyles() {
+  return `
+    /* ========== 浮动设置按钮 ========== */
+    .github-i18n-toggle-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background-color: #2ea44f !important;
+      color: #ffffff !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      border-radius: 50% !important;
+      width: 56px !important;
+      height: 56px !important;
+      font-size: 22px !important;
+      cursor: pointer !important;
+      box-shadow: 0 6px 18px rgba(46, 160, 67, 0.22), 0 2px 6px rgba(0, 0, 0, 0.35) !important;
+      z-index: 2147483000 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.2s cubic-bezier(0.22, 1, 0.36, 1) !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+    }
+
+    .github-i18n-toggle-btn:hover {
+      background-color: #2c974b !important;
+      transform: translateY(-2px) scale(1.05) !important;
+      box-shadow: 0 10px 28px rgba(46, 160, 67, 0.3),
+        0 4px 12px rgba(0, 0, 0, 0.35) !important;
+    }
+
+    .github-i18n-toggle-btn:active {
+      transform: translateY(1px) scale(0.98) !important;
+    }
+
+    /* ========== 浮动设置按钮（对齐 prototype.md 规范） ========== */
+    .github-i18n-floating-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background-color: #161b22;
+      border: 1px solid #30363d;
+      color: #e6edf3;
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+      z-index: 2147483000;
+      transition: transform 0.15s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.15s ease;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: inherit;
+    }
+
+    .github-i18n-floating-btn:hover {
+      background-color: #30363d;
+      transform: scale(1.1);
+    }
+
+    .github-i18n-floating-btn:active {
+      transform: scale(0.98);
+    }
+  `;
+}
+
+/**
+ * 获取配置界面的完整样式
+ * @returns {string} CSS样式字符串
+ */
+export function getConfigUIStyles() {
+  return [
+    getPanelContainerStyles(),
+    getHeaderStyles(),
+    getContentAreaStyles(),
+    getConfigItemStyles(),
+    getFooterStyles(),
+    getPerformanceAndActionStyles(),
+    getFloatingButtonStyles(),
+  ].join('\n');
 }
 
 /**
