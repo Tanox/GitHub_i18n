@@ -1,8 +1,8 @@
 /**
  * GitHub 中文翻译配置面板渲染模块
  * @file configPanelRenderer.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 负责渲染配置面板的 UI 结构（容器、头部、内容、底部、配置项）
  */

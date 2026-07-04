@@ -1,8 +1,8 @@
 /**
  * 虚拟DOM节点模块
  * @file virtualNode.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 虚拟DOM节点类，表示一个DOM元素的虚拟映射，包含其状态和内容哈希
  */

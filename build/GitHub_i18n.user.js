@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GitHub 中文翻译
 // @namespace    https://github.com/Tanox/GitHub_i18n
-// @version      1.9.21
+// @version      1.9.22
 // @description  GitHub页面自动翻译为中文
 // @author       Sut
 // @match        https://github.com/*
@@ -26,8 +26,8 @@
 /**
  * 版本信息模块
  * @file version.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 统一管理GitHub自动化字符串更新工具的版本信息
  */
@@ -36,12 +36,12 @@
  * @type {string}
  * @description 这是项目的单一版本源，所有其他版本号引用都应从此处获取
  */
-const VERSION = '1.9.21';
+const VERSION = '1.9.22';
 /**
  * GitHub 中文翻译配置文件
  * @file config.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 包含脚本所有可配置项
  */
@@ -288,8 +288,8 @@ const CONFIG = {
 /**
  * 函数控制工具模块
  * @file functionUtils.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 包含节流、防抖、延迟、安全执行等函数控制相关辅助函数
  */
@@ -394,8 +394,8 @@ const functionUtils = {
 /**
  * 字符串与正则工具模块
  * @file stringUtils.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 包含正则转义、安全正则、JSON安全解析与序列化等辅助函数
  */
@@ -493,8 +493,8 @@ const stringUtils = {
 /**
  * URL与页面路径工具模块
  * @file urlUtils.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 包含页面路径获取、URL匹配、查询参数解析等辅助函数
  */
@@ -555,8 +555,8 @@ const urlUtils = {
 /**
  * DOM文本节点工具模块
  * @file domUtils.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 包含DOM文本节点收集、可收集文本判断等辅助函数
  */
@@ -632,8 +632,8 @@ const domUtils = {
 /**
  * 对象操作工具模块
  * @file objectUtils.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 包含嵌套属性安全访问、深拷贝等辅助函数
  */
@@ -691,8 +691,8 @@ const objectUtils = {
 /**
  * 编码与加密工具模块
  * @file cryptoUtils.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 包含Base64编解码、数据混淆还原、SHA-256哈希、错误信息脱敏等辅助函数
  */
@@ -807,8 +807,8 @@ const cryptoUtils = {
 /**
  * 工具函数模块（门面模式）
  * @file utils.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 工具函数统一入口，委托给各子模块，保持 utils 对象 API 不变
  */
@@ -828,8 +828,8 @@ const utils = {
 /**
  * LRU缓存管理模块
  * @file cacheManager.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 实现LRU缓存策略，用于翻译结果缓存
  */
@@ -921,8 +921,8 @@ class CacheManager {
 /**
  * 错误处理模块
  * @file errorHandler.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 负责统一管理所有错误处理和恢复机制
  */
@@ -1126,8 +1126,8 @@ ErrorHandler.init();
 /**
  * 开发工具模块
  * @file tools.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 包含字符串提取、自动更新和词典处理等开发工具
  */
@@ -1272,8 +1272,8 @@ function loadTools() {
 /**
  * 页面监控缓存管理模块
  * @file pageMonitor/cacheManager.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 管理页面监控中的缓存
  */
@@ -1337,8 +1337,8 @@ const pageMonitorCache = {
 /**
  * 页面分析模块
  * @file pageMonitor/pageAnalyzer.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 分析页面类型和关键区域
  */
@@ -1468,8 +1468,8 @@ const pageAnalyzer = {
 /**
  * 路径变化监听模块
  * @file pageMonitor/pathListener.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 监听URL路径变化
  */
@@ -1546,8 +1546,8 @@ const pathListener = {
 /**
  * DOM变化观察器模块
  * @file pageMonitor/domObserver.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 观察DOM变化并触发翻译
  */
@@ -1825,8 +1825,8 @@ const domObserver = {
 /**
  * 翻译触发模块
  * @file pageMonitor/translationTrigger.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 管理翻译触发和节流
  */
@@ -1922,8 +1922,8 @@ const translationTrigger = {
 /**
  * 页面监控主模块
  * @file pageMonitor/index.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 页面监控主入口，整合所有子模块
  */
@@ -2012,8 +2012,8 @@ const pageMonitor = {
 /**
  * 通用翻译词典
  * @file common.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 包含所有页面共用的翻译字符串，使用 GitHub 实际界面文本作为键
  */
@@ -2459,8 +2459,8 @@ const commonDictionary = {
 /**
  * Codespaces 页面翻译词典
  * @file codespaces.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 包含 GitHub Codespaces 页面的翻译词典
  */
@@ -2489,8 +2489,8 @@ const codespacesDictionary = {
 /**
  * Explore 页面翻译词典
  * @file explore.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 包含 GitHub Explore 页面的翻译词典
  */
@@ -2645,21 +2645,1123 @@ const exploreDictionary = {
   'Updated\n            Oct 4, 2025': '更新于\n            2025年10月4日',
 };
 /**
+ * Issues 页面翻译词典
+ * @file issues.js
+ * @version 1.9.22
+ * @date 2026-07-04
+ * @author Sut
+ * @description 包含 GitHub Issues 页面的翻译词条
+ */
+const issuesDictionary = {
+  // ===== 页面标题与筛选 =====
+  Issues: '问题',
+  'New issue': '新建问题',
+  'Open issue': '打开问题',
+  'Close issue': '关闭问题',
+  'Closed issue': '已关闭的问题',
+  'Reopen issue': '重新打开问题',
+  'Issue title': '问题标题',
+  'Add issue title': '添加问题标题',
+  // ===== 筛选与排序 =====
+  Filters: '筛选条件',
+  'Open issues': '打开的问题',
+  'Closed issues': '已关闭的问题',
+  'Your issues': '您的问题',
+  'Your pull requests': '您的拉取请求',
+  'Assigned to you': '分配给您',
+  'Created by you': '由您创建',
+  'Mentioning you': '提及您',
+  'Sort by': '排序方式',
+  'Newest': '最新',
+  'Oldest': '最旧',
+  'Most commented': '评论最多',
+  'Least commented': '评论最少',
+  'Recently updated': '最近更新',
+  'Least recently updated': '最久未更新',
+  // ===== 标签与里程碑 =====
+  Labels: '标签',
+  'No label': '无标签',
+  Milestones: '里程碑',
+  'No milestone': '无里程碑',
+  'Create a new label': '创建新标签',
+  'Create a new milestone': '创建新里程碑',
+  'Label name': '标签名称',
+  'Label description': '标签描述',
+  'Milestone title': '里程碑标题',
+  'Due date': '截止日期',
+  'Milestone description': '里程碑描述',
+  // ===== 评论与回复 =====
+  'Write a comment': '撰写评论',
+  'Add comment': '添加评论',
+  'Submit new issue': '提交新问题',
+  Comment: '评论',
+  Comments: '评论',
+  'Comment on this issue': '对此问题发表评论',
+  'Reply to this comment': '回复此评论',
+  'Edit comment': '编辑评论',
+  'Delete comment': '删除评论',
+  'Hide comment': '隐藏评论',
+  'Copy link': '复制链接',
+  'Quote reply': '引用回复',
+  // ===== 状态管理 =====
+  'Open': '打开',
+  'Closed': '已关闭',
+  'Close with comment': '评论并关闭',
+  'Reopen': '重新打开',
+  'Reopen with comment': '评论并重新打开',
+  'Close as completed': '以已完成关闭',
+  'Close as not planned': '以未计划关闭',
+  'Close as duplicate': '以重复关闭',
+  // ===== 分配与关联 =====
+  Assignees: '负责人',
+  'Assign yourself': '分配给自己',
+  'No assignees': '无负责人',
+  'No one assigned': '未分配任何人',
+  'Linked issues': '关联的问题',
+  'Linked pull requests': '关联的拉取请求',
+  'Development': '开发',
+  'Successfully linked': '成功关联',
+  'Create a branch': '创建分支',
+  'Check out locally': '在本地检出',
+  // ===== 通知与订阅 =====
+  Notifications: '通知',
+  'Notifications menu': '通知菜单',
+  'Subscribe to notifications': '订阅通知',
+  'Unsubscribe from notifications': '取消订阅通知',
+  'You are receiving this because you': '您收到此通知是因为您',
+  // ===== 项目关联 =====
+  Projects: '项目',
+  'No projects': '无项目',
+  'Add to project': '添加到项目',
+  'Remove from project': '从项目移除',
+  // ===== 侧边栏操作 =====
+  'About this issue': '关于此问题',
+  'No description provided': '未提供描述',
+  'Edit description': '编辑描述',
+  // ===== 时间与活动 =====
+  Activity: '活动',
+  'Show all activity': '显示全部活动',
+  'Show conversation only': '仅显示对话',
+  'Show history only': '仅显示历史',
+  'This issue was closed by': '此问题由关闭',
+  'This issue was reopened by': '此问题由重新打开',
+};
+/**
+ * Pull Requests 页面翻译词典
+ * @file pullRequests.js
+ * @version 1.9.22
+ * @date 2026-07-04
+ * @author Sut
+ * @description 包含 GitHub Pull Requests 页面的翻译词条
+ */
+const pullRequestsDictionary = {
+  // ===== 页面标题 =====
+  'Pull requests': '拉取请求',
+  'New pull request': '新建拉取请求',
+  'Create pull request': '创建拉取请求',
+  'Open pull request': '打开拉取请求',
+  'Close pull request': '关闭拉取请求',
+  'Merged pull request': '已合并的拉取请求',
+  'Draft pull request': '草稿拉取请求',
+  // ===== 筛选与排序 =====
+  'Open pull requests': '打开的拉取请求',
+  'Closed pull requests': '已关闭的拉取请求',
+  'Merged pull requests': '已合并的拉取请求',
+  'Draft pull requests': '草稿拉取请求',
+  'Your pull requests': '您的拉取请求',
+  'Pull request title': '拉取请求标题',
+  'Add pull request title': '添加拉取请求标题',
+  // ===== 状态标签 =====
+  Open: '打开',
+  Closed: '已关闭',
+  Merged: '已合并',
+  Draft: '草稿',
+  'Ready for review': '可审查',
+  'Review required': '需要审查',
+  'Changes requested': '要求修改',
+  Approved: '已批准',
+  'Review in progress': '审查中',
+  'Commented': '已评论',
+  'Awaiting review': '等待审查',
+  // ===== 合并 =====
+  'Merge pull request': '合并拉取请求',
+  'Merge': '合并',
+  'Confirm merge': '确认合并',
+  'Squash and merge': '压缩并合并',
+  'Rebase and merge': '变基并合并',
+  'Create a merge commit': '创建合并提交',
+  'Merged successfully': '合并成功',
+  'This branch has no conflicts with the base branch': '此分支与基础分支无冲突',
+  'This branch has conflicts that must be resolved': '此分支存在必须解决的冲突',
+  'Merge conflict': '合并冲突',
+  'Resolve conflicts': '解决冲突',
+  'View merge conflicts': '查看合并冲突',
+  // ===== 代码审查 =====
+  Reviewers: '审查者',
+  'Request review': '请求审查',
+  'Review changes': '审查变更',
+  'Add review': '添加审查',
+  'Submit review': '提交审查',
+  'Review summary': '审查摘要',
+  'Finish your review': '完成您的审查',
+  'Comment': '评论',
+  'Approve': '批准',
+  'Request changes': '请求修改',
+  'Change requested': '请求的修改',
+  'Files changed': '变更的文件',
+  'Conversation': '对话',
+  Commits: '提交',
+  Checks: '检查',
+  'All checks have passed': '所有检查已通过',
+  'Some checks were not successful': '部分检查未成功',
+  'Checks have not completed yet': '检查尚未完成',
+  // ===== 分支 =====
+  'base:': '基础：',
+  'compare:': '比较：',
+  'base branch': '基础分支',
+  'compare branch': '比较分支',
+  'head branch': '头部分支',
+  'Choose base branch': '选择基础分支',
+  'Choose head branch': '选择头部分支',
+  'Able to merge': '可合并',
+  'Can\'t be merged': '无法合并',
+  // ===== 提交与变更 =====
+  'No commits': '无提交',
+  'Showing': '显示',
+  'of': '共',
+  'Commit message': '提交信息',
+  'Verified': '已验证',
+  'Unverified': '未验证',
+  // ===== 评论 =====
+  'Write a comment': '撰写评论',
+  'Add comment': '添加评论',
+  'Review comment': '审查评论',
+  'File comment': '文件评论',
+  'Line comment': '行内评论',
+  'Start a review': '开始审查',
+  'Comment on this pull request': '对此拉取请求发表评论',
+  'Reply to this review': '回复此审查',
+  // ===== 指派与标签 =====
+  Assignees: '负责人',
+  'Assign yourself': '分配给自己',
+  Labels: '标签',
+  Milestones: '里程碑',
+  Projects: '项目',
+  'Linked issues': '关联的问题',
+  'Development': '开发',
+  // ===== 通知 =====
+  Notifications: '通知',
+  'Subscribe to notifications': '订阅通知',
+  'Unsubscribe from notifications': '取消订阅通知',
+  // ===== 操作按钮 =====
+  'Edit': '编辑',
+  'Reopen pull request': '重新打开拉取请求',
+  'Mark as draft': '标记为草稿',
+  'Convert to draft': '转换为草稿',
+  // ===== 描述区 =====
+  'About this pull request': '关于此拉取请求',
+  'No description provided': '未提供描述',
+  'Edit description': '编辑描述',
+};
+/**
+ * Actions 页面翻译词典
+ * @file actions.js
+ * @version 1.9.22
+ * @date 2026-07-04
+ * @author Sut
+ * @description 包含 GitHub Actions 页面的翻译词条
+ */
+const actionsDictionary = {
+  // ===== 页面标题 =====
+  Actions: 'Actions',
+  'All workflows': '所有工作流',
+  'New workflow': '新建工作流',
+  'Actions documentation': 'Actions 文档',
+  // ===== 工作流 =====
+  Workflows: '工作流',
+  Workflow: '工作流',
+  'Workflow runs': '工作流运行',
+  'Workflow file': '工作流文件',
+  'Workflow name': '工作流名称',
+  'No workflows found': '未找到工作流',
+  'Create workflow': '创建工作流',
+  'Configure': '配置',
+  'Set up this workflow': '设置此工作流',
+  'Start commit': '开始提交',
+  'Commit new file': '提交新文件',
+  // ===== 运行状态 =====
+  Status: '状态',
+  'All statuses': '所有状态',
+  Success: '成功',
+  Failed: '失败',
+  Cancelled: '已取消',
+  'In progress': '进行中',
+  Queued: '排队中',
+  Skipped: '已跳过',
+  'Waiting': '等待中',
+  'Completed': '已完成',
+  // ===== 运行详情 =====
+  'Run details': '运行详情',
+  'Run ID': '运行 ID',
+  'Workflow run': '工作流运行',
+  'Triggered by': '触发者',
+  'Triggered': '已触发',
+  'Trigger': '触发器',
+  'Manual workflow': '手动工作流',
+  'Push': '推送',
+  'Pull request': '拉取请求',
+  Schedule: '定时',
+  'Workflow dispatch': '工作流调度',
+  'Branch': '分支',
+  'Commit': '提交',
+  'Event': '事件',
+  'Duration': '持续时间',
+  'Started': '开始时间',
+  // ===== 作业与步骤 =====
+  Jobs: '作业',
+  Job: '作业',
+  Steps: '步骤',
+  Step: '步骤',
+  'Run step': '运行步骤',
+  'No jobs': '无作业',
+  'No steps': '无步骤',
+  'Set up job': '设置作业',
+  'Complete job': '完成作业',
+  'Checkout': '检出',
+  'Build': '构建',
+  Test: '测试',
+  Deploy: '部署',
+  'Post': '后置',
+  'Set up': '设置',
+  'Clean up': '清理',
+  // ===== 日志 =====
+  Logs: '日志',
+  'View logs': '查看日志',
+  'Download logs': '下载日志',
+  'Search logs': '搜索日志',
+  'Expand all': '全部展开',
+  'Collapse all': '全部折叠',
+  'Raw logs': '原始日志',
+  'Annotate': '注释',
+  'Annotation': '注释',
+  'Notice': '提示',
+  Warning: '警告',
+  Error: '错误',
+  Errors: '错误',
+  Warnings: '警告',
+  Notices: '提示',
+  // ===== 操作按钮 =====
+  'Re-run jobs': '重新运行作业',
+  'Re-run all jobs': '重新运行所有作业',
+  'Re-run failed jobs': '重新运行失败的作业',
+  'Cancel workflow': '取消工作流',
+  'Delete workflow run': '删除工作流运行',
+  'Rerun': '重新运行',
+  'Cancel': '取消',
+  'Delete': '删除',
+  // ===== 速率与使用量 =====
+  'Billing & usage': '账单与使用量',
+  'Usage': '使用量',
+  'Storage usage': '存储使用量',
+  'Minutes used': '已用分钟数',
+  'Total minutes': '总分钟数',
+  'Included minutes': '包含分钟数',
+  'Paid minutes': '付费分钟数',
+  'Free minutes': '免费分钟数',
+  'Estimated spending': '预估花费',
+  // ===== 构件与产物 =====
+  Artifacts: '构件',
+  'Artifact name': '构件名称',
+  'No artifacts': '无构件',
+  'Download': '下载',
+  'Expired': '已过期',
+  'Expires': '过期',
+  'Size': '大小',
+  // ===== 环境 =====
+  Environments: '环境',
+  Environment: '环境',
+  'Deployment': '部署',
+  'Deployments': '部署',
+  'Production': '生产环境',
+  Staging: '预发布环境',
+  Development: '开发环境',
+  // ===== 缓存 =====
+  Caches: '缓存',
+  'Cache list': '缓存列表',
+  'Cache size': '缓存大小',
+  'Clear all caches': '清除所有缓存',
+  'No caches found': '未找到缓存',
+};
+/**
+ * Wiki 页面翻译词典
+ * @file wiki.js
+ * @version 1.9.22
+ * @date 2026-07-04
+ * @author Sut
+ * @description 包含 GitHub Wiki 页面的翻译词条
+ */
+const wikiDictionary = {
+  // ===== 页面标题 =====
+  Wiki: 'Wiki',
+  Wikis: 'Wikis',
+  'Home': '首页',
+  'Wiki Home': 'Wiki 首页',
+  'New Page': '新建页面',
+  'New page': '新建页面',
+  'Create new page': '创建新页面',
+  'Edit Page': '编辑页面',
+  'Edit page': '编辑页面',
+  // ===== 页面操作 =====
+  'Page title': '页面标题',
+  'Page content': '页面内容',
+  'No wiki pages': '无 Wiki 页面',
+  'No content yet': '暂无内容',
+  'This page has no content yet.': '此页面暂无内容。',
+  'You must be logged in to edit wiki pages': '您必须登录才能编辑 Wiki 页面',
+  // ===== 编辑 =====
+  'Write': '编写',
+  'Preview': '预览',
+  'Save': '保存',
+  'Save page': '保存页面',
+  'Cancel': '取消',
+  'Edit mode': '编辑模式',
+  'Edit message': '编辑说明',
+  'Edit summary': '编辑摘要',
+  'Describe this change': '描述此变更',
+  'Save changes': '保存变更',
+  // ===== 历史与版本 =====
+  'Page History': '页面历史',
+  'Page history': '页面历史',
+  'View history': '查看历史',
+  'Revision history': '修订历史',
+  'View revision': '查看修订版本',
+  'Show changes': '显示变更',
+  'No revisions yet': '暂无修订版本',
+  'Last edited': '最后编辑',
+  'Edited by': '编辑者',
+  'Edited': '已编辑',
+  // ===== 侧边栏 =====
+  Pages: '页面',
+  'Pages in this wiki': '此 Wiki 中的页面',
+  'All pages': '全部页面',
+  'Recently updated': '最近更新',
+  'Oldest': '最旧',
+  'Newest': '最新',
+  // ===== 搜索 =====
+  'Search': '搜索',
+  'Search pages': '搜索页面',
+  'Search this wiki': '搜索此 Wiki',
+  'No results': '无结果',
+  'No results found': '未找到结果',
+  // ===== 格式 =====
+  Format: '格式',
+  'Markdown': 'Markdown',
+  'Markdown is a lightweight and easy-to-use syntax for styling your writing.':
+    'Markdown 是一种轻量级且易于使用的语法，用于为您的写作设置样式。',
+  'Formatting help': '格式帮助',
+  'Styling with Markdown is supported': '支持使用 Markdown 设置样式',
+  'Attach files by dragging & dropping or': '通过拖放或附加文件',
+  'selecting them': '选择它们',
+  // ===== 页面列表 =====
+  'Home Page': '首页',
+  'Table of Contents': '目录',
+  'Table of contents': '目录',
+  'Back to home': '返回首页',
+  'Back to Home': '返回首页',
+  // ===== 操作菜单 =====
+  'More': '更多',
+  'Delete page': '删除页面',
+  'Delete this page': '删除此页面',
+  'Are you sure?': '确定吗？',
+  'This action cannot be undone.': '此操作无法撤销。',
+  'Clone this wiki locally': '在本地克隆此 Wiki',
+  'Clone repository': '克隆仓库',
+  // ===== 克隆与访问 =====
+  'Clone': '克隆',
+  'HTTPS': 'HTTPS',
+  SSH: 'SSH',
+  'Copy URL': '复制 URL',
+  'Copy clone URL': '复制克隆 URL',
+};
+/**
+ * Notifications 页面翻译词典
+ * @file notifications.js
+ * @version 1.9.22
+ * @date 2026-07-04
+ * @author Sut
+ * @description 包含 GitHub Notifications 页面的翻译词条
+ */
+const notificationsDictionary = {
+  // ===== 页面标题 =====
+  Notifications: '通知',
+  'Your notifications': '您的通知',
+  'Notification settings': '通知设置',
+  'Notification inbox': '通知收件箱',
+  // ===== 筛选 =====
+  Inbox: '收件箱',
+  'All notifications': '所有通知',
+  'Unread notifications': '未读通知',
+  'Participating': '参与的',
+  'Participating and @mentions': '参与的和提及的',
+  'Saved for later': '稍后保存',
+  'Done': '已完成',
+  'Done notifications': '已完成通知',
+  // ===== 分类筛选 =====
+  Filter: '筛选',
+  'Filter by': '筛选方式',
+  'All activity': '所有活动',
+  'Repositories you watch': '您关注的仓库',
+  'Participating mentions': '参与的提及',
+  'Your work': '您的工作',
+  // ===== 通知类型 =====
+  Issue: '问题',
+  'Pull request': '拉取请求',
+  Release: '发布',
+  Discussion: '讨论',
+  Commit: '提交',
+  'Security alert': '安全提醒',
+  'Workflow run': '工作流运行',
+  'Repository invitation': '仓库邀请',
+  'Team mention': '团队提及',
+  'GitHub Sponsors': 'GitHub Sponsors',
+  // ===== 操作按钮 =====
+  'Mark as read': '标记为已读',
+  'Mark as done': '标记为已完成',
+  'Mark as unread': '标记为未读',
+  'Save for later': '稍后保存',
+  'Unsave': '取消保存',
+  'Unsubscribe': '取消订阅',
+  'Mute this conversation': '静音此对话',
+  'Muted': '已静音',
+  // ===== 批量操作 =====
+  'Select all': '全选',
+  'Deselect all': '取消全选',
+  'Mark selected as read': '将选中的标记为已读',
+  'Mark selected as done': '将选中的标记为已完成',
+  'Save selected for later': '保存选中的供稍后查看',
+  'Unsubscribe selected': '取消选中的订阅',
+  'Delete selected': '删除选中的',
+  // ===== 排序与视图 =====
+  'Sort by': '排序方式',
+  'Newest first': '最新优先',
+  'Oldest first': '最旧优先',
+  'Most recent': '最近的',
+  'Least recent': '最久的',
+  'Group by date': '按日期分组',
+  'Group by repository': '按仓库分组',
+  'List view': '列表视图',
+  'Dense view': '紧凑视图',
+  // ===== 通知状态 =====
+  Unread: '未读',
+  Read: '已读',
+  New: '新',
+  'New notification': '新通知',
+  'No new notifications': '无新通知',
+  'No notifications': '无通知',
+  'You are all caught up!': '您已全部查看！',
+  'You have no unread notifications': '您没有未读通知',
+  // ===== 通知内容 =====
+  'mentioned you': '提到了您',
+  'assigned you to': '分配给您',
+  'requested your review': '请求您审查',
+  'commented on': '评论了',
+  'closed this': '关闭了此',
+  'merged this': '合并了此',
+  'opened this': '打开了此',
+  'reopened this': '重新打开了此',
+  // ===== 仓库筛选 =====
+  'All repositories': '所有仓库',
+  'Current repository': '当前仓库',
+  'Search repositories': '搜索仓库',
+  'No repositories found': '未找到仓库',
+  // ===== 页面底部 =====
+  'Older notifications': '较早的通知',
+  'Newer notifications': '较新的通知',
+  'Load more': '加载更多',
+  'Loading': '加载中',
+  // ===== 设置相关 =====
+  'Customize your notification preferences': '自定义您的通知偏好',
+  'Notification preferences': '通知偏好',
+  'Watch settings': '关注设置',
+  'Email preferences': '电子邮件偏好',
+  'Web notifications': '网页通知',
+};
+/**
+ * Settings 页面翻译词典
+ * @file settings.js
+ * @version 1.9.22
+ * @date 2026-07-04
+ * @author Sut
+ * @description 包含 GitHub Settings 页面的翻译词条
+ */
+const settingsDictionary = {
+  // ===== 页面标题 =====
+  Settings: '设置',
+  'Account settings': '账户设置',
+  'User settings': '用户设置',
+  'Repository settings': '仓库设置',
+  'Organization settings': '组织设置',
+  // ===== 侧边栏菜单 =====
+  Profile: '个人资料',
+  Account: '账户',
+  'Account security': '账户安全',
+  'Accessibility': '辅助功能',
+  Notifications: '通知',
+  Appearance: '外观',
+  'Billing and plans': '账单与方案',
+  'Billing & plans': '账单与方案',
+  'Codespaces': 'Codespaces',
+  'Developer settings': '开发者设置',
+  'Security': '安全',
+  'SSH and GPG keys': 'SSH 和 GPG 密钥',
+  'Password and authentication': '密码与身份验证',
+  'Two-factor authentication': '双因素认证',
+  'Personal access tokens': '个人访问令牌',
+  'OAuth applications': 'OAuth 应用程序',
+  'GitHub Apps': 'GitHub Apps',
+  'Organizations': '组织',
+  'Repositories': '仓库',
+  'Starred repositories': '收藏的仓库',
+  // ===== 个人资料 =====
+  'Public profile': '公开个人资料',
+  'Profile picture': '个人头像',
+  'Upload new picture': '上传新头像',
+  'Edit': '编辑',
+  Name: '名称',
+  'Public email': '公开邮箱',
+  'Don\'t show my email address': '不显示我的邮箱地址',
+  Bio: '个人简介',
+  'Add a bio': '添加简介',
+  URL: '网址',
+  'Add your website URL': '添加您的网站网址',
+  Company: '公司',
+  'Add your company name': '添加您的公司名称',
+  Location: '位置',
+  'Add your location': '添加您的位置',
+  'Social accounts': '社交账户',
+  'Add social accounts': '添加社交账户',
+  // ===== 外观 =====
+  'Theme preferences': '主题偏好',
+  'Light': '浅色',
+  Dark: '深色',
+  'System default': '系统默认',
+  'Theme': '主题',
+  'Sync with system': '与系统同步',
+  // ===== 通知设置 =====
+  'Notification settings': '通知设置',
+  'Email notification preferences': '电子邮件通知偏好',
+  'Web notification preferences': '网页通知偏好',
+  'Participating notifications': '参与通知',
+  'Watching notifications': '关注通知',
+  'Email': '电子邮件',
+  'Web and Mobile': '网页和移动端',
+  'GitHub Mobile': 'GitHub 移动端',
+  // ===== 安全设置 =====
+  'Password': '密码',
+  'Change password': '修改密码',
+  'Current password': '当前密码',
+  'New password': '新密码',
+  'Confirm new password': '确认新密码',
+  'Update password': '更新密码',
+  '2FA': '双因素认证',
+  'Enable 2FA': '启用双因素认证',
+  'Disable 2FA': '禁用双因素认证',
+  'Recovery codes': '恢复代码',
+  // ===== SSH 和 GPG 密钥 =====
+  'SSH keys': 'SSH 密钥',
+  'GPG keys': 'GPG 密钥',
+  'New SSH key': '新建 SSH 密钥',
+  'New GPG key': '新建 GPG 密钥',
+  'Add SSH key': '添加 SSH 密钥',
+  'Add GPG key': '添加 GPG 密钥',
+  'Key': '密钥',
+  'Title': '标题',
+  'Key type': '密钥类型',
+  'Created': '创建时间',
+  'Last used': '最后使用',
+  'Delete': '删除',
+  // ===== 开发者设置 =====
+  'Generate new token': '生成新令牌',
+  'Token name': '令牌名称',
+  'Expiration': '过期时间',
+  'Select scopes': '选择权限范围',
+  'Generate token': '生成令牌',
+  // ===== 组织与仓库 =====
+  'Your organizations': '您的组织',
+  'Your repositories': '您的仓库',
+  'General': '常规',
+  'Collaborators': '协作者',
+  'Branches': '分支',
+  'Tags': '标签',
+  'Actions': 'Actions',
+  'Pages': 'Pages',
+  'Webhooks': 'Webhook',
+  'Deploy keys': '部署密钥',
+  'Secrets and variables': '密钥和变量',
+  // ===== 保存操作 =====
+  'Update profile': '更新个人资料',
+  'Save changes': '保存更改',
+  'Cancel': '取消',
+  'Save': '保存',
+  'Confirm': '确认',
+  'Danger Zone': '危险区',
+  'Delete account': '删除账户',
+  'Delete this repository': '删除此仓库',
+  'Transfer ownership': '转让所有权',
+};
+/**
+ * Search 页面翻译词典
+ * @file search.js
+ * @version 1.9.22
+ * @date 2026-07-04
+ * @author Sut
+ * @description 包含 GitHub Search 页面的翻译词条
+ */
+const searchDictionary = {
+  // ===== 搜索框 =====
+  'Search': '搜索',
+  'Search or jump to...': '搜索或跳转到...',
+  'Search GitHub': '搜索 GitHub',
+  'Search results': '搜索结果',
+  'No results': '无结果',
+  'No results matched your search.': '没有匹配您搜索的结果。',
+  'Search syntax tips': '搜索语法提示',
+  // ===== 搜索类型 =====
+  'All': '全部',
+  'Repositories': '仓库',
+  'Code': '代码',
+  'Commits': '提交',
+  'Issues': '问题',
+  'Pull requests': '拉取请求',
+  'Discussions': '讨论',
+  'Packages': '包',
+  'Topics': '主题',
+  'Wikis': 'Wikis',
+  'Users': '用户',
+  // ===== 筛选器 =====
+  Filters: '筛选条件',
+  'Filter by': '筛选方式',
+  'Language': '语言',
+  'All languages': '所有语言',
+  'Most stars': '最多星标',
+  'Fewest stars': '最少星标',
+  'Most forks': '最多 Fork',
+  'Fewest forks': '最少 Fork',
+  'Recently updated': '最近更新',
+  'Least recently updated': '最久未更新',
+  'Newest': '最新',
+  'Oldest': '最旧',
+  'Best match': '最佳匹配',
+  'Sort by': '排序方式',
+  // ===== 仓库搜索结果 =====
+  'repository results': '个仓库结果',
+  'result': '个结果',
+  'results': '个结果',
+  'Showing': '显示',
+  'of': '共',
+  'Page': '页',
+  'Previous': '上一页',
+  'Next': '下一页',
+  // ===== 代码搜索 =====
+  'Code search': '代码搜索',
+  'Search code': '搜索代码',
+  'Search code, issues, pull requests': '搜索代码、问题、拉取请求',
+  'Matching lines': '匹配行',
+  'Matching repositories': '匹配仓库',
+  'in this repository': '在此仓库中',
+  'in this organization': '在此组织中',
+  // ===== 高级搜索 =====
+  'Advanced search': '高级搜索',
+  'Advanced search options': '高级搜索选项',
+  'From these owners': '来自这些所有者',
+  'In these repositories': '在这些仓库中',
+  'Written in this language': '使用此语言编写',
+  'With this many stars': '拥有这么多星标',
+  'With this many forks': '拥有这么多 Fork',
+  'Pushed within': '推送时间在',
+  'Created within': '创建时间在',
+  'State': '状态',
+  'Open': '打开',
+  'Closed': '已关闭',
+  // ===== 搜索建议 =====
+  'Saved searches': '已保存的搜索',
+  'Use saved searches to filter your results more quickly': '使用已保存的搜索更快地筛选结果',
+  'Recent searches': '最近搜索',
+  'Clear recent searches': '清除最近搜索',
+  'Suggestions': '建议',
+  // ===== 空状态 =====
+  'We couldn\'t find any code matching': '我们找不到任何匹配的代码',
+  'Try modifying your search or filters.': '尝试修改您的搜索或筛选条件。',
+  'There aren\'t any repositories matching': '没有匹配的仓库',
+  'Try adjusting your search to find what you\'re looking for.': '尝试调整搜索以找到您要找的内容。',
+  // ===== 仓库筛选 =====
+  'In:': '范围：',
+  'Stars:': '星标数：',
+  'Forks:': 'Fork 数：',
+  'Topics:': '主题：',
+  'License:': '许可证：',
+  'Any license': '任何许可证',
+  'Issues:': '问题：',
+  'Has issues': '有问题',
+  'No issues': '无问题',
+};
+/**
+ * Profile 页面翻译词典
+ * @file profile.js
+ * @version 1.9.22
+ * @date 2026-07-04
+ * @author Sut
+ * @description 包含 GitHub Profile 页面的翻译词条
+ */
+const profileDictionary = {
+  // ===== 个人信息 =====
+  'Overview': '概览',
+  'Repositories': '仓库',
+  'Projects': '项目',
+  'Packages': '包',
+  'Stars': '星标',
+  'Followers': '关注者',
+  'Following': '关注中',
+  'Follow': '关注',
+  'Unfollow': '取消关注',
+  'Followers count': '关注者数量',
+  'Following count': '关注中数量',
+  // ===== 个人资料详情 =====
+  'Bio': '个人简介',
+  'No bio provided': '未提供简介',
+  'Location': '位置',
+  'No location provided': '未提供位置',
+  'Company': '公司',
+  'No company provided': '未提供公司',
+  'Website': '网站',
+  'No website provided': '未提供网站',
+  'Email': '电子邮件',
+  'No public email': '无公开邮箱',
+  'Social accounts': '社交账户',
+  'Twitter': 'Twitter',
+  'LinkedIn': 'LinkedIn',
+  'Mastodon': 'Mastodon',
+  'YouTube': 'YouTube',
+  'Hireable': '可雇佣',
+  'Not hireable': '暂不接受工作邀请',
+  // ===== 统计信息 =====
+  'Contribution activity': '贡献活动',
+  'Contributions': '贡献',
+  'Total contributions': '总贡献数',
+  'Contribution graph': '贡献图',
+  'Contribution calendar': '贡献日历',
+  'Less': '少',
+  'More': '多',
+  'No contributions': '无贡献',
+  'Contribution activity overview': '贡献活动概览',
+  // ===== 年度贡献 =====
+  'Contributions in the last year': '过去一年的贡献',
+  'This year': '今年',
+  'Last year': '去年',
+  'Yearly contributions': '年度贡献',
+  'Current streak': '当前连续',
+  'Longest streak': '最长连续',
+  'Public contributions': '公开贡献',
+  'Private contributions': '私有贡献',
+  // ===== 仓库标签页 =====
+  'Pinned': '置顶',
+  'Popular': '热门',
+  'All': '全部',
+  'Type': '类型',
+  'All types': '所有类型',
+  'Source': '源代码',
+  'Forks': 'Fork',
+  'Archived': '已归档',
+  'Templates': '模板',
+  'Mirrors': '镜像',
+  'Language': '语言',
+  'All languages': '所有语言',
+  'Sort by': '排序方式',
+  'Last updated': '最近更新',
+  // ===== 项目标签页 =====
+  'Projects overview': '项目概览',
+  'No projects yet': '暂无项目',
+  'Create project': '创建项目',
+  // ===== 星标标签页 =====
+  'Starred repositories': '已收藏的仓库',
+  'Starred by': '收藏者',
+  'No starred repositories': '无收藏的仓库',
+  'List view': '列表视图',
+  'Grid view': '网格视图',
+  // ===== 编辑资料 =====
+  'Edit profile': '编辑个人资料',
+  'Edit bio': '编辑简介',
+  'Save': '保存',
+  'Cancel': '取消',
+  'Profile picture': '个人头像',
+  'Upload new picture': '上传新头像',
+  'Pronouns': '代词',
+  'Set pronouns': '设置代词',
+  // ===== 成就 =====
+  'Achievements': '成就',
+  'Achievements overview': '成就概览',
+  'No achievements yet': '暂无成就',
+  'Showcase': '展示',
+  // ===== 高亮 =====
+  Highlights: '亮点',
+  'Developer Program Member': '开发者计划成员',
+  'Pro': 'Pro',
+  'Team': '团队',
+  'Enterprise': '企业版',
+  'Campus Expert': '校园专家',
+  'Security Bug Bounty': '安全漏洞赏金',
+  // ===== 组织 =====
+  'Organizations': '组织',
+  'No organizations': '无组织',
+  'Member of': '成员于',
+  // ===== 仓库卡片 =====
+  'Updated': '更新',
+  'stars': '星标',
+  'forks': 'Fork',
+  'Contributors': '贡献者',
+  'License': '许可证',
+};
+/**
+ * Dashboard 页面翻译词典
+ * @file dashboard.js
+ * @version 1.9.22
+ * @date 2026-07-04
+ * @author Sut
+ * @description 包含 GitHub Dashboard（首页）的翻译词条
+ */
+const dashboardDictionary = {
+  // ===== 页面标题 =====
+  'Dashboard': '仪表盘',
+  'Home': '首页',
+  'GitHub': 'GitHub',
+  'Your dashboard': '您的仪表盘',
+  'Personal dashboard': '个人仪表盘',
+  // ===== 顶部导航 =====
+  'Pull requests': '拉取请求',
+  Issues: '问题',
+  Codespaces: 'Codespaces',
+  Explore: '探索',
+  Marketplace: '应用市场',
+  // ===== 侧边栏 - 仓库列表 =====
+  'Top repositories': '热门仓库',
+  'Recent activity': '最近活动',
+  'Your repositories': '您的仓库',
+  'No repositories': '无仓库',
+  'Find a repository': '查找仓库',
+  'Filter by name': '按名称筛选',
+  'View all': '查看全部',
+  'New repository': '新建仓库',
+  // ===== 侧边栏 - 最新动态 =====
+  'Latest changes': '最新变更',
+  'Latest activity': '最新活动',
+  'Activity from': '活动来自',
+  'Following feed': '关注动态',
+  'Your feed': '您的动态',
+  'For you': '为您推荐',
+  'Following': '关注中',
+  // ===== 动态内容 =====
+  'pushed to': '推送到',
+  'opened this': '打开了此',
+  'closed this': '关闭了此',
+  'merged this': '合并了此',
+  'commented on': '评论了',
+  'starred': '收藏了',
+  'forked': 'Fork 了',
+  'created a repository': '创建了一个仓库',
+  'created a branch': '创建了一个分支',
+  'deleted a branch': '删除了一个分支',
+  'added a comment': '添加了一条评论',
+  'edited': '编辑了',
+  'deleted': '删除了',
+  'renamed': '重命名了',
+  // ===== 发现新内容 =====
+  'Discover interesting projects and people to populate your personal news feed.':
+    '发现有趣的项目和人，填充您的个人新闻动态。',
+  'Explore more on Explore': '在 Explore 上发现更多',
+  'Get started': '开始使用',
+  'New to GitHub?': 'GitHub 新用户？',
+  'Create your first repository': '创建您的第一个仓库',
+  // ===== 全局通知 =====
+  'All GitHub features': '所有 GitHub 功能',
+  'Feature previews': '功能预览',
+  'New feature announcements': '新功能公告',
+  'What\'s new': '最新动态',
+  // ===== 组织切换 =====
+  'Switch dashboard context': '切换仪表盘上下文',
+  'Your personal dashboard': '您的个人仪表盘',
+  'Organization dashboard': '组织仪表盘',
+  // ===== 推荐仓库 =====
+  'Recommended for you': '为您推荐',
+  'Explore repositories': '探索仓库',
+  'See more': '查看更多',
+  'Trending': '趋势',
+  // ===== 快捷操作 =====
+  'Quick links': '快捷链接',
+  'Create an issue': '创建问题',
+  'Create a pull request': '创建拉取请求',
+  'Create a project': '创建项目',
+  'Import repository': '导入仓库',
+  'New gist': '新建代码片段',
+  'New organization': '新建组织',
+  // ===== 团队/组织 =====
+  'Your teams': '您的团队',
+  'Your organizations': '您的组织',
+  'No teams': '无团队',
+  'No organizations': '无组织',
+  'Create organization': '创建组织',
+  // ===== 底部 =====
+  'All of GitHub': '全部 GitHub',
+  'Show more activity': '显示更多活动',
+  'Load more': '加载更多',
+  'Loading': '加载中',
+};
+/**
+ * Marketplace 页面翻译词典
+ * @file marketplace.js
+ * @version 1.9.22
+ * @date 2026-07-04
+ * @author Sut
+ * @description 包含 GitHub Marketplace 页面的翻译词条
+ */
+const marketplaceDictionary = {
+  // ===== 页面标题 =====
+  Marketplace: '应用市场',
+  'GitHub Marketplace': 'GitHub 应用市场',
+  'Apps': '应用',
+  'Actions': 'Actions',
+  'Explore GitHub Apps': '探索 GitHub Apps',
+  'Explore Actions': '探索 Actions',
+  // ===== 分类导航 =====
+  'Categories': '分类',
+  'All categories': '全部分类',
+  'Code quality': '代码质量',
+  'Code review': '代码审查',
+  'Continuous integration': '持续集成',
+  'Deployment': '部署',
+  'Monitoring': '监控',
+  'Security': '安全',
+  'Publishing': '发布',
+  'Project management': '项目管理',
+  'Chat': '聊天',
+  'Support': '支持',
+  'Mobile': '移动端',
+  'Utilities': '工具',
+  // ===== 搜索和筛选 =====
+  Search: '搜索',
+  'Search Marketplace': '搜索应用市场',
+  'Search results': '搜索结果',
+  'No results found': '未找到结果',
+  Filter: '筛选',
+  'Filter by': '筛选方式',
+  'Sort by': '排序方式',
+  'Most popular': '最热门',
+  'Highest rated': '评分最高',
+  'Most recently added': '最新添加',
+  'Most recent release': '最近发布',
+  // ===== 应用卡片 =====
+  'Install': '安装',
+  'Install it for free': '免费安装',
+  'Free': '免费',
+  'Free trial': '免费试用',
+  'Paid': '付费',
+  'Pricing': '定价',
+  'See plans': '查看方案',
+  'View details': '查看详情',
+  'Categories:': '分类：',
+  'Developer:': '开发者：',
+  // ===== 评分 =====
+  Rating: '评分',
+  'No ratings yet': '暂无评分',
+  'Ratings': '评分',
+  stars: '星',
+  Reviews: '评论',
+  'Write a review': '写评论',
+  'Your review': '您的评论',
+  // ===== 应用详情页 =====
+  'About this app': '关于此应用',
+  'How it works': '工作原理',
+  'Screenshots': '截图',
+  'Screenshot': '截图',
+  'Privacy and security': '隐私与安全',
+  'Documentation': '文档',
+  'Developer site': '开发者网站',
+  'Report abuse': '举报滥用',
+  // ===== 安装流程 =====
+  'Install app': '安装应用',
+  'Installing app': '正在安装应用',
+  'Install for free': '免费安装',
+  'Start free trial': '开始免费试用',
+  'Choose a plan': '选择方案',
+  'Upgrade to install': '升级以安装',
+  'Configure': '配置',
+  'Configuration': '配置',
+  'Authorize': '授权',
+  'Authorization': '授权',
+  // ===== 仓库选择 =====
+  'Select repositories': '选择仓库',
+  'All repositories': '所有仓库',
+  'Only select repositories': '仅选择仓库',
+  'Select repositories to install this app on': '选择要安装此应用的仓库',
+  'Install & Authorize': '安装并授权',
+  // ===== Actions 相关 =====
+  'Actions on GitHub Marketplace': 'GitHub 应用市场上的 Actions',
+  'New to GitHub Actions?': 'GitHub Actions 新用户？',
+  'Learn more': '了解更多',
+  'Get started with GitHub Actions': '开始使用 GitHub Actions',
+  'Latest commit': '最新提交',
+  'Publisher': '发布者',
+  'Used by': '使用者',
+  'Repository': '仓库',
+  // ===== 验证信息 =====
+  'Verified creator': '已验证创作者',
+  'Verified': '已验证',
+  'Unverified': '未验证',
+  'GitHub has verified this publisher\'s identity': 'GitHub 已验证此发布者的身份',
+  // ===== 定价方案 =====
+  Plan: '方案',
+  'Price': '价格',
+  'per month': '每月',
+  'per year': '每年',
+  'per seat': '每席位',
+  'Free plan': '免费方案',
+  'Pro plan': '专业方案',
+  'Team plan': '团队方案',
+  'Enterprise plan': '企业方案',
+  'Includes:': '包含：',
+  'View full pricing details': '查看完整定价详情',
+  // ===== 版本与发布 =====
+  'Latest version': '最新版本',
+  'Version': '版本',
+  'Released': '发布时间',
+  'Last updated': '最后更新',
+  'All versions': '所有版本',
+  'Change log': '变更日志',
+};
+/**
  * 翻译词典合并模块
  * @file index.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 整合所有页面的翻译词典
  */
 /**
- * 翻译词典对象，包含所有需要翻译的字符串
+ * 翻译词典对象，包含所有页面的翻译词典
  */
 const translationModule = {
   common: commonDictionary,
   codespaces: codespacesDictionary,
   explore: exploreDictionary,
-  // 可以根据需要添加更多页面的词典
+  issues: issuesDictionary,
+  pullRequests: pullRequestsDictionary,
+  actions: actionsDictionary,
+  wiki: wikiDictionary,
+  notifications: notificationsDictionary,
+  settings: settingsDictionary,
+  search: searchDictionary,
+  profile: profileDictionary,
+  dashboard: dashboardDictionary,
+  marketplace: marketplaceDictionary,
 };
 /**
  * 合并所有词典为一个完整的词典对象
@@ -2675,8 +3777,8 @@ function mergeAllDictionaries() {
 /**
  * 翻译词典管理模块
  * @file translationCore/dictionaryManager.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 管理翻译词典的加载和查询
  */
@@ -2801,8 +3903,8 @@ const dictionaryManager = {
 /**
  * 页面模式检测模块
  * @file translationCore/pageModeDetector.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 检测当前页面的模式
  */
@@ -2813,6 +3915,7 @@ const pageModeDetector = {
       batchSize: CONFIG.performance?.batchSize,
       enablePartialMatch: CONFIG.performance?.enablePartialMatch,
     },
+    dashboard: { batchSize: 40, enablePartialMatch: false },
     search: { batchSize: 100, enablePartialMatch: false },
     repository: { batchSize: 50, enablePartialMatch: false },
     issues: { batchSize: 75, enablePartialMatch: true },
@@ -2823,6 +3926,16 @@ const pageModeDetector = {
     codespaces: { batchSize: 50, enablePartialMatch: false },
     wiki: { batchSize: 120, enablePartialMatch: true },
     actions: { batchSize: 60, enablePartialMatch: false },
+    settings: { batchSize: 80, enablePartialMatch: false },
+    profile: { batchSize: 60, enablePartialMatch: false },
+    organizations: { batchSize: 70, enablePartialMatch: false },
+    projects: { batchSize: 55, enablePartialMatch: true },
+    packages: { batchSize: 90, enablePartialMatch: false },
+    security: { batchSize: 50, enablePartialMatch: false },
+    insights: { batchSize: 65, enablePartialMatch: false },
+    topics: { batchSize: 90, enablePartialMatch: false },
+    stars: { batchSize: 80, enablePartialMatch: false },
+    trending: { batchSize: 100, enablePartialMatch: false },
   },
   detectPageMode() {
     try {
@@ -2868,8 +3981,8 @@ const pageModeDetector = {
 /**
  * 翻译元素选择模块
  * @file translationCore/elementSelector.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 选择需要翻译的DOM元素
  */
@@ -3208,8 +4321,8 @@ const elementSelector = {
 /**
  * 元素翻译模块
  * @file translationCore/elementTranslator.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 实际翻译DOM元素的模块
  */
@@ -3428,8 +4541,8 @@ const elementTranslator = {
 /**
  * 性能监控模块
  * @file translationCore/performanceMonitor.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 监控翻译性能数据
  */
@@ -3526,8 +4639,8 @@ const performanceMonitor = {
 /**
  * 翻译核心主模块
  * @file translationCore/index.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 翻译核心主入口，整合所有子模块
  */
@@ -3866,8 +4979,8 @@ const translationCore = {
 /**
  * GitHub 中文翻译配置界面样式模块
  * @file configUI.styles.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 配置界面的CSS样式定义，遵循原型设计系统的深色主题规范
  */
@@ -4242,8 +5355,8 @@ function addConfigUIStyles() {
 /**
  * GitHub 中文翻译性能监控组件
  * @file performanceMonitor.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 性能监控区域组件
  */
@@ -4380,8 +5493,8 @@ function exportPerformanceStats() {
 /**
  * GitHub 中文翻译配置面板渲染模块
  * @file configPanelRenderer.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 负责渲染配置面板的 UI 结构（容器、头部、内容、底部、配置项）
  */
@@ -4527,8 +5640,8 @@ function createConfigSection(title, items) {
 /**
  * GitHub 中文翻译配置管理模块
  * @file configManager.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 负责用户配置的加载、保存、合并与重置逻辑
  */
@@ -4613,8 +5726,8 @@ function handleReset(instance) {
 /**
  * GitHub 中文翻译配置面板事件模块
  * @file configPanelEvents.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 负责配置面板的事件绑定与清理
  */
@@ -4664,8 +5777,8 @@ function cleanupConfigPanelEventListeners(instance) {
 /**
  * GitHub 中文翻译配置界面模块
  * @file configUI.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 提供用户友好的配置界面，允许用户调整插件参数
  */
@@ -4820,8 +5933,8 @@ configUI;
 /**
  * 更新通知 UI 模块
  * @file updateNotification.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 负责渲染和隐藏脚本更新通知（安全 DOM 操作，不使用 innerHTML）
  */
@@ -4983,8 +6096,8 @@ function notificationId() {
 /**
  * 版本存储模块
  * @file versionStorage.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 版本检查相关的本地存储读写（历史记录、缓存版本、通知状态）
  */
@@ -5072,8 +6185,8 @@ const versionStorage = {
 /**
  * 版本更新检查模块
  * @file versionChecker.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 负责检查和处理脚本更新，UI 与存储委托给独立模块
  */
@@ -5291,8 +6404,8 @@ const versionChecker = {
 /**
  * 虚拟DOM节点模块
  * @file virtualNode.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 虚拟DOM节点类，表示一个DOM元素的虚拟映射，包含其状态和内容哈希
  */
@@ -5460,8 +6573,8 @@ class VirtualNode {
 /**
  * 虚拟DOM清理模块
  * @file virtualDomCleanup.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 提供虚拟DOM管理器的清理、定时器和页面卸载处理功能
  */
@@ -5587,8 +6700,8 @@ function destroyVdomManager(manager) {
 /**
  * 虚拟DOM处理器模块
  * @file virtualDomProcessor.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 提供虚拟DOM节点的创建、查找、翻译状态检查和批量处理功能
  */
@@ -5728,8 +6841,8 @@ function processVdomElements(manager, elements) {
 /**
  * 虚拟DOM模块
  * @file virtualDom.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 用于跟踪已翻译元素的状态，避免重复翻译和不必要的DOM操作
  */
@@ -5842,8 +6955,8 @@ virtualDomManager;
 /**
  * GitHub 中文翻译主入口文件
  * @file main.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 整合所有模块并初始化脚本
  */

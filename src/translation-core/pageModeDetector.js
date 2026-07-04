@@ -1,8 +1,8 @@
 /**
  * 页面模式检测模块
  * @file translationCore/pageModeDetector.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 检测当前页面的模式
  */
@@ -16,6 +16,7 @@ export const pageModeDetector = {
       batchSize: CONFIG.performance?.batchSize,
       enablePartialMatch: CONFIG.performance?.enablePartialMatch,
     },
+    dashboard: { batchSize: 40, enablePartialMatch: false },
     search: { batchSize: 100, enablePartialMatch: false },
     repository: { batchSize: 50, enablePartialMatch: false },
     issues: { batchSize: 75, enablePartialMatch: true },
@@ -26,6 +27,16 @@ export const pageModeDetector = {
     codespaces: { batchSize: 50, enablePartialMatch: false },
     wiki: { batchSize: 120, enablePartialMatch: true },
     actions: { batchSize: 60, enablePartialMatch: false },
+    settings: { batchSize: 80, enablePartialMatch: false },
+    profile: { batchSize: 60, enablePartialMatch: false },
+    organizations: { batchSize: 70, enablePartialMatch: false },
+    projects: { batchSize: 55, enablePartialMatch: true },
+    packages: { batchSize: 90, enablePartialMatch: false },
+    security: { batchSize: 50, enablePartialMatch: false },
+    insights: { batchSize: 65, enablePartialMatch: false },
+    topics: { batchSize: 90, enablePartialMatch: false },
+    stars: { batchSize: 80, enablePartialMatch: false },
+    trending: { batchSize: 100, enablePartialMatch: false },
   },
 
   detectPageMode() {

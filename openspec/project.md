@@ -125,10 +125,20 @@ GitHub_i18n/
 - `performanceMonitor.js`：显示翻译性能统计
 
 ### 5. dictionaries（翻译词典）
-提供翻译词条数据。
+提供翻译词条数据，按页面类型划分。
 - `common.js`：通用翻译词典
 - `codespaces.js`：GitHub Codespaces 相关词典
 - `explore.js`：GitHub Explore 页面词典
+- `issues.js`：Issues 页面相关词典
+- `pullRequests.js`：Pull Requests 页面相关词典
+- `actions.js`：GitHub Actions 页面相关词典
+- `wiki.js`：Wiki 页面相关词典
+- `notifications.js`：Notifications 页面相关词典
+- `settings.js`：Settings 页面相关词典
+- `search.js`：Search 页面相关词典
+- `profile.js`：Profile 页面相关词典
+- `dashboard.js`：Dashboard 首页相关词典
+- `marketplace.js`：Marketplace 页面相关词典
 
 ---
 
@@ -154,7 +164,7 @@ docs: 更新项目文档
 
 ### 版本号管理
 - **版本号格式**：SemVer（主版本.次版本.修订号）
-- **当前版本**：1.9.21（定义于 `src/version.js`）
+- **当前版本**：1.9.22（定义于 `src/version.js`）
 - **单一版本源**：`src/version.js` 是项目的唯一版本源
 - **更新时机**：
   - 修订号：文档完善、代码注释更新、Bug 修复
@@ -184,7 +194,7 @@ npm test           # 完整测试流水线（lint → build → validate）
 ### 发布流程
 1. 在 `src/version.js` 更新版本号
 2. 运行 `npm test` 验证构建
-3. 创建 Git Tag：`git tag v1.9.21`
+3. 创建 Git Tag：`git tag v1.9.22`
 4. 推送 Tag 触发 CI/CD 发布流程
 
 ---
@@ -195,7 +205,7 @@ npm test           # 完整测试流水线（lint → build → validate）
 |------|------|
 | **项目名称** | GitHub_i18n |
 | **项目 URL** | https://github.com/Tanox/GitHub_i18n |
-| **当前版本** | 1.9.21 |
+| **当前版本** | 1.9.22 |
 | **核心语言** | JavaScript (ES6+) |
 | **模块系统** | ES Modules |
 | **目标平台** | 浏览器用户脚本 |

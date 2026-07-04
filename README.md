@@ -52,7 +52,21 @@
 ```
 src/
 ├── core/                    # 核心模块 (cacheManager/errorHandler/virtualDom + virtualNode/Cleanup/Processor)
-├── dictionaries/            # 翻译词典 (common/codespaces/explore)
+├── dictionaries/            # 翻译词典 (13 个页面专用词典 + 入口)
+│   ├── common.js            # 通用翻译
+│   ├── codespaces.js        # Codespaces 页面
+│   ├── explore.js           # Explore 页面
+│   ├── issues.js            # Issues 页面
+│   ├── pullRequests.js      # Pull Requests 页面
+│   ├── actions.js           # Actions 页面
+│   ├── wiki.js              # Wiki 页面
+│   ├── notifications.js     # Notifications 页面
+│   ├── settings.js          # Settings 页面
+│   ├── search.js            # Search 页面
+│   ├── profile.js           # Profile 页面
+│   ├── dashboard.js         # Dashboard 首页
+│   ├── marketplace.js       # Marketplace 页面
+│   └── index.js             # 词典合并入口
 ├── page-monitor/            # 页面监控 (DOM 监听、路径监听、翻译触发)
 ├── translation-core/        # 翻译核心 (词典管理、元素翻译、性能监控)
 ├── ui/                      # UI 组件 (配置面板、性能监控)
@@ -119,7 +133,7 @@ npm run build
 
 ## 🔄 版本管理
 
-- **当前版本**：1.9.21
+- **当前版本**：1.9.22
 - **版本格式**：SemVer（主版本.次版本.修订号）
 - **版本源**：`src/version.js` 是项目的单一版本源
 

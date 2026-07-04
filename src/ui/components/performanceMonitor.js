@@ -1,8 +1,8 @@
 /**
  * GitHub 中文翻译性能监控组件
  * @file performanceMonitor.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 性能监控区域组件
  */

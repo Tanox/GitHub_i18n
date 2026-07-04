@@ -1,8 +1,8 @@
 /**
  * 函数控制工具模块
  * @file functionUtils.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 包含节流、防抖、延迟、安全执行等函数控制相关辅助函数
  */

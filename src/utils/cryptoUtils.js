@@ -1,8 +1,8 @@
 /**
  * 编码与加密工具模块
  * @file cryptoUtils.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 包含Base64编解码、数据混淆还原、SHA-256哈希、错误信息脱敏等辅助函数
  */

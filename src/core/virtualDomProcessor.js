@@ -1,8 +1,8 @@
 /**
  * 虚拟DOM处理器模块
  * @file virtualDomProcessor.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 提供虚拟DOM节点的创建、查找、翻译状态检查和批量处理功能
  */

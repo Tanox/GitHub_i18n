@@ -1,8 +1,8 @@
 /**
  * 元素翻译模块
  * @file translationCore/elementTranslator.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 实际翻译DOM元素的模块
  */

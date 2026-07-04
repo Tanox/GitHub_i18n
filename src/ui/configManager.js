@@ -1,8 +1,8 @@
 /**
  * GitHub 中文翻译配置管理模块
  * @file configManager.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 负责用户配置的加载、保存、合并与重置逻辑
  */

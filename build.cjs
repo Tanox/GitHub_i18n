@@ -1,8 +1,8 @@
 /**
  * GitHub 中文翻译插件构建脚本
  * @file build.cjs
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @description 简化的单文件构建脚本
  */
 
@@ -36,6 +36,16 @@ const SOURCE_ORDER = [
   'dictionaries/common.js',
   'dictionaries/codespaces.js',
   'dictionaries/explore.js',
+  'dictionaries/issues.js',
+  'dictionaries/pullRequests.js',
+  'dictionaries/actions.js',
+  'dictionaries/wiki.js',
+  'dictionaries/notifications.js',
+  'dictionaries/settings.js',
+  'dictionaries/search.js',
+  'dictionaries/profile.js',
+  'dictionaries/dashboard.js',
+  'dictionaries/marketplace.js',
   'dictionaries/index.js',
   'translation-core/dictionaryManager.js',
   'translation-core/pageModeDetector.js',

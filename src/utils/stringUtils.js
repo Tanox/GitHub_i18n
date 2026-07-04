@@ -1,8 +1,8 @@
 /**
  * 字符串与正则工具模块
  * @file stringUtils.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 包含正则转义、安全正则、JSON安全解析与序列化等辅助函数
  */

@@ -1,8 +1,8 @@
 /**
  * 对象操作工具模块
  * @file objectUtils.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 包含嵌套属性安全访问、深拷贝等辅助函数
  */

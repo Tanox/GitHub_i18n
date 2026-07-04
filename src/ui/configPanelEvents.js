@@ -1,8 +1,8 @@
 /**
  * GitHub 中文翻译配置面板事件模块
  * @file configPanelEvents.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 负责配置面板的事件绑定与清理
  */

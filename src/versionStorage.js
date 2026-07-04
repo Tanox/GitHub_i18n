@@ -1,8 +1,8 @@
 /**
  * 版本存储模块
  * @file versionStorage.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 版本检查相关的本地存储读写（历史记录、缓存版本、通知状态）
  */

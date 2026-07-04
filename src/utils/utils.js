@@ -1,8 +1,8 @@
 /**
  * 工具函数模块（门面模式）
  * @file utils.js
- * @version 1.9.21
- * @date 2026-07-03
+ * @version 1.9.22
+ * @date 2026-07-04
  * @author Sut
  * @description 工具函数统一入口，委托给各子模块，保持 utils 对象 API 不变
  */

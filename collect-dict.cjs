@@ -1,7 +1,7 @@
 /**
  * 词典采集工具
  * @file collect-dict.cjs
- * @version 1.9.21
+ * @version 1.9.22
  * @date 2026-06-10
  * @author Sut
  * @description 从 GitHub 页面采集未翻译的文本并生成待翻译列表

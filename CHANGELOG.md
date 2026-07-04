@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.9.22] - 2026-07-04
+
+### Added
+- 新增 10 个页面专用词典：issues、pullRequests、actions、wiki、notifications、settings、search、profile、dashboard、marketplace
+- 完善 pageModeDetector 的 pageModeConfig，补全所有 20 种页面模式配置（dashboard、settings、profile、organizations、projects、packages、security、insights、topics、stars、trending）
+- 每种页面模式配置独立的 batchSize 和 enablePartialMatch 参数
+
+### Changed
+- dictionaries/index.js 整合所有 13 个词典（3 个原有 + 10 个新增）
+- build.cjs SOURCE_ORDER 添加 10 个新词典文件
+- 构建产物从 169.02 KB 增加到 197.56 KB
+- 同步 openspec/project.md 词典列表
+- 同步 README.md 项目结构说明
+
+---
+
 ## [1.9.21] - 2026-07-03
 
 ### Added
