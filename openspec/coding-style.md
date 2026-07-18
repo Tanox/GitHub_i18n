@@ -280,7 +280,7 @@ function processData(data)
 **示例**：
 ```javascript
 /**
- * GitHub 中文翻译主入口文件
+ * GitHub Chinese 简体中文主入口文件
  * @file main.js
  * @version 1.9.20
  * @date 2026-06-10

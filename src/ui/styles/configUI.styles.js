@@ -1,7 +1,7 @@
 /**
  * GitHub 中文翻译配置界面样式模块
  * @file configUI.styles.js
- * @version 1.9.20
+ * @version 1.9.21
  * @date 2026-06-10
  * @author Sut
  * @description 配置界面的CSS样式定义，遵循原型设计系统的深色主题规范

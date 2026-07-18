@@ -1,4 +1,4 @@
-# GitHub 中文翻译插件
+# GitHub Chinese 简体中文
 
 让 GitHub 界面变成中文，提升使用体验。
 

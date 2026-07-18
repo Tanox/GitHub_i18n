@@ -1,7 +1,7 @@
 /**
  * 字符串工具模块
  * @file stringUtils.js
- * @version 1.9.20
+ * @version 1.9.21
  * @date 2026-06-10
  * @author Sut
  * @description 包含字符串处理、正则表达式、JSON等工具函数

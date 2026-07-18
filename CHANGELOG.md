@@ -24,6 +24,16 @@
 
 ---
 
+## [1.9.21] - 2026-07-18
+
+### Changed
+- 更新项目名称为 GitHub Chinese 简体中文
+- 更新 package.json 项目名称为 github-chinese
+- 更新用户脚本名称为 GitHub Chinese 简体中文
+- 更新所有文档和原型中的项目名称引用
+
+---
+
 ## [1.9.19] - 2026-06-08
 
 ### Changed
@@ -76,7 +86,7 @@
 - 修复测试文件导入路径问题
 
 ### Changed
-- 更新项目 URL 至 https://github.com/Tanox/GitHub_i18n
+- 更新项目名称为 GitHub Chinese 简体中文
 - 更新版本号至 1.9.16
 - 统一使用 Date.now() 进行计时
 - 优化浮动按钮创建逻辑和样式

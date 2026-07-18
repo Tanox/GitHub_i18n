@@ -1,7 +1,7 @@
 /**
  * URL工具模块
  * @file urlUtils.js
- * @version 1.9.20
+ * @version 1.9.21
  * @date 2026-06-10
  * @author Sut
  * @description 包含URL和页面路径相关的工具函数

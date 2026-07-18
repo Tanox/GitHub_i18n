@@ -1,7 +1,7 @@
 /**
  * 更新通知模块
  * @file updateNotification.js
- * @version 1.9.20
+ * @version 1.9.21
  * @date 2026-06-10
  * @author Sut
  * @description 更新通知 UI 相关功能

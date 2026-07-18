@@ -1,9 +1,9 @@
-# GitHub 中文翻译插件架构文档
+# GitHub Chinese 简体中文插件架构文档
 
 ## 1. 系统整体架构概述
 
 ### 1.1 项目简介
-GitHub 中文翻译插件是一个浏览器用户脚本，旨在为 GitHub 提供全面的中文本地化支持。该项目采用模块化设计，使用现代 JavaScript 技术栈，提供高性能、可扩展的 GitHub 界面翻译功能。
+GitHub Chinese 简体中文插件是一个浏览器用户脚本，旨在为 GitHub 提供全面的中文本地化支持。该项目采用模块化设计，使用现代 JavaScript 技术栈，提供高性能、可扩展的 GitHub 界面翻译功能。
 
 ### 1.2 架构特点
 - **模块化设计**：将功能分解为独立模块，便于维护和扩展
@@ -329,7 +329,7 @@ main.js
 ## 5. 目录结构
 
 ```
-GitHub_i18n/
+GitHub Chinese/
 ├── src/                          # 用户脚本源码
 │   ├── core/                    # 核心工具模块
 │   │   ├── cacheManager.js

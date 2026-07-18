@@ -1,7 +1,7 @@
 /**
  * 通用翻译词典
  * @file common.js
- * @version 1.9.20
+ * @version 1.9.21
  * @date 2026-06-10
  * @author Sut
  * @description 包含所有页面共用的翻译字符串，使用 GitHub 实际界面文本作为键

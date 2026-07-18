@@ -1,7 +1,7 @@
 /**
  * 版本工具模块
  * @file versionUtils.js
- * @version 1.9.20
+ * @version 1.9.21
  * @date 2026-06-10
  * @author Sut
  * @description 版本比较、提取等工具函数

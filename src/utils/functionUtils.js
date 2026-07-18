@@ -1,7 +1,7 @@
 /**
  * 函数工具模块
  * @file functionUtils.js
- * @version 1.9.20
+ * @version 1.9.21
  * @date 2026-06-10
  * @author Sut
  * @description 包含节流、防抖、延迟等函数相关工具

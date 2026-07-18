@@ -2,7 +2,7 @@
 
 ## 项目概述
 
-GitHub_i18n 是一个浏览器用户脚本项目，为 GitHub 网站提供中文本地化翻译支持。
+GitHub Chinese 是一个浏览器用户脚本项目，为 GitHub 网站提供中文本地化翻译支持。
 
 ### 核心功能
 - **静态文本翻译**：将 GitHub 界面的英文文本翻译为中文
@@ -21,7 +21,7 @@ GitHub_i18n 是一个浏览器用户脚本项目，为 GitHub 网站提供中文
 ## 目录结构
 
 ```
-GitHub_i18n/
+GitHub Chinese/
 ├── src/                          # 用户脚本源码（核心代码）
 │   ├── core/                     # 核心工具模块
 │   │   ├── cacheManager.js       # LRU 缓存管理器
@@ -66,7 +66,7 @@ GitHub_i18n/
 │   ├── version.js                # 版本信息（单一版本源）
 │   └── versionChecker.js         # 版本检查器
 ├── build/                        # 构建产物目录
-│   └── GitHub_i18n.user.js       # 编译后的用户脚本
+│   └── GitHub Chinese.user.js       # 编译后的用户脚本
 ├── utils/                        # 自动化工具目录
 ├── scripts/                      # 构建脚本目录
 ├── docs/                         # 项目规范文档
@@ -161,8 +161,8 @@ npm run format     # 代码格式化
 
 | 属性 | 值 |
 |------|------|
-| **项目名称** | GitHub_i18n |
-| **项目 URL** | https://github.com/Tanox/GitHub_i18n |
+| **项目名称** | GitHub Chinese |
+| **项目 URL** | https://github.com/Tanox/GitHub Chinese |
 | **当前版本** | 1.9.20 |
 | **核心语言** | JavaScript (ES6+) |
 | **目标平台** | 浏览器用户脚本 |

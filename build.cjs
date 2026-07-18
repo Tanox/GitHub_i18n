@@ -1,7 +1,7 @@
 /**
- * GitHub 中文翻译插件构建脚本
+ * GitHub Chinese 简体中文构建脚本
  * @file build.cjs
- * @version 1.9.20
+ * @version 1.9.21
  * @date 2026-06-10
  * @description 简化的单文件构建脚本
  */
@@ -53,7 +53,7 @@ const SOURCE_ORDER = [
 ];
 
 const USER_SCRIPT_HEADER = `// ==UserScript==
-// @name         GitHub 中文翻译
+// @name         GitHub Chinese 简体中文
 // @namespace    https://github.com/Tanox/GitHub_i18n
 // @version      {VERSION}
 // @description  GitHub页面自动翻译为中文
@@ -137,7 +137,7 @@ function buildUserScript(version) {
 
 function build() {
   console.log('\n========================================');
-  console.log('  GitHub 中文翻译插件构建');
+  console.log('  GitHub Chinese 简体中文构建');
   console.log('========================================\n');
 
   cleanProject();

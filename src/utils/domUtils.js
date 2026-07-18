@@ -1,7 +1,7 @@
 /**
  * DOM工具模块
  * @file domUtils.js
- * @version 1.9.20
+ * @version 1.9.21
  * @date 2026-06-10
  * @author Sut
  * @description 包含DOM操作相关的工具函数

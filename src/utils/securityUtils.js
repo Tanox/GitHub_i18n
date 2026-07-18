@@ -1,7 +1,7 @@
 /**
  * 编码安全工具模块
  * @file securityUtils.js
- * @version 1.9.20
+ * @version 1.9.21
  * @date 2026-06-10
  * @author Sut
  * @description 包含编码、加密、数据混淆等安全相关工具

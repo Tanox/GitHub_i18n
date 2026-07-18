@@ -1,7 +1,7 @@
 /**
  * 国际化支持框架
  * @file i18n.js
- * @version 1.9.20
+ * @version 1.9.21
  * @date 2026-06-10
  * @author Sut
  * @description 为GitHub翻译插件提供多语言支持的基础框架
