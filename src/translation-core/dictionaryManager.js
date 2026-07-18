@@ -27,7 +27,9 @@ export const dictionaryManager = {
         startTime = Date.now();
       }
 
-      this.cacheManager = new CacheManager(CONFIG.performance?.maxDictSize || DEFAULT_MAX_DICT_SIZE);
+      this.cacheManager = new CacheManager(
+        CONFIG.performance?.maxDictSize || DEFAULT_MAX_DICT_SIZE,
+      );
       this.dictionary = mergeAllDictionaries();
       this.dictionaryHash.clear();
 

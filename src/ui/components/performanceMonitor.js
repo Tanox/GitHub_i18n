@@ -72,7 +72,8 @@ export function createPerformanceMonitoringSection() {
 
     const value = document.createElement('span');
     value.id = stat.id;
-    value.style.fontFamily = '"JetBrains Mono", "SF Mono", SFMono-Regular, Menlo, Consolas, "Courier New", monospace';
+    value.style.fontFamily =
+      '"JetBrains Mono", "SF Mono", SFMono-Regular, Menlo, Consolas, "Courier New", monospace';
     value.style.color = '#8b949e';
     value.textContent = '-';
 

@@ -115,9 +115,12 @@ export const ErrorHandler = {
       if (attempt < maxRetries) {
         // 指数退避重试
         const delay = Math.pow(2, attempt) * RECOVERY_BASE_DELAY_MS;
-        setTimeout(() => {
-          this.attemptRecovery(context, recoveryFn, maxRetries, attempt);
-        }, Math.min(delay, RECOVERY_MAX_DELAY_MS));
+        setTimeout(
+          () => {
+            this.attemptRecovery(context, recoveryFn, maxRetries, attempt);
+          },
+          Math.min(delay, RECOVERY_MAX_DELAY_MS),
+        );
       }
     }
   },
@@ -163,7 +166,10 @@ export const ErrorHandler = {
         break;
       case this.ERROR_TYPES.DOM_OPERATION:
         // 减少DOM操作频率
-        CONFIG.performance.batchDelay = Math.max(CONFIG.performance.batchDelay || 0, BATCH_DELAY_MIN_MS);
+        CONFIG.performance.batchDelay = Math.max(
+          CONFIG.performance.batchDelay || 0,
+          BATCH_DELAY_MIN_MS,
+        );
         break;
       case this.ERROR_TYPES.DICTIONARY:
         // 重新初始化词典
@@ -180,7 +186,10 @@ export const ErrorHandler = {
         break;
       default:
         // 通用紧急措施：减少处理频率
-        CONFIG.performance.batchDelay = Math.max(CONFIG.performance.batchDelay || 0, BATCH_DELAY_FALLBACK_MS);
+        CONFIG.performance.batchDelay = Math.max(
+          CONFIG.performance.batchDelay || 0,
+          BATCH_DELAY_FALLBACK_MS,
+        );
         break;
     }
 

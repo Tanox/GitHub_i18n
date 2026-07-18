@@ -315,7 +315,8 @@ export const commonDictionary = {
   'Dismiss alert': '关闭警告',
   "You can't perform that action at this time.": '您现在无法执行此操作。',
   'Uh oh!': '哎呀！',
-  'There was an error while loading. Please reload this page.': '加载时发生错误。请重新加载此页面。',
+  'There was an error while loading. Please reload this page.':
+    '加载时发生错误。请重新加载此页面。',
   'Please reload this page': '请重新加载此页面',
   "You're all set!": '一切就绪！',
   'The repository has been created.': '仓库已创建。',
@@ -335,8 +336,7 @@ export const commonDictionary = {
   'Copied!': '已复制！',
 
   // ===== 空仓库提示 =====
-  'Quick setup — if you\'ve done this kind of thing before':
-    '快速设置 — 如果您之前做过这种事',
+  "Quick setup — if you've done this kind of thing before": '快速设置 — 如果您之前做过这种事',
   'Get started by creating a new file or uploading an existing file. We recommend every repository include a README, LICENSE, and .gitignore.':
     '通过创建新文件或上传现有文件开始。我们建议每个仓库都包含 README、LICENSE 和 .gitignore。',
   '…or create a new repository on the command line': '…或在命令行上创建新仓库',

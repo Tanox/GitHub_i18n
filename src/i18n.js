@@ -2,7 +2,7 @@
  * 国际化支持框架
  * @file i18n.js
  * @version 1.9.20
- * @date 2026-06-09
+ * @date 2026-06-10
  * @author Sut
  * @description 为GitHub翻译插件提供多语言支持的基础框架
  */
@@ -285,23 +285,21 @@ class I18nManager {
   formatRelativeTime(date, locale = null) {
     const targetLocale = locale || this.currentLocale;
     const now = new Date();
-    const MS_TO_SECONDS = 1000; // 毫秒转秒
+    const MS_TO_SECONDS = 1000;
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / MS_TO_SECONDS);
 
-    // 定义时间单位
     const units = [
-      { max: 60, unit: 'second' },
-      { max: 3600, unit: 'minute' },
-      { max: 86400, unit: 'hour' },
-      { max: 2592000, unit: 'day' },
-      { max: 31536000, unit: 'month' },
-      { max: Infinity, unit: 'year' },
+      { max: 60, unit: 'second', divisor: 1 },
+      { max: 3600, unit: 'minute', divisor: 60 },
+      { max: 86400, unit: 'hour', divisor: 3600 },
+      { max: 2592000, unit: 'day', divisor: 86400 },
+      { max: 31536000, unit: 'month', divisor: 2592000 },
+      { max: Infinity, unit: 'year', divisor: 31536000 },
     ];
 
-    const SECONDS_PER_MINUTE = 60;
-    for (const { max, unit } of units) {
+    for (const { max, unit, divisor } of units) {
       if (diffInSeconds < max) {
-        const value = Math.floor(diffInSeconds / (max / SECONDS_PER_MINUTE));
+        const value = Math.floor(diffInSeconds / divisor);
         try {
           return new Intl.RelativeTimeFormat(targetLocale).format(-value, unit);
         } catch (error) {

@@ -26,7 +26,7 @@ class ConfigUI {
     this.userConfig = {};
     this.isOpen = false;
     this.container = null;
-    this.settings = this.loadUserSettings();
+    this.settings = ConfigUI.loadUserSettings();
     this.isPageUnloading = false;
     this.eventListeners = [];
 
@@ -47,7 +47,7 @@ class ConfigUI {
       // 如果解码失败，尝试直接解析（兼容旧格式）
       try {
         return JSON.parse(saved);
-      } catch {
+      } catch (_e) {
         return {};
       }
     } catch (error) {
@@ -138,7 +138,8 @@ class ConfigUI {
     title.textContent = 'GitHub 中文翻译';
 
     const versionBadge = document.createElement('span');
-    versionBadge.style.fontFamily = '"JetBrains Mono", "SF Mono", SFMono-Regular, Menlo, Consolas, "Courier New", monospace';
+    versionBadge.style.fontFamily =
+      '"JetBrains Mono", "SF Mono", SFMono-Regular, Menlo, Consolas, "Courier New", monospace';
     versionBadge.style.fontSize = '11px';
     versionBadge.style.color = '#6e7681';
     versionBadge.style.padding = '2px 8px';

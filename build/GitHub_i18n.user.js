@@ -286,469 +286,543 @@ const CONFIG = {
   },
 };
 /**
+ * 函数工具模块
+ * @file functionUtils.js
+ * @version 1.9.20
+ * @date 2026-06-10
+ * @author Sut
+ * @description 包含节流、防抖、延迟等函数相关工具
+ */
+/**
+ * 节流函数，用于限制高频操作的执行频率
+ * 支持返回Promise
+ * @param {Function} func - 要节流的函数
+ * @param {number} limit - 限制时间（毫秒）
+ * @param {Object} options - 配置选项
+ * @param {boolean} options.leading - 是否在开始时执行（默认true）
+ * @param {boolean} options.trailing - 是否在结束后执行（默认true）
+ * @returns {Function} 节流后的函数
+ */
+function throttle(func, limit, options = {}) {
+  const { leading = true, trailing = true } = options;
+  let inThrottle, lastArgs, lastThis, result, timerId;
+  const later = (context, args) => {
+    inThrottle = false;
+    if (trailing && lastArgs) {
+      result = func.apply(context, args);
+      lastArgs = null;
+      lastThis = null;
+    }
+  };
+  return function () {
+    const args = arguments;
+    // eslint-disable-next-line no-invalid-this
+    const context = this;
+    if (!inThrottle) {
+      if (leading) {
+        result = func.apply(context, args);
+      }
+      inThrottle = true;
+      timerId = setTimeout(() => later(context, args), limit);
+    } else if (trailing) {
+      lastArgs = args;
+      lastThis = context;
+      // 确保只有一个定时器
+      clearTimeout(timerId);
+      timerId = setTimeout(() => later(lastThis, lastArgs), limit);
+    }
+    return result;
+  };
+}
+/**
+ * 防抖函数，延迟执行函数直到停止触发一段时间
+ * 支持返回Promise
+ * @param {Function} func - 要防抖的函数
+ * @param {number} delay - 延迟时间（毫秒）
+ * @param {Object} options - 配置选项
+ * @param {boolean} options.leading - 是否在开始时执行一次（默认false）
+ * @returns {Function} 防抖后的函数
+ */
+function debounce(func, delay, options = {}) {
+  const { leading = false } = options;
+  let timeout, result;
+  const later = (context, args) => {
+    result = func.apply(context, args);
+  };
+  return function () {
+    const args = arguments;
+    // eslint-disable-next-line no-invalid-this
+    const context = this;
+    const isLeadingCall = !timeout && leading;
+    clearTimeout(timeout);
+    timeout = setTimeout(() => later(context, args), delay);
+    if (isLeadingCall) {
+      result = func.apply(context, args);
+    }
+    return result;
+  };
+}
+/**
+ * 延迟函数，返回Promise的setTimeout
+ * @param {number} ms - 延迟时间（毫秒）
+ * @returns {Promise<void>}
+ */
+function delay(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+/**
+ * 安全地执行函数，捕获可能的异常
+ * @param {Function} fn - 要执行的函数
+ * @param {*} defaultValue - 执行失败时的默认返回值
+ * @param {Object} context - 函数执行上下文
+ * @param {...*} args - 函数参数
+ * @returns {*} 函数返回值或默认值
+ */
+function safeExecute(fn, defaultValue = null, context = null, ...args) {
+  try {
+    if (typeof fn === 'function') {
+      return fn.apply(context, args);
+    }
+    return defaultValue;
+  } catch (error) {
+    console.error('[GitHub 中文翻译] 安全执行函数失败:', error);
+    return defaultValue;
+  }
+}
+/**
+ * 字符串工具模块
+ * @file stringUtils.js
+ * @version 1.9.20
+ * @date 2026-06-10
+ * @author Sut
+ * @description 包含字符串处理、正则表达式、JSON等工具函数
+ */
+// 工具函数常量
+const MAX_REGEX_LENGTH = 100;
+const MAX_REPETITION_COUNT = 5;
+/**
+ * 转义正则表达式中的特殊字符
+ * @param {string} string - 要转义的字符串
+ * @returns {string} 转义后的字符串
+ */
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
+}
+/**
+ * 安全地解析JSON字符串
+ * @param {string} jsonString - JSON字符串
+ * @param {*} defaultValue - 解析失败时的默认值
+ * @returns {*} 解析结果或默认值
+ */
+function safeJSONParse(jsonString, defaultValue = null) {
+  try {
+    return JSON.parse(jsonString);
+  } catch (error) {
+    console.warn('[GitHub 中文翻译] JSON解析失败:', error);
+    return defaultValue;
+  }
+}
+/**
+ * 安全地序列化对象为JSON字符串
+ * @param {*} obj - 要序列化的对象
+ * @param {string} defaultValue - 序列化失败时的默认值
+ * @returns {string} JSON字符串或默认值
+ */
+function safeJSONStringify(obj, defaultValue = '{}') {
+  try {
+    return JSON.stringify(obj);
+  } catch (error) {
+    console.warn('[GitHub 中文翻译] JSON序列化失败:', error);
+    return defaultValue;
+  }
+}
+/**
+ * 检查正则表达式是否存在潜在的ReDoS风险
+ * @param {string|RegExp} pattern - 正则表达式模式
+ * @returns {boolean} - 是否安全
+ */
+function isSafeRegex(pattern) {
+  let patternObj = pattern;
+  if (typeof patternObj === 'string') {
+    patternObj = new RegExp(patternObj);
+  }
+  const source = patternObj.source;
+  let depth = 0;
+  let hasNestedRepetition = false;
+  for (let i = 0; i < source.length; i++) {
+    const char = source[i];
+    if (char === '(' && source[i - 1] !== '\\') {
+      depth++;
+    } else if (char === ')' && source[i - 1] !== '\\') {
+      depth--;
+    } else if (depth > 0 && /[*+?]/.test(char) && source[i - 1] !== '\\') {
+      hasNestedRepetition = true;
+      break;
+    }
+  }
+  const longPatternWarning = source.length > MAX_REGEX_LENGTH;
+  const hasMultipleRepetitions = (source.match(/[*+?]/g) || []).length > MAX_REPETITION_COUNT;
+  return !hasNestedRepetition && !longPatternWarning && !hasMultipleRepetitions;
+}
+/**
+ * 安全地创建正则表达式，防止ReDoS攻击
+ * @param {string} pattern - 正则表达式模式
+ * @param {string} flags - 正则表达式标志
+ * @returns {RegExp|null} - 安全的正则表达式或null
+ */
+function safeRegExp(pattern, flags = '') {
+  try {
+    const regex = new RegExp(pattern, flags);
+    if (isSafeRegex(regex)) {
+      return regex;
+    }
+    console.warn('[GitHub 中文翻译] 检测到可能存在ReDoS风险的正则表达式:', pattern);
+    return null;
+  } catch (error) {
+    console.warn('[GitHub 中文翻译] 创建正则表达式失败:', error);
+    return null;
+  }
+}
+/**
+ * 安全地访问对象属性，避免嵌套属性访问出错
+ * @param {Object} obj - 目标对象
+ * @param {string|string[]} path - 属性路径，如'a.b.c'或['a','b','c']
+ * @param {*} defaultValue - 获取失败时的默认值
+ * @returns {*} 属性值或默认值
+ */
+function getNestedProperty(obj, path, defaultValue = null) {
+  try {
+    const pathArray = Array.isArray(path) ? path : path.split('.');
+    let result = obj;
+    for (const key of pathArray) {
+      if (result === null || result === undefined) {
+        return defaultValue;
+      }
+      result = result[key];
+    }
+    return result === undefined ? defaultValue : result;
+  } catch (_error) {
+    return defaultValue;
+  }
+}
+/**
+ * 深拷贝对象
+ * @param {*} obj - 要拷贝的对象
+ * @returns {*} 拷贝后的对象
+ */
+function deepClone(obj) {
+  try {
+    if (obj === null || typeof obj !== 'object') return obj;
+    if (obj instanceof Date) return new Date(obj.getTime());
+    if (obj instanceof Array) return obj.map((item) => deepClone(item));
+    if (obj instanceof Object) {
+      const clonedObj = {};
+      for (const key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+          clonedObj[key] = deepClone(obj[key]);
+        }
+      }
+      return clonedObj;
+    }
+  } catch (error) {
+    console.warn('[GitHub 中文翻译] 深拷贝失败:', error);
+    return obj;
+  }
+  return null;
+}
+/**
+ * 脱敏错误信息，移除敏感路径和内部细节
+ * @param {string|Error} error - 错误对象或错误消息
+ * @returns {string} 脱敏后的错误消息
+ */
+function sanitizeErrorMessage(error) {
+  try {
+    let message = typeof error === 'string' ? error : error.message || String(error);
+    message = message.replace(/\/[a-zA-Z0-9_/.-]+:[0-9]+:[0-9]+/g, '[位置]');
+    message = message.replace(/\/workspace\//g, '');
+    message = message.replace(/at\s+[a-zA-Z0-9_.]+\s+[<(]/g, 'at [函数]');
+    message = message.replace(
+      /(password|token|secret|key)\s*[=:]\s*['"][^'"]*['"]/gi,
+      '$1=[已隐藏]',
+    );
+    message = message.replace(/['"][a-zA-Z0-9+/=]{20,}['"]/g, '[已隐藏]');
+    if (message.length > 200) {
+      message = message.substring(0, 200) + '...';
+    }
+    return message;
+  } catch (_error) {
+    return '[未知错误]';
+  }
+}
+/**
+ * DOM工具模块
+ * @file domUtils.js
+ * @version 1.9.20
+ * @date 2026-06-10
+ * @author Sut
+ * @description 包含DOM操作相关的工具函数
+ */
+/**
+ * 收集DOM树中的所有文本节点内容
+ * @param {HTMLElement} element - 要收集文本的起始元素
+ * @param {Set<string>} resultSet - 用于存储结果的Set集合
+ * @param {Object} options - 配置选项
+ * @param {number} options.maxLength - 最大文本长度（默认200）
+ * @param {string[]} options.skipTags - 跳过的标签名数组
+ */
+function collectTextNodes(element, resultSet, options = {}) {
+  if (!element || !resultSet || typeof resultSet.add !== 'function') return;
+  const {
+    maxLength = 200,
+    skipTags = [
+      'script',
+      'style',
+      'code',
+      'pre',
+      'textarea',
+      'input',
+      'select',
+      'noscript',
+      'template',
+    ],
+  } = options;
+  try {
+    if (element.tagName && skipTags.includes(element.tagName.toLowerCase())) {
+      return;
+    }
+    if (element.classList && element.classList.contains('sr-only')) {
+      return;
+    }
+    const childNodes = Array.from(element.childNodes || []);
+    for (const node of childNodes) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.nodeValue ? node.nodeValue.trim() : '';
+        if (
+          text &&
+          text.length > 0 &&
+          text.length < maxLength &&
+          !/^\d+$/.test(text) &&
+          !/^[\s\u0021-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E\u00A1-\u00BF\u2000-\u206F\u3000-\u303F]+$/.test(
+            text,
+          )
+        ) {
+          resultSet.add(text);
+        }
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        collectTextNodes(node, resultSet, options);
+      }
+    }
+  } catch (error) {
+    console.error('[GitHub 中文翻译] 收集文本节点时出错:', error);
+  }
+}
+/**
+ * URL工具模块
+ * @file urlUtils.js
+ * @version 1.9.20
+ * @date 2026-06-10
+ * @author Sut
+ * @description 包含URL和页面路径相关的工具函数
+ */
+/**
+ * 获取当前页面路径
+ * @returns {string} 当前页面的路径
+ */
+function getCurrentPath() {
+  return window.location.pathname;
+}
+/**
+ * 获取完整的当前页面URL（包含查询参数）
+ * @returns {string} 完整的URL
+ */
+function getCurrentUrl() {
+  return window.location.href;
+}
+/**
+ * 判断当前页面是否匹配某个路径模式
+ * @param {RegExp} pattern - 路径模式
+ * @returns {boolean} 是否匹配
+ */
+function isCurrentPathMatch(pattern) {
+  return pattern.test(getCurrentPath());
+}
+/**
+ * 从URL获取查询参数
+ * @param {string} name - 参数名
+ * @param {string} url - URL字符串，默认使用当前页面URL
+ * @returns {string|null} 参数值或null
+ */
+function getQueryParam(name, url = window.location.href) {
+  const match = RegExp(`[?&]${name}=([^&]*)`).exec(url);
+  return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+/**
+ * 获取URL中的所有查询参数
+ * @param {string} url - URL字符串，默认使用当前页面URL
+ * @returns {Object} 查询参数对象
+ */
+function getAllQueryParams(url = window.location.href) {
+  const params = {};
+  try {
+    const searchParams = new URL(url || window.location.href).searchParams;
+    for (const [key, value] of searchParams) {
+      params[key] = value;
+    }
+  } catch (error) {
+    console.warn('[GitHub 中文翻译] 解析URL参数失败:', error);
+    }
+  return params;
+}
+/**
+ * 编码安全工具模块
+ * @file securityUtils.js
+ * @version 1.9.20
+ * @date 2026-06-10
+ * @author Sut
+ * @description 包含编码、加密、数据混淆等安全相关工具
+ */
+const RADIX_16 = 16;
+const PAD_LENGTH_2 = 2;
+const PAD_CHAR = '0';
+/**
+ * 对数据进行Base64编码（用于轻量级数据混淆，非加密）
+ * @param {string} data - 要编码的数据
+ * @returns {string} Base64编码后的字符串
+ */
+function base64Encode(data) {
+  try {
+    return btoa(unescape(encodeURIComponent(data)));
+  } catch (_error) {
+    return data;
+  }
+}
+/**
+ * 对Base64编码的数据进行解码
+ * @param {string} encodedData - Base64编码的字符串
+ * @returns {string|null} 解码后的字符串或null
+ */
+function base64Decode(encodedData) {
+  try {
+    return decodeURIComponent(escape(atob(encodedData)));
+  } catch (_error) {
+    return null;
+  }
+}
+/**
+ * 混淆敏感配置数据（轻量级保护）
+ * 使用XOR加密配合Base64编码
+ * @param {string} data - 要混淆的数据
+ * @param {string} key - 混淆密钥
+ * @returns {string} 混淆后的数据
+ */
+function obfuscateData(data, key = 'github-i18n-secure') {
+  try {
+    const encoded = base64Encode(data);
+    let result = '';
+    for (let i = 0; i < encoded.length; i++) {
+      // eslint-disable-next-line no-bitwise
+      const charCode = encoded.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+      result += String.fromCharCode(charCode);
+    }
+    return base64Encode(result);
+  } catch (_error) {
+    return data;
+  }
+}
+/**
+ * 还原被混淆的配置数据
+ * @param {string} obfuscatedData - 被混淆的数据
+ * @param {string} key - 混淆密钥
+ * @returns {string|null} 还原后的数据或null
+ */
+function deobfuscateData(obfuscatedData, key = 'github-i18n-secure') {
+  try {
+    const decoded = base64Decode(obfuscatedData);
+    if (!decoded) return null;
+    let result = '';
+    for (let i = 0; i < decoded.length; i++) {
+      // eslint-disable-next-line no-bitwise
+      const charCode = decoded.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+      result += String.fromCharCode(charCode);
+    }
+    return base64Decode(result);
+  } catch (_error) {
+    return null;
+  }
+}
+/**
+ * 计算字符串的SHA-256哈希值
+ * @param {string} data - 要计算哈希的数据
+ * @returns {Promise<string>} SHA-256哈希值（十六进制格式）
+ */
+async function sha256Hash(data) {
+  try {
+    const msgUint8 = new TextEncoder().encode(data);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map((b) => b.toString(RADIX_16).padStart(PAD_LENGTH_2, PAD_CHAR)).join('');
+  } catch (_error) {
+    return '';
+  }
+}
+/**
  * 工具函数模块
  * @file utils.js
  * @version 1.9.20
  * @date 2026-06-10
  * @author Sut
- * @description 包含各种通用的辅助函数
+ * @description 包含各种通用的辅助函数，从子模块整合导出
  */
-// 工具函数常量
-const MAX_REGEX_LENGTH = 100; // 正则表达式最大长度
-const MAX_REPETITION_COUNT = 5; // 最大重复量词数
-const RADIX_16 = 16; // 十六进制基数
-const PAD_LENGTH_2 = 2; // 填充长度
-const PAD_CHAR = '0'; // 填充字符
-/**
- * 工具函数集合
- */
+import {
+  escapeRegExp,
+  safeJSONParse,
+  safeJSONStringify,
+  isSafeRegex,
+  safeRegExp,
+  getNestedProperty,
+  deepClone,
+  sanitizeErrorMessage,
+} from './stringUtils.js';
+import {
+  getCurrentPath,
+  getCurrentUrl,
+  isCurrentPathMatch,
+  getQueryParam,
+  getAllQueryParams,
+} from './urlUtils.js';
+import {
+  base64Encode,
+  base64Decode,
+  obfuscateData,
+  deobfuscateData,
+  sha256Hash,
+} from './securityUtils.js';
 const utils = {
-  /**
-   * 节流函数，用于限制高频操作的执行频率
-   * 支持返回Promise
-   * @param {Function} func - 要节流的函数
-   * @param {number} limit - 限制时间（毫秒）
-   * @param {Object} options - 配置选项
-   * @param {boolean} options.leading - 是否在开始时执行（默认true）
-   * @param {boolean} options.trailing - 是否在结束后执行（默认true）
-   * @returns {Function} 节流后的函数
-   */
-  throttle(func, limit, options = {}) {
-    const { leading = true, trailing = true } = options;
-    let inThrottle, lastArgs, lastThis, result, timerId;
-    const later = (context, args) => {
-      inThrottle = false;
-      if (trailing && lastArgs) {
-        result = func.apply(context, args);
-        lastArgs = null;
-        lastThis = null;
-      }
-    };
-    return function () {
-      const args = arguments;
-      // eslint-disable-next-line no-invalid-this
-      const context = this;
-      if (!inThrottle) {
-        if (leading) {
-          result = func.apply(context, args);
-        }
-        inThrottle = true;
-        timerId = setTimeout(() => later(context, args), limit);
-      } else if (trailing) {
-        lastArgs = args;
-        lastThis = context;
-        // 确保只有一个定时器
-        clearTimeout(timerId);
-        timerId = setTimeout(() => later(lastThis, lastArgs), limit);
-      }
-      return result;
-    };
-  },
-  /**
-   * 防抖函数，延迟执行函数直到停止触发一段时间
-   * 支持返回Promise
-   * @param {Function} func - 要防抖的函数
-   * @param {number} delay - 延迟时间（毫秒）
-   * @param {Object} options - 配置选项
-   * @param {boolean} options.leading - 是否在开始时执行一次（默认false）
-   * @returns {Function} 防抖后的函数
-   */
-  debounce(func, delay, options = {}) {
-    const { leading = false } = options;
-    let timeout, result;
-    const later = (context, args) => {
-      result = func.apply(context, args);
-    };
-    return function () {
-      const args = arguments;
-      // eslint-disable-next-line no-invalid-this
-      const context = this;
-      const isLeadingCall = !timeout && leading;
-      clearTimeout(timeout);
-      timeout = setTimeout(() => later(context, args), delay);
-      if (isLeadingCall) {
-        result = func.apply(context, args);
-      }
-      return result;
-    };
-  },
-  /**
-   * 延迟函数，返回Promise的setTimeout
-   * @param {number} ms - 延迟时间（毫秒）
-   * @returns {Promise<void>}
-   */
-  delay(ms) {
-    return new Promise((resolve) => {
-      setTimeout(resolve, ms);
-    });
-  },
-  /**
-   * 转义正则表达式中的特殊字符
-   * @param {string} string - 要转义的字符串
-   * @returns {string} 转义后的字符串
-   */
-  escapeRegExp(string) {
-    // 转义所有正则表达式特殊字符，包括/字符
-    return string.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
-  },
-  /**
-   * 安全地解析JSON字符串
-   * @param {string} jsonString - JSON字符串
-   * @param {*} defaultValue - 解析失败时的默认值
-   * @returns {*} 解析结果或默认值
-   */
-  safeJSONParse(jsonString, defaultValue = null) {
-    try {
-      return JSON.parse(jsonString);
-    } catch (error) {
-      console.warn('[GitHub 中文翻译] JSON解析失败:', error);
-      return defaultValue;
-    }
-  },
-  /**
-   * 检查正则表达式是否存在潜在的ReDoS风险
-   * @param {string|RegExp} pattern - 正则表达式模式
-   * @returns {boolean} - 是否安全
-   */
-  isSafeRegex(pattern) {
-    let patternObj = pattern;
-    if (typeof patternObj === 'string') {
-      patternObj = new RegExp(patternObj);
-    }
-    const source = patternObj.source;
-    let depth = 0;
-    let hasNestedRepetition = false;
-    // 检查是否存在嵌套的重复量词（ReDoS的主要来源）
-    for (let i = 0; i < source.length; i++) {
-      const char = source[i];
-      if (char === '(' && source[i - 1] !== '\\') {
-        depth++;
-      } else if (char === ')' && source[i - 1] !== '\\') {
-        depth--;
-      } else if (depth > 0 && /[*+?]/.test(char) && source[i - 1] !== '\\') {
-        // 在分组内发现重复量词
-        hasNestedRepetition = true;
-        break;
-      }
-    }
-    // 检查是否存在长时间运行的可能性
-    const longPatternWarning = source.length > MAX_REGEX_LENGTH; // 过长的正则表达式
-    const hasMultipleRepetitions = (source.match(/[*+?]/g) || []).length > MAX_REPETITION_COUNT; // 过多的重复量词
-    return !hasNestedRepetition && !longPatternWarning && !hasMultipleRepetitions;
-  },
-  /**
-   * 安全地创建正则表达式，防止ReDoS攻击
-   * @param {string} pattern - 正则表达式模式
-   * @param {string} flags - 正则表达式标志
-   * @returns {RegExp|null} - 安全的正则表达式或null
-   */
-  safeRegExp(pattern, flags = '') {
-    try {
-      const regex = new RegExp(pattern, flags);
-      if (this.isSafeRegex(regex)) {
-        return regex;
-      }
-      console.warn('[GitHub 中文翻译] 检测到可能存在ReDoS风险的正则表达式:', pattern);
-      return null;
-    } catch (error) {
-      console.warn('[GitHub 中文翻译] 创建正则表达式失败:', error);
-      return null;
-    }
-  },
-  /**
-   * 安全地序列化对象为JSON字符串
-   * @param {*} obj - 要序列化的对象
-   * @param {string} defaultValue - 序列化失败时的默认值
-   * @returns {string} JSON字符串或默认值
-   */
-  safeJSONStringify(obj, defaultValue = '{}') {
-    try {
-      return JSON.stringify(obj);
-    } catch (error) {
-      console.warn('[GitHub 中文翻译] JSON序列化失败:', error);
-      return defaultValue;
-    }
-  },
-  /**
-   * 获取当前页面路径
-   * @returns {string} 当前页面的路径
-   */
-  getCurrentPath() {
-    return window.location.pathname;
-  },
-  /**
-   * 获取完整的当前页面URL（包含查询参数）
-   * @returns {string} 完整的URL
-   */
-  getCurrentUrl() {
-    return window.location.href;
-  },
-  /**
-   * 判断当前页面是否匹配某个路径模式
-   * @param {RegExp} pattern - 路径模式
-   * @returns {boolean} 是否匹配
-   */
-  isCurrentPathMatch(pattern) {
-    return pattern.test(this.getCurrentPath());
-  },
-  /**
-   * 从URL获取查询参数
-   * @param {string} name - 参数名
-   * @param {string} url - URL字符串，默认使用当前页面URL
-   * @returns {string|null} 参数值或null
-   */
-  getQueryParam(name, url = window.location.href) {
-    const match = RegExp(`[?&]${name}=([^&]*)`).exec(url);
-    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
-  },
-  /**
-   * 获取URL中的所有查询参数
-   * @param {string} url - URL字符串，默认使用当前页面URL
-   * @returns {Object} 查询参数对象
-   */
-  getAllQueryParams(url = window.location.href) {
-    const params = {};
-    try {
-      const searchParams = new URL(url || window.location.href).searchParams;
-      for (const [key, value] of searchParams) {
-        params[key] = value;
-      }
-    } catch (error) {
-      console.warn('[GitHub 中文翻译] 解析URL参数失败:', error);
-    }
-    return params;
-  },
-  /**
-   * 收集DOM树中的所有文本节点内容
-   * @param {HTMLElement} element - 要收集文本的起始元素
-   * @param {Set<string>} resultSet - 用于存储结果的Set集合
-   * @param {Object} options - 配置选项
-   * @param {number} options.maxLength - 最大文本长度（默认200）
-   * @param {string[]} options.skipTags - 跳过的标签名数组
-   */
-  collectTextNodes(element, resultSet, options = {}) {
-    if (!element || !resultSet || typeof resultSet.add !== 'function') return;
-    const {
-      maxLength = 200,
-      skipTags = [
-        'script',
-        'style',
-        'code',
-        'pre',
-        'textarea',
-        'input',
-        'select',
-        'noscript',
-        'template',
-      ],
-    } = options;
-    try {
-      // 检查是否需要跳过此元素
-      if (element.tagName && skipTags.includes(element.tagName.toLowerCase())) {
-        return;
-      }
-      // 检查元素是否有隐藏类或样式
-      if (element.classList && element.classList.contains('sr-only')) {
-        return;
-      }
-      // 遍历所有子节点
-      const childNodes = Array.from(element.childNodes || []);
-      for (const node of childNodes) {
-        if (node.nodeType === Node.TEXT_NODE) {
-          const text = node.nodeValue ? node.nodeValue.trim() : '';
-          // 只收集符合条件的文本
-          if (
-            text &&
-            text.length > 0 &&
-            text.length < maxLength &&
-            !/^\d+$/.test(text) &&
-            // 使用基础字符类替代Unicode属性转义，避免构建过程中的解析问题
-            !/^[\s\u0021-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E\u00A1-\u00BF\u2000-\u206F\u3000-\u303F]+$/.test(
-              text,
-            )
-          ) {
-            resultSet.add(text);
-          }
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          // 递归收集子元素的文本
-          this.collectTextNodes(node, resultSet, options);
-        }
-      }
-    } catch (error) {
-      console.error('[GitHub 中文翻译] 收集文本节点时出错:', error);
-    }
-  },
-  /**
-   * 安全地访问对象属性，避免嵌套属性访问出错
-   * @param {Object} obj - 目标对象
-   * @param {string|string[]} path - 属性路径，如'a.b.c'或['a','b','c']
-   * @param {*} defaultValue - 获取失败时的默认值
-   * @returns {*} 属性值或默认值
-   */
-  getNestedProperty(obj, path, defaultValue = null) {
-    try {
-      const pathArray = Array.isArray(path) ? path : path.split('.');
-      let result = obj;
-      for (const key of pathArray) {
-        if (result === null || result === undefined) {
-          return defaultValue;
-        }
-        result = result[key];
-      }
-      return result === undefined ? defaultValue : result;
-    } catch (_error) {
-      return defaultValue;
-    }
-  },
-  /**
-   * 深拷贝对象
-   * @param {*} obj - 要拷贝的对象
-   * @returns {*} 拷贝后的对象
-   */
-  deepClone(obj) {
-    try {
-      if (obj === null || typeof obj !== 'object') return obj;
-      if (obj instanceof Date) return new Date(obj.getTime());
-      if (obj instanceof Array) return obj.map((item) => this.deepClone(item));
-      if (obj instanceof Object) {
-        const clonedObj = {};
-        for (const key in obj) {
-          if (Object.prototype.hasOwnProperty.call(obj, key)) {
-            clonedObj[key] = this.deepClone(obj[key]);
-          }
-        }
-        return clonedObj;
-      }
-    } catch (error) {
-      console.warn('[GitHub 中文翻译] 深拷贝失败:', error);
-      return obj;
-    }
-    return null;
-  },
-  /**
-   * 安全地执行函数，捕获可能的异常
-   * @param {Function} fn - 要执行的函数
-   * @param {*} defaultValue - 执行失败时的默认返回值
-   * @param {Object} context - 函数执行上下文
-   * @param {...*} args - 函数参数
-   * @returns {*} 函数返回值或默认值
-   */
-  safeExecute(fn, defaultValue = null, context = null, ...args) {
-    try {
-      if (typeof fn === 'function') {
-        return fn.apply(context, args);
-      }
-      return defaultValue;
-    } catch (error) {
-      console.error('[GitHub 中文翻译] 安全执行函数失败:', error);
-      return defaultValue;
-    }
-  },
-  /**
-   * 对数据进行Base64编码（用于轻量级数据混淆，非加密）
-   * @param {string} data - 要编码的数据
-   * @returns {string} Base64编码后的字符串
-   */
-  base64Encode(data) {
-    try {
-      return btoa(unescape(encodeURIComponent(data)));
-    } catch (_error) {
-      return data;
-    }
-  },
-  /**
-   * 对Base64编码的数据进行解码
-   * @param {string} encodedData - Base64编码的字符串
-   * @returns {string|null} 解码后的字符串或null
-   */
-  base64Decode(encodedData) {
-    try {
-      return decodeURIComponent(escape(atob(encodedData)));
-    } catch (_error) {
-      return null;
-    }
-  },
-  /**
-   * 混淆敏感配置数据（轻量级保护）
-   * 使用XOR加密配合Base64编码
-   * @param {string} data - 要混淆的数据
-   * @param {string} key - 混淆密钥
-   * @returns {string} 混淆后的数据
-   */
-  obfuscateData(data, key = 'github-i18n-secure') {
-    try {
-      const encoded = this.base64Encode(data);
-      let result = '';
-      for (let i = 0; i < encoded.length; i++) {
-        // eslint-disable-next-line no-bitwise
-      const charCode = encoded.charCodeAt(i) ^ key.charCodeAt(i % key.length);
-        result += String.fromCharCode(charCode);
-      }
-      return this.base64Encode(result);
-    } catch (_error) {
-      return data;
-    }
-  },
-  /**
-   * 还原被混淆的配置数据
-   * @param {string} obfuscatedData - 被混淆的数据
-   * @param {string} key - 混淆密钥
-   * @returns {string|null} 还原后的数据或null
-   */
-  deobfuscateData(obfuscatedData, key = 'github-i18n-secure') {
-    try {
-      const decoded = this.base64Decode(obfuscatedData);
-      if (!decoded) return null;
-      let result = '';
-      for (let i = 0; i < decoded.length; i++) {
-        // eslint-disable-next-line no-bitwise
-        const charCode = decoded.charCodeAt(i) ^ key.charCodeAt(i % key.length);
-        result += String.fromCharCode(charCode);
-      }
-      return this.base64Decode(result);
-    } catch (_error) {
-      return null;
-    }
-  },
-  /**
-   * 计算字符串的SHA-256哈希值
-   * @param {string} data - 要计算哈希的数据
-   * @returns {Promise<string>} SHA-256哈希值（十六进制格式）
-   */
-  async sha256Hash(data) {
-    try {
-      const msgUint8 = new TextEncoder().encode(data);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map((b) => b.toString(RADIX_16).padStart(PAD_LENGTH_2, PAD_CHAR)).join('');
-    } catch (_error) {
-      return '';
-    }
-  },
-  /**
-   * 脱敏错误信息，移除敏感路径和内部细节
-   * @param {string|Error} error - 错误对象或错误消息
-   * @returns {string} 脱敏后的错误消息
-   */
-  sanitizeErrorMessage(error) {
-    try {
-      let message = typeof error === 'string' ? error : error.message || String(error);
-      // 移除文件路径信息
-      message = message.replace(/\/[a-zA-Z0-9_/.-]+:[0-9]+:[0-9]+/g, '[位置]');
-      message = message.replace(/\/workspace\//g, '');
-      message = message.replace(/at\s+[a-zA-Z0-9_.]+\s+[<(]/g, 'at [函数]');
-      // 移除可能的敏感数据
-      message = message.replace(/(password|token|secret|key)\s*[=:]\s*['"][^'"]*['"]/gi, '$1=[已隐藏]');
-      message = message.replace(/['"][a-zA-Z0-9+/=]{20,}['"]/g, '[已隐藏]');
-      // 限制错误消息长度
-      if (message.length > 200) {
-        message = message.substring(0, 200) + '...';
-      }
-      return message;
-    } catch (_error) {
-      return '[未知错误]';
-    }
-  },
+  throttle,
+  debounce,
+  delay,
+  safeExecute,
+  escapeRegExp,
+  safeJSONParse,
+  safeJSONStringify,
+  isSafeRegex,
+  safeRegExp,
+  getNestedProperty,
+  deepClone,
+  sanitizeErrorMessage,
+  collectTextNodes,
+  getCurrentPath,
+  getCurrentUrl,
+  isCurrentPathMatch,
+  getQueryParam,
+  getAllQueryParams,
+  base64Encode,
+  base64Decode,
+  obfuscateData,
+  deobfuscateData,
+  sha256Hash,
 };
 /**
  * LRU缓存管理模块
@@ -945,9 +1019,12 @@ const ErrorHandler = {
       if (attempt < maxRetries) {
         // 指数退避重试
         const delay = Math.pow(2, attempt) * RECOVERY_BASE_DELAY_MS;
-        setTimeout(() => {
-          this.attemptRecovery(context, recoveryFn, maxRetries, attempt);
-        }, Math.min(delay, RECOVERY_MAX_DELAY_MS));
+        setTimeout(
+          () => {
+            this.attemptRecovery(context, recoveryFn, maxRetries, attempt);
+          },
+          Math.min(delay, RECOVERY_MAX_DELAY_MS),
+        );
       }
     }
   },
@@ -988,7 +1065,10 @@ const ErrorHandler = {
         break;
       case this.ERROR_TYPES.DOM_OPERATION:
         // 减少DOM操作频率
-        CONFIG.performance.batchDelay = Math.max(CONFIG.performance.batchDelay || 0, BATCH_DELAY_MIN_MS);
+        CONFIG.performance.batchDelay = Math.max(
+          CONFIG.performance.batchDelay || 0,
+          BATCH_DELAY_MIN_MS,
+        );
         break;
       case this.ERROR_TYPES.DICTIONARY:
         // 重新初始化词典
@@ -1005,7 +1085,10 @@ const ErrorHandler = {
         break;
       default:
         // 通用紧急措施：减少处理频率
-        CONFIG.performance.batchDelay = Math.max(CONFIG.performance.batchDelay || 0, BATCH_DELAY_FALLBACK_MS);
+        CONFIG.performance.batchDelay = Math.max(
+          CONFIG.performance.batchDelay || 0,
+          BATCH_DELAY_FALLBACK_MS,
+        );
         break;
     }
     // 重置错误计数
@@ -1036,6 +1119,323 @@ const ErrorHandler = {
 };
 // 初始化错误处理器
 ErrorHandler.init();
+/**
+ * 虚拟DOM节点模块
+ * @file virtualNode.js
+ * @version 1.9.20
+ * @date 2026-06-10
+ * @author Sut
+ * @description 虚拟DOM节点类，表示一个DOM元素的虚拟映射
+ */
+const RANDOM_BASE = 36;
+const RANDOM_START_INDEX = 2;
+const RANDOM_LENGTH = 9;
+function hashString(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    // eslint-disable-next-line no-magic-numbers
+    hash = (hash * 31 + char) % 2147483647;
+  }
+  return Math.abs(hash).toString(RANDOM_BASE);
+}
+class VirtualNode {
+  constructor(element) {
+    this.element = element;
+    this.elementId = null;
+    this.contentHash = null;
+    this.isTranslated = false;
+    this.attributes = new Map();
+    this.childNodes = new Map();
+    this.lastUpdated = Date.now();
+    this.initialize();
+  }
+  initialize() {
+    try {
+      this.generateId();
+      this.updateContentHash();
+      this.updateAttributes();
+    } catch (error) {
+      if (CONFIG.debugMode) {
+        console.error('[GitHub 中文翻译] 初始化虚拟节点失败:', error);
+      }
+    }
+  }
+  generateId() {
+    try {
+      if (this.element.id) {
+        this.elementId = `id:${this.element.id}`;
+      } else if (this.element.dataset && this.element.dataset.testid) {
+        this.elementId = `testid:${this.element.dataset.testid}`;
+      } else {
+        this.elementId = `temp:${Date.now()}:${Math.random().toString(RANDOM_BASE).substr(RANDOM_START_INDEX, RANDOM_LENGTH)}`;
+        this.element.dataset.virtualDomId = this.elementId;
+      }
+    } catch (_error) {
+      this.elementId = `fallback:${Math.random().toString(RANDOM_BASE).substr(RANDOM_START_INDEX, RANDOM_LENGTH)}`;
+    }
+  }
+  updateContentHash() {
+    try {
+      const content = this.element.textContent || '';
+      this.contentHash = hashString(content);
+      return this.contentHash;
+    } catch (_error) {
+      this.contentHash = null;
+      return null;
+    }
+  }
+  updateAttributes() {
+    try {
+      const importantAttrs = CONFIG.performance.importantAttributes || [];
+      importantAttrs.forEach((attrName) => {
+        if (this.element.hasAttribute(attrName)) {
+          this.attributes.set(attrName, this.element.getAttribute(attrName));
+        } else {
+          this.attributes.delete(attrName);
+        }
+      });
+    } catch (error) {
+      if (CONFIG.debugMode) {
+        console.error('[GitHub 中文翻译] 更新属性状态失败:', error);
+      }
+    }
+  }
+  hasContentChanged() {
+    const newHash = this.updateContentHash();
+    return newHash !== this.contentHash;
+  }
+  hasAttributesChanged() {
+    const originalAttributes = new Map(this.attributes);
+    this.updateAttributes();
+    if (originalAttributes.size !== this.attributes.size) {
+      return true;
+    }
+    for (const [key, value] of originalAttributes) {
+      if (!this.attributes.has(key) || this.attributes.get(key) !== value) {
+        return true;
+      }
+    }
+    return false;
+  }
+  markAsTranslated() {
+    this.isTranslated = true;
+    this.lastUpdated = Date.now();
+    try {
+      this.element.dataset.githubZhTranslated = 'true';
+    } catch (_error) {
+      // 忽略错误
+    }
+  }
+  resetTranslation() {
+    this.isTranslated = false;
+    this.lastUpdated = Date.now();
+    try {
+      delete this.element.dataset.githubZhTranslated;
+    } catch (_error) {
+      // 忽略错误
+    }
+  }
+}
+/**
+ * 虚拟DOM模块
+ * @file virtualDom.js
+ * @version 1.9.20
+ * @date 2026-06-10
+ * @author Sut
+ * @description 用于跟踪已翻译元素的状态，避免重复翻译和不必要的DOM操作
+ */
+const CLEANUP_INTERVAL_MS = 30000;
+const MAX_NODES_DEFAULT = 5000;
+const NODES_REMOVE_RATIO = 0.2;
+const MAX_AGE_HOURS = 1;
+const MAX_AGE_MS = MAX_AGE_HOURS * 60 * 60 * 1000;
+class VirtualDomManager {
+  constructor() {
+    this.nodes = new Map();
+    this.nodeCache = new Map();
+    this.lastCleanupTime = Date.now();
+    this.cleanupInterval = CLEANUP_INTERVAL_MS;
+    this.maxNodes = MAX_NODES_DEFAULT;
+    this.cleanupTimer = null;
+    this.isPageUnloading = false;
+    this.setupPageUnloadHandler();
+    this.startAutoCleanup();
+  }
+  setupPageUnloadHandler() {
+    const unloadHandler = () => {
+      this.isPageUnloading = true;
+      this.cleanup();
+    };
+    window.addEventListener('beforeunload', unloadHandler);
+    window.addEventListener('unload', unloadHandler);
+    window.addEventListener('pagehide', unloadHandler);
+  }
+  getOrCreateNode(element) {
+    try {
+      if (this.isPageUnloading) {
+        return null;
+      }
+      if (element.dataset && element.dataset.virtualDomId) {
+        const cachedNode = this.nodeCache.get(element.dataset.virtualDomId);
+        if (cachedNode && cachedNode.element === element) {
+          return cachedNode;
+        }
+      }
+      if (this.nodes.size >= this.maxNodes) {
+        this.cleanup(true);
+        if (this.nodes.size >= this.maxNodes) {
+          const nodesToRemove = Math.floor(this.maxNodes * NODES_REMOVE_RATIO);
+          const entries = Array.from(this.nodes.entries());
+          entries.sort((a, b) => a[1].lastUpdated - b[1].lastUpdated);
+          for (let i = 0; i < nodesToRemove; i++) {
+            const [id] = entries[i];
+            this.nodes.delete(id);
+            this.nodeCache.delete(id);
+          }
+          if (CONFIG.debugMode) {
+            console.log(`[GitHub 中文翻译] 强制清理了${nodesToRemove}个虚拟节点`);
+          }
+        }
+      }
+      const node = new VirtualNode(element);
+      this.nodes.set(node.elementId, node);
+      this.nodeCache.set(node.elementId, node);
+      return node;
+    } catch (error) {
+      if (CONFIG.debugMode) {
+        console.error('[GitHub 中文翻译] 获取或创建虚拟节点失败:', error);
+      }
+      return null;
+    }
+  }
+  findNodeById(elementId) {
+    return this.nodes.get(elementId) || null;
+  }
+  shouldTranslate(element) {
+    try {
+      const node = this.getOrCreateNode(element);
+      if (!node) {
+        return true;
+      }
+      const contentChanged = node.hasContentChanged();
+      const attributesChanged = node.hasAttributesChanged();
+      if (contentChanged || attributesChanged) {
+        node.resetTranslation();
+        return true;
+      }
+      if (node.isTranslated) {
+        return false;
+      }
+      return true;
+    } catch (error) {
+      if (CONFIG.debugMode) {
+        console.error('[GitHub 中文翻译] 检查翻译状态失败:', error);
+      }
+      return true;
+    }
+  }
+  markElementAsTranslated(element) {
+    try {
+      const node = this.getOrCreateNode(element);
+      if (node) {
+        node.markAsTranslated();
+      }
+    } catch (_error) {
+      // 忽略错误
+    }
+  }
+  processElements(elements) {
+    const elementsToTranslate = [];
+    try {
+      elements.forEach((element) => {
+        if (this.shouldTranslate(element)) {
+          elementsToTranslate.push(element);
+        }
+      });
+    } catch (error) {
+      if (CONFIG.debugMode) {
+        console.error('[GitHub 中文翻译] 批量处理元素失败:', error);
+      }
+      elementsToTranslate.push(...elements);
+    }
+    return elementsToTranslate;
+  }
+  startAutoCleanup() {
+    this.stopAutoCleanup();
+    this.cleanupTimer = setInterval(() => {
+      if (this.isPageUnloading) {
+        this.stopAutoCleanup();
+        return;
+      }
+      this.cleanup();
+    }, this.cleanupInterval);
+  }
+  stopAutoCleanup() {
+    if (this.cleanupTimer) {
+      clearInterval(this.cleanupTimer);
+      this.cleanupTimer = null;
+    }
+  }
+  cleanup(force = false) {
+    try {
+      const now = Date.now();
+      if (!force && now - this.lastCleanupTime < this.cleanupInterval) {
+        return;
+      }
+      this.lastCleanupTime = now;
+      let removedCount = 0;
+      if (force || this.isPageUnloading) {
+        removedCount = this.nodes.size;
+        this.nodes.clear();
+        this.nodeCache.clear();
+        if (CONFIG.debugMode) {
+          console.log(`[GitHub 中文翻译] 强制清理了${removedCount}个虚拟节点`);
+        }
+        return;
+      }
+      const nodesToRemove = [];
+      for (const [id, node] of this.nodes) {
+        if (!document.contains(node.element)) {
+          nodesToRemove.push(id);
+          continue;
+        }
+        const timeSinceUpdate = now - node.lastUpdated;
+        const maxAge = MAX_AGE_MS;
+        if (timeSinceUpdate > maxAge) {
+          nodesToRemove.push(id);
+        }
+      }
+      for (const id of nodesToRemove) {
+        this.nodes.delete(id);
+        this.nodeCache.delete(id);
+        removedCount++;
+      }
+      if (CONFIG.debugMode && removedCount > 0) {
+        console.log(
+          `[GitHub 中文翻译] 清理了${removedCount}个无效虚拟节点，当前节点数：${this.nodes.size}`,
+        );
+      }
+    } catch (error) {
+      if (CONFIG.debugMode) {
+        console.error('[GitHub 中文翻译] 清理虚拟节点失败:', error);
+      }
+    }
+  }
+  clear() {
+    this.nodes.clear();
+    this.nodeCache.clear();
+    this.lastCleanupTime = Date.now();
+  }
+  getStats() {
+    return {
+      nodeCount: this.nodes.size,
+      lastCleanupTime: this.lastCleanupTime,
+    };
+  }
+}
+const virtualDomManager = new VirtualDomManager();
+virtualDomManager;
 /**
  * 开发工具模块
  * @file tools.js
@@ -2191,7 +2591,8 @@ const commonDictionary = {
   'Dismiss alert': '关闭警告',
   "You can't perform that action at this time.": '您现在无法执行此操作。',
   'Uh oh!': '哎呀！',
-  'There was an error while loading. Please reload this page.': '加载时发生错误。请重新加载此页面。',
+  'There was an error while loading. Please reload this page.':
+    '加载时发生错误。请重新加载此页面。',
   'Please reload this page': '请重新加载此页面',
   "You're all set!": '一切就绪！',
   'The repository has been created.': '仓库已创建。',
@@ -2210,8 +2611,7 @@ const commonDictionary = {
   'The branch has been restored.': '分支已恢复。',
   'Copied!': '已复制！',
   // ===== 空仓库提示 =====
-  'Quick setup — if you\'ve done this kind of thing before':
-    '快速设置 — 如果您之前做过这种事',
+  "Quick setup — if you've done this kind of thing before": '快速设置 — 如果您之前做过这种事',
   'Get started by creating a new file or uploading an existing file. We recommend every repository include a README, LICENSE, and .gitignore.':
     '通过创建新文件或上传现有文件开始。我们建议每个仓库都包含 README、LICENSE 和 .gitignore。',
   '…or create a new repository on the command line': '…或在命令行上创建新仓库',
@@ -2582,7 +2982,9 @@ const dictionaryManager = {
       if (CONFIG.debugMode) {
         startTime = Date.now();
       }
-      this.cacheManager = new CacheManager(CONFIG.performance?.maxDictSize || DEFAULT_MAX_DICT_SIZE);
+      this.cacheManager = new CacheManager(
+        CONFIG.performance?.maxDictSize || DEFAULT_MAX_DICT_SIZE,
+      );
       this.dictionary = mergeAllDictionaries();
       this.dictionaryHash.clear();
       // 构建哈希表，支持大小写不敏感查询
@@ -3824,7 +4226,7 @@ class ConfigUI {
     this.userConfig = {};
     this.isOpen = false;
     this.container = null;
-    this.settings = this.loadUserSettings();
+    this.settings = ConfigUI.loadUserSettings();
     this.isPageUnloading = false;
     this.eventListeners = [];
     this.setupPageUnloadHandler();
@@ -3841,7 +4243,7 @@ class ConfigUI {
       // 如果解码失败，尝试直接解析（兼容旧格式）
       try {
         return JSON.parse(saved);
-      } catch {
+      } catch (_e) {
         return {};
       }
     } catch (error) {
@@ -3916,7 +4318,8 @@ class ConfigUI {
     const title = document.createElement('h3');
     title.textContent = 'GitHub 中文翻译';
     const versionBadge = document.createElement('span');
-    versionBadge.style.fontFamily = '"JetBrains Mono", "SF Mono", SFMono-Regular, Menlo, Consolas, "Courier New", monospace';
+    versionBadge.style.fontFamily =
+      '"JetBrains Mono", "SF Mono", SFMono-Regular, Menlo, Consolas, "Courier New", monospace';
     versionBadge.style.fontSize = '11px';
     versionBadge.style.color = '#6e7681';
     versionBadge.style.padding = '2px 8px';
@@ -4113,6 +4516,236 @@ class ConfigUI {
   }
 }
 /**
+ * 版本工具模块
+ * @file versionUtils.js
+ * @version 1.9.20
+ * @date 2026-06-10
+ * @author Sut
+ * @description 版本比较、提取等工具函数
+ */
+const PARSE_INT_RADIX = 10;
+const HASH_DISPLAY_LENGTH = 16;
+/**
+ * 从脚本内容中提取版本号
+ * 支持多种版本号格式
+ * @param {string} content - 脚本内容
+ * @returns {string|null} 提取的版本号或null
+ */
+function extractVersion(content) {
+  const patterns = [
+    /\/\*\s*@version\s+(\d+\.\d+\.\d+)\s*\*\//i,
+    /\/\/\s*@version\s+(\d+\.\d+\.\d+)/i,
+    /\/\/\s*version\s*:\s*(\d+\.\d+\.\d+)/i,
+    /version\s*=\s*['"](\d+\.\d+\.\d+)['"]/i,
+    /version:\s*['"](\d+\.\d+\.\d+)['"]/i,
+  ];
+  for (const pattern of patterns) {
+    const match = content.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+  return null;
+}
+/**
+ * 比较版本号，判断是否有新版本
+ * @param {string} newVersion - 新版本号
+ * @param {string} currentVersion - 当前版本号
+ * @returns {boolean} 是否有新版本
+ */
+function isNewerVersion(newVersion, currentVersion) {
+  const newParts = newVersion.split('.').map(Number);
+  const currentParts = currentVersion.split('.').map(Number);
+  for (let i = 0; i < Math.max(newParts.length, currentParts.length); i++) {
+    const newPart = newParts[i] || 0;
+    const currentPart = currentParts[i] || 0;
+    if (newPart > currentPart) {
+      return true;
+    } else if (newPart < currentPart) {
+      return false;
+    }
+  }
+  return false;
+}
+/**
+ * 更新通知模块
+ * @file updateNotification.js
+ * @version 1.9.20
+ * @date 2026-06-10
+ * @author Sut
+ * @description 更新通知 UI 相关功能
+ */
+const NOTIFICATION_AUTO_HIDE_MS = 20000;
+const NOTIFICATION_ANIMATION_MS = 300;
+const MAX_HISTORY_LENGTH = 10;
+/**
+ * 显示更新通知
+ * @param {string} newVersion - 新版本号
+ */
+function showUpdateNotification(newVersion) {
+  const notificationKey = 'githubZhUpdateNotificationDismissed';
+  const notificationVersionKey = 'githubZhLastNotifiedVersion';
+  const lastNotifiedVersion = localStorage.getItem(notificationVersionKey);
+  if (
+    localStorage.getItem(notificationKey) === 'dismissed' ||
+    lastNotifiedVersion === newVersion
+  ) {
+    if (CONFIG.debugMode && lastNotifiedVersion === newVersion) {
+      console.log(`[GitHub 中文翻译] 已经通知过版本 ${newVersion} 的更新`);
+    }
+    return;
+  }
+  try {
+    const notification = document.createElement('div');
+    notification.className =
+      'fixed bottom-4 right-4 bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-lg z-50 max-w-md transform transition-all duration-300 translate-y-0 opacity-100';
+    const notificationId = `github-zh-update-${Date.now()}`;
+    notification.id = notificationId;
+    const flexContainer = document.createElement('div');
+    flexContainer.className = 'flex items-start';
+    notification.appendChild(flexContainer);
+    const iconContainer = document.createElement('div');
+    iconContainer.className = 'flex-shrink-0 bg-blue-100 rounded-full p-2';
+    flexContainer.appendChild(iconContainer);
+    const svgIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svgIcon.setAttribute('class', 'h-6 w-6 text-blue-600');
+    svgIcon.setAttribute('fill', 'none');
+    svgIcon.setAttribute('viewBox', '0 0 24 24');
+    svgIcon.setAttribute('stroke', 'currentColor');
+    iconContainer.appendChild(svgIcon);
+    const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    pathElement.setAttribute('stroke-linecap', 'round');
+    pathElement.setAttribute('stroke-linejoin', 'round');
+    pathElement.setAttribute('stroke-width', '2');
+    pathElement.setAttribute(
+      'd',
+      'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+    );
+    svgIcon.appendChild(pathElement);
+    const contentContainer = document.createElement('div');
+    contentContainer.className = 'ml-3 flex-1';
+    flexContainer.appendChild(contentContainer);
+    const titleElement = document.createElement('p');
+    titleElement.className = 'text-sm font-medium text-blue-800';
+    titleElement.textContent = 'GitHub 中文翻译脚本更新';
+    contentContainer.appendChild(titleElement);
+    const messageElement = document.createElement('p');
+    messageElement.className = 'text-sm text-blue-700 mt-1';
+    messageElement.textContent = `发现新版本 ${newVersion}，建议更新以获得更好的翻译体验。`;
+    contentContainer.appendChild(messageElement);
+    const buttonsContainer = document.createElement('div');
+    buttonsContainer.className = 'mt-3 flex space-x-2';
+    contentContainer.appendChild(buttonsContainer);
+    const updateButton = document.createElement('a');
+    updateButton.id = `${notificationId}-update-btn`;
+    updateButton.href = CONFIG.updateCheck.scriptUrl || '#';
+    updateButton.target = '_blank';
+    updateButton.rel = 'noopener noreferrer';
+    updateButton.className =
+      'inline-flex items-center px-3 py-1.5 border border-blue-300 text-sm leading-4 font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 transition-colors';
+    updateButton.textContent = '立即更新';
+    buttonsContainer.appendChild(updateButton);
+    const laterButton = document.createElement('button');
+    laterButton.id = `${notificationId}-later-btn`;
+    laterButton.className =
+      'inline-flex items-center px-3 py-1.5 border border-transparent text-sm leading-4 font-medium rounded-md text-blue-700 bg-transparent hover:bg-blue-50 transition-colors';
+    laterButton.textContent = '稍后';
+    laterButton.addEventListener('click', () => {
+      hideNotification(notification, false);
+    });
+    buttonsContainer.appendChild(laterButton);
+    const dismissButton = document.createElement('button');
+    dismissButton.id = `${notificationId}-dismiss-btn`;
+    dismissButton.className =
+      'inline-flex items-center px-2 py-1 border border-transparent text-sm font-medium rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors';
+    dismissButton.textContent = '不再提醒';
+    dismissButton.addEventListener('click', () => {
+      hideNotification(notification, true);
+    });
+    buttonsContainer.appendChild(dismissButton);
+    if (document.body) {
+      document.body.appendChild(notification);
+      localStorage.setItem(notificationVersionKey, newVersion);
+      if (CONFIG.updateCheck.autoHideNotification !== false) {
+        setTimeout(() => {
+          hideNotification(notification, false);
+        }, NOTIFICATION_AUTO_HIDE_MS);
+      }
+      if (CONFIG.debugMode) {
+        console.log(`[GitHub 中文翻译] 显示更新通知: 版本 ${newVersion}`);
+      }
+    }
+  } catch (error) {
+    console.error('[GitHub 中文翻译] 创建更新通知失败:', error);
+  }
+}
+/**
+ * 隐藏通知元素（带动画效果）
+ * @param {HTMLElement} notification - 通知元素
+ * @param {boolean} permanently - 是否永久隐藏
+ */
+function hideNotification(notification, permanently = false) {
+  try {
+    notification.style.transform = 'translateY(20px)';
+    notification.style.opacity = '0';
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+    }, NOTIFICATION_ANIMATION_MS);
+    if (permanently) {
+      localStorage.setItem('githubZhUpdateNotificationDismissed', 'dismissed');
+      if (CONFIG.debugMode) {
+        console.log('[GitHub 中文翻译] 更新通知已永久隐藏');
+      }
+    }
+  } catch (error) {
+    console.error('[GitHub 中文翻译] 隐藏通知失败:', error);
+  }
+}
+/**
+ * 记录版本历史
+ * @param {string} version - 版本号
+ */
+function recordVersionHistory(version) {
+  try {
+    const historyKey = 'githubZhVersionHistory';
+    let history = utils.safeJSONParse(localStorage.getItem(historyKey), []);
+    if (!Array.isArray(history)) {
+      history = [];
+    }
+    history.push({
+      version,
+      detectedAt: Date.now(),
+    });
+    if (history.length > MAX_HISTORY_LENGTH) {
+      history = history.slice(-MAX_HISTORY_LENGTH);
+    }
+    localStorage.setItem(historyKey, JSON.stringify(history));
+  } catch (_error) {
+    // 忽略存储错误
+  }
+}
+/**
+ * 清除更新通知的忽略状态
+ * @returns {boolean} 是否成功
+ */
+function clearNotificationDismissal() {
+  try {
+    localStorage.removeItem('githubZhUpdateNotificationDismissed');
+    localStorage.removeItem('githubZhLastNotifiedVersion');
+    if (CONFIG.debugMode) {
+      console.log('[GitHub 中文翻译] 已清除更新通知忽略状态');
+    }
+    return true;
+  } catch (error) {
+    if (CONFIG.debugMode) {
+      console.error('[GitHub 中文翻译] 清除通知忽略状态失败:', error);
+    }
+    return false;
+  }
+}
+/**
  * 版本更新检查模块
  * @file versionChecker.js
  * @version 1.9.20
@@ -4120,44 +4753,30 @@ class ConfigUI {
  * @author Sut
  * @description 负责检查和处理脚本更新
  */
-// 版本检查常量
-const DEFAULT_INTERVAL_HOURS = 24; // 默认检查间隔（小时）
-const HOURS_TO_MS = 60 * 60 * 1000; // 小时转毫秒
-const PARSE_INT_RADIX = 10; // parseInt 基数
-const DEFAULT_MAX_RETRIES = 2; // 默认最大重试次数
-const DEFAULT_RETRY_DELAY_MS = 1000; // 默认重试延迟
-const FETCH_TIMEOUT_MS = 8000; // 请求超时时间
-const EXPONENTIAL_BASE = 2; // 指数退避基数
-const HASH_DISPLAY_LENGTH = 16; // 哈希显示长度
-const NOTIFICATION_AUTO_HIDE_MS = 20000; // 通知自动隐藏时间
-const NOTIFICATION_ANIMATION_MS = 300; // 通知动画时间
-const MAX_HISTORY_LENGTH = 10; // 最大历史记录数
-/**
- * 远程脚本的已知哈希值（用于完整性验证）
- * 在发布新版本时更新此值
- */
+import {
+  showUpdateNotification,
+  recordVersionHistory,
+  clearNotificationDismissal,
+} from './updateNotification.js';
+const DEFAULT_INTERVAL_HOURS = 24;
+const HOURS_TO_MS = 60 * 60 * 1000;
+const PARSE_INT_RADIX = 10;
+const DEFAULT_MAX_RETRIES = 2;
+const DEFAULT_RETRY_DELAY_MS = 1000;
+const FETCH_TIMEOUT_MS = 8000;
+const EXPONENTIAL_BASE = 2;
 const KNOWN_SCRIPT_HASHES = {
   'https://github.com/Tanox/GitHub_i18n/raw/main/build/GitHub_i18n.user.js':
     'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456',
 };
-/**
- * 版本检查器对象
- */
 const versionChecker = {
-  /**
-   * 检查版本更新
-   * 支持重试机制和更详细的错误处理
-   * @returns {Promise<boolean>} 检查完成的Promise，resolve为是否发现更新
-   */
   async checkForUpdates() {
-    // 检查是否启用了更新检查
     if (!CONFIG.updateCheck.enabled) {
       if (CONFIG.debugMode) {
         console.log('[GitHub 中文翻译] 已禁用更新检查');
       }
       return false;
     }
-    // 检查是否达到检查间隔
     const lastCheck = localStorage.getItem('githubZhLastUpdateCheck');
     const now = Date.now();
     const intervalMs = (CONFIG.updateCheck.intervalHours || DEFAULT_INTERVAL_HOURS) * HOURS_TO_MS;
@@ -4170,28 +4789,21 @@ const versionChecker = {
       return false;
     }
     try {
-      // 记录本次检查时间
       localStorage.setItem('githubZhLastUpdateCheck', now.toString());
-      // 使用带重试的获取方法
       const scriptContent = await this.fetchWithRetry(CONFIG.updateCheck.scriptUrl);
-      // 提取远程版本号 - 支持多种格式
-      const remoteVersion = this.extractVersion(scriptContent);
+      const remoteVersion = extractVersion(scriptContent);
       if (!remoteVersion) {
         throw new Error('无法从远程脚本提取有效的版本号');
       }
       if (CONFIG.debugMode) {
         console.log(`[GitHub 中文翻译] 当前版本: ${CONFIG.version}, 远程版本: ${remoteVersion}`);
       }
-      // 比较版本号
-      if (this.isNewerVersion(remoteVersion, CONFIG.version)) {
-        // 显示更新通知
-        this.showUpdateNotification(remoteVersion);
-        // 如果启用了自动更新版本号
+      if (isNewerVersion(remoteVersion, CONFIG.version)) {
+        showUpdateNotification(remoteVersion);
         if (CONFIG.updateCheck.autoUpdateVersion) {
           this.updateVersionInStorage(remoteVersion);
         }
-        // 记录版本历史
-        this.recordVersionHistory(remoteVersion);
+        recordVersionHistory(remoteVersion);
         return true;
       }
       return false;
@@ -4201,7 +4813,6 @@ const versionChecker = {
       if (CONFIG.debugMode) {
         console.error(errorMsg);
       }
-      // 记录错误日志
       try {
         localStorage.setItem(
           'githubZhUpdateError',
@@ -4216,13 +4827,6 @@ const versionChecker = {
       return false;
     }
   },
-  /**
-   * 带重试机制的网络请求
-   * @param {string} url - 请求URL
-   * @param {number} maxRetries - 最大重试次数
-   * @param {number} retryDelay - 重试间隔（毫秒）
-   * @returns {Promise<string>} 响应文本
-   */
   async fetchWithRetry(url, maxRetries = DEFAULT_MAX_RETRIES, retryDelay = DEFAULT_RETRY_DELAY_MS) {
     let lastError;
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -4230,9 +4834,8 @@ const versionChecker = {
         if (CONFIG.debugMode && attempt > 0) {
           console.log(`[GitHub 中文翻译] 重试更新检查 (${attempt}/${maxRetries})...`);
         }
-        // 自定义超时控制
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS); // 8秒超时
+        const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -4240,56 +4843,42 @@ const versionChecker = {
             Accept: 'text/javascript, text/plain, */*',
           },
           signal: controller.signal,
-          credentials: 'omit', // 不发送凭证信息
+          credentials: 'omit',
         });
         clearTimeout(timeoutId);
         if (!response.ok) {
           throw new Error(`HTTP错误! 状态码: ${response.status}`);
         }
         const scriptContent = await response.text();
-        // 验证脚本完整性（如果已知哈希值存在）
         if (KNOWN_SCRIPT_HASHES[url]) {
           const isValid = await this.verifyScriptIntegrity(scriptContent, url);
           if (!isValid) {
             if (CONFIG.debugMode) {
               console.warn('[GitHub 中文翻译] 脚本完整性验证失败，可能存在安全风险');
             }
-            // 不阻止更新，但记录警告
           }
         }
         return scriptContent;
       } catch (error) {
         lastError = error;
-        // 如果是最后一次尝试，则抛出错误
         if (attempt === maxRetries) {
           throw error;
         }
-        // 等待后重试
-        await utils.delay(retryDelay * Math.pow(EXPONENTIAL_BASE, attempt)); // 指数退避策略
+        await utils.delay(retryDelay * Math.pow(EXPONENTIAL_BASE, attempt));
       }
     }
     throw lastError;
   },
-  /**
-   * 验证脚本完整性
-   * @param {string} scriptContent - 脚本内容
-   * @param {string} url - 脚本URL
-   * @returns {Promise<boolean>} 验证是否通过
-   */
   async verifyScriptIntegrity(scriptContent, url) {
     try {
       const expectedHash = KNOWN_SCRIPT_HASHES[url];
       if (!expectedHash) {
-        return true; // 没有已知哈希，跳过验证
+        return true;
       }
       const actualHash = await utils.sha256Hash(scriptContent);
       const isValid = actualHash === expectedHash;
       if (CONFIG.debugMode) {
         console.log(`[GitHub 中文翻译] 脚本完整性验证: ${isValid ? '通过' : '失败'}`);
-        if (!isValid) {
-          console.log(`[GitHub 中文翻译] 期望哈希: ${expectedHash.substring(0, HASH_DISPLAY_LENGTH)}...`);
-          console.log(`[GitHub 中文翻译] 实际哈希: ${actualHash.substring(0, HASH_DISPLAY_LENGTH)}...`);
-        }
       }
       return isValid;
     } catch (error) {
@@ -4299,230 +4888,6 @@ const versionChecker = {
       return false;
     }
   },
-  /**
-   * 从脚本内容中提取版本号
-   * 支持多种版本号格式
-   * @param {string} content - 脚本内容
-   * @returns {string|null} 提取的版本号或null
-   */
-  extractVersion(content) {
-    // 尝试多种版本号格式
-    const patterns = [
-      // UserScript多行注释格式
-      /\/\*\s*@version\s+(\d+\.\d+\.\d+)\s*\*\//i,
-      // UserScript单行注释格式
-      /\/\/\s*@version\s+(\d+\.\d+\.\d+)/i,
-      // JavaScript注释格式
-      /\/\/\s*version\s*:\s*(\d+\.\d+\.\d+)/i,
-      // 变量赋值格式
-      /version\s*=\s*['"](\d+\.\d+\.\d+)['"]/i,
-      // 对象属性格式
-      /version:\s*['"](\d+\.\d+\.\d+)['"]/i,
-    ];
-    for (const pattern of patterns) {
-      const match = content.match(pattern);
-      if (match && match[1]) {
-        return match[1];
-      }
-    }
-    return null;
-  },
-  /**
-   * 比较版本号，判断是否有新版本
-   * @param {string} newVersion - 新版本号
-   * @param {string} currentVersion - 当前版本号
-   * @returns {boolean} 是否有新版本
-   */
-  isNewerVersion(newVersion, currentVersion) {
-    // 将版本号转换为数组进行比较
-    const newParts = newVersion.split('.').map(Number);
-    const currentParts = currentVersion.split('.').map(Number);
-    // 比较每个部分
-    for (let i = 0; i < Math.max(newParts.length, currentParts.length); i++) {
-      const newPart = newParts[i] || 0;
-      const currentPart = currentParts[i] || 0;
-      if (newPart > currentPart) {
-        return true;
-      } else if (newPart < currentPart) {
-        return false;
-      }
-    }
-    // 版本号相同
-    return false;
-  },
-  /**
-   * 显示更新通知
-   * 使用安全的DOM操作而不是innerHTML
-   * @param {string} newVersion - 新版本号
-   */
-  showUpdateNotification(newVersion) {
-    const notificationKey = 'githubZhUpdateNotificationDismissed';
-    const notificationVersionKey = 'githubZhLastNotifiedVersion';
-    // 获取最后通知的版本
-    const lastNotifiedVersion = localStorage.getItem(notificationVersionKey);
-    // 如果用户已经关闭过通知，或者已经通知过相同版本，则不显示
-    if (
-      localStorage.getItem(notificationKey) === 'dismissed' ||
-      lastNotifiedVersion === newVersion
-    ) {
-      if (CONFIG.debugMode && lastNotifiedVersion === newVersion) {
-        console.log(`[GitHub 中文翻译] 已经通知过版本 ${newVersion} 的更新`);
-      }
-      return;
-    }
-    try {
-      // 创建通知元素 - 安全的DOM操作
-      const notification = document.createElement('div');
-      notification.className =
-        'fixed bottom-4 right-4 bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-lg z-50 max-w-md transform transition-all duration-300 translate-y-0 opacity-100';
-      // 生成唯一的ID
-      const notificationId = `github-zh-update-${Date.now()}`;
-      notification.id = notificationId;
-      // 创建flex容器
-      const flexContainer = document.createElement('div');
-      flexContainer.className = 'flex items-start';
-      notification.appendChild(flexContainer);
-      // 创建图标容器
-      const iconContainer = document.createElement('div');
-      iconContainer.className = 'flex-shrink-0 bg-blue-100 rounded-full p-2';
-      flexContainer.appendChild(iconContainer);
-      // 创建SVG图标
-      const svgIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      svgIcon.setAttribute('class', 'h-6 w-6 text-blue-600');
-      svgIcon.setAttribute('fill', 'none');
-      svgIcon.setAttribute('viewBox', '0 0 24 24');
-      svgIcon.setAttribute('stroke', 'currentColor');
-      iconContainer.appendChild(svgIcon);
-      // 创建SVG路径
-      const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      pathElement.setAttribute('stroke-linecap', 'round');
-      pathElement.setAttribute('stroke-linejoin', 'round');
-      pathElement.setAttribute('stroke-width', '2');
-      pathElement.setAttribute('d', 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z');
-      svgIcon.appendChild(pathElement);
-      // 创建内容容器
-      const contentContainer = document.createElement('div');
-      contentContainer.className = 'ml-3 flex-1';
-      flexContainer.appendChild(contentContainer);
-      // 创建标题
-      const titleElement = document.createElement('p');
-      titleElement.className = 'text-sm font-medium text-blue-800';
-      titleElement.textContent = 'GitHub 中文翻译脚本更新';
-      contentContainer.appendChild(titleElement);
-      // 创建消息文本 - 安全地设置文本内容
-      const messageElement = document.createElement('p');
-      messageElement.className = 'text-sm text-blue-700 mt-1';
-      messageElement.textContent = `发现新版本 ${newVersion}，建议更新以获得更好的翻译体验。`;
-      contentContainer.appendChild(messageElement);
-      // 创建按钮容器
-      const buttonsContainer = document.createElement('div');
-      buttonsContainer.className = 'mt-3 flex space-x-2';
-      contentContainer.appendChild(buttonsContainer);
-      // 创建更新按钮 - 安全地设置URL
-      const updateButton = document.createElement('a');
-      updateButton.id = `${notificationId}-update-btn`;
-      updateButton.href = CONFIG.updateCheck.scriptUrl || '#';
-      updateButton.target = '_blank';
-      updateButton.rel = 'noopener noreferrer';
-      updateButton.className =
-        'inline-flex items-center px-3 py-1.5 border border-blue-300 text-sm leading-4 font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 transition-colors';
-      updateButton.textContent = '立即更新';
-      buttonsContainer.appendChild(updateButton);
-      // 创建稍后按钮
-      const laterButton = document.createElement('button');
-      laterButton.id = `${notificationId}-later-btn`;
-      laterButton.className =
-        'inline-flex items-center px-3 py-1.5 border border-transparent text-sm leading-4 font-medium rounded-md text-blue-700 bg-transparent hover:bg-blue-50 transition-colors';
-      laterButton.textContent = '稍后';
-      laterButton.addEventListener('click', () => {
-        this.hideNotification(notification, false);
-      });
-      buttonsContainer.appendChild(laterButton);
-      // 创建不再提醒按钮
-      const dismissButton = document.createElement('button');
-      dismissButton.id = `${notificationId}-dismiss-btn`;
-      dismissButton.className =
-        'inline-flex items-center px-2 py-1 border border-transparent text-sm font-medium rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors';
-      dismissButton.textContent = '不再提醒';
-      dismissButton.addEventListener('click', () => {
-        this.hideNotification(notification, true);
-      });
-      buttonsContainer.appendChild(dismissButton);
-      // 添加到DOM
-      if (document.body) {
-        document.body.appendChild(notification);
-        // 记录本次通知的版本
-        localStorage.setItem(notificationVersionKey, newVersion);
-        // 自动隐藏（可选）
-        if (CONFIG.updateCheck.autoHideNotification !== false) {
-          setTimeout(() => {
-            this.hideNotification(notification, false);
-          }, NOTIFICATION_AUTO_HIDE_MS); // 20秒后自动隐藏
-        }
-        if (CONFIG.debugMode) {
-          console.log(`[GitHub 中文翻译] 显示更新通知: 版本 ${newVersion}`);
-        }
-      }
-    } catch (error) {
-      console.error('[GitHub 中文翻译] 创建更新通知失败:', error);
-    }
-  },
-  /**
-   * 隐藏通知元素（带动画效果）
-   * @param {HTMLElement} notification - 通知元素
-   * @param {boolean} permanently - 是否永久隐藏
-   */
-  hideNotification(notification, permanently = false) {
-    try {
-      // 添加动画效果
-      notification.style.transform = 'translateY(20px)';
-      notification.style.opacity = '0';
-      setTimeout(() => {
-        if (notification.parentNode) {
-          notification.parentNode.removeChild(notification);
-        }
-      }, NOTIFICATION_ANIMATION_MS);
-      // 如果是永久隐藏，记录到localStorage
-      if (permanently) {
-        localStorage.setItem('githubZhUpdateNotificationDismissed', 'dismissed');
-        if (CONFIG.debugMode) {
-          console.log('[GitHub 中文翻译] 更新通知已永久隐藏');
-        }
-      }
-    } catch (error) {
-      console.error('[GitHub 中文翻译] 隐藏通知失败:', error);
-    }
-  },
-  /**
-   * 记录版本历史
-   * @param {string} version - 版本号
-   */
-  recordVersionHistory(version) {
-    try {
-      const historyKey = 'githubZhVersionHistory';
-      let history = utils.safeJSONParse(localStorage.getItem(historyKey), []);
-      // 确保是数组
-      if (!Array.isArray(history)) {
-        history = [];
-      }
-      // 添加新版本记录
-      history.push({
-        version,
-        detectedAt: Date.now(),
-      });
-      // 限制历史记录数量
-      if (history.length > MAX_HISTORY_LENGTH) {
-        history = history.slice(-MAX_HISTORY_LENGTH);
-      }
-      localStorage.setItem(historyKey, JSON.stringify(history));
-    } catch (_error) {
-      // 忽略存储错误
-    }
-  },
-  /**
-   * 更新本地存储中的版本号
-   * @param {string} newVersion - 新版本号
-   */
   updateVersionInStorage(newVersion) {
     try {
       const cacheData = {
@@ -4544,10 +4909,6 @@ const versionChecker = {
       return false;
     }
   },
-  /**
-   * 获取缓存的版本信息
-   * @returns {Object|null} 缓存的版本数据
-   */
   getCachedVersion() {
     try {
       const cachedData = utils.safeJSONParse(localStorage.getItem('githubZhCachedVersion'));
@@ -4556,468 +4917,8 @@ const versionChecker = {
       return null;
     }
   },
-  /**
-   * 清除更新通知的忽略状态
-   * 允许再次显示更新通知
-   */
-  clearNotificationDismissal() {
-    try {
-      localStorage.removeItem('githubZhUpdateNotificationDismissed');
-      localStorage.removeItem('githubZhLastNotifiedVersion');
-      if (CONFIG.debugMode) {
-        console.log('[GitHub 中文翻译] 已清除更新通知忽略状态');
-      }
-      return true;
-    } catch (error) {
-      if (CONFIG.debugMode) {
-        console.error('[GitHub 中文翻译] 清除通知忽略状态失败:', error);
-      }
-      return false;
-    }
-  },
+  clearNotificationDismissal,
 };
-/**
- * 虚拟DOM模块
- * @file virtualDom.js
- * @version 1.9.20
- * @date 2026-06-10
- * @author Sut
- * @description 用于跟踪已翻译元素的状态，避免重复翻译和不必要的DOM操作
- */
-// 虚拟DOM常量
-const RANDOM_BASE = 36; // Math.random().toString() 的基数
-const RANDOM_START_INDEX = 2; // toString() 生成字符串的起始索引
-const RANDOM_LENGTH = 9; // 随机字符串长度
-const CLEANUP_INTERVAL_MS = 30000; // 清理间隔
-const MAX_NODES_DEFAULT = 5000; // 最大节点数
-const NODES_REMOVE_RATIO = 0.2; // 强制清理时删除节点的比例
-const MAX_AGE_HOURS = 1; // 节点最大存活时间（小时）
-const MAX_AGE_MS = MAX_AGE_HOURS * 60 * 60 * 1000; // 最大存活时间（毫秒）
-/**
- * 简单的字符串哈希函数（无位运算版本）
- * @param {string} str - 要哈希的字符串
- * @returns {string} 哈希值
- */
-function hashString(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    // 使用乘法和加法替代位运算
-    // eslint-disable-next-line no-magic-numbers
-    hash = (hash * 31 + char) % 2147483647;
-  }
-  return Math.abs(hash).toString(RANDOM_BASE);
-}
-/**
- * 虚拟DOM节点类
- * 表示一个DOM元素的虚拟映射，包含其状态和内容哈希
- */
-class VirtualNode {
-  /**
-   * 构造函数
-   * @param {HTMLElement} element - 对应的真实DOM元素
-   */
-  constructor(element) {
-    this.element = element;
-    this.elementId = null;
-    this.contentHash = null;
-    this.isTranslated = false;
-    this.attributes = new Map();
-    this.childNodes = new Map();
-    this.lastUpdated = Date.now();
-    // 初始化节点
-    this.initialize();
-  }
-  /**
-   * 初始化虚拟节点
-   */
-  initialize() {
-    try {
-      // 生成唯一标识符
-      this.generateId();
-      // 计算内容哈希
-      this.updateContentHash();
-      // 记录属性状态
-      this.updateAttributes();
-    } catch (error) {
-      if (CONFIG.debugMode) {
-        console.error('[GitHub 中文翻译] 初始化虚拟节点失败:', error);
-      }
-    }
-  }
-  /**
-   * 生成唯一标识符
-   */
-  generateId() {
-    try {
-      // 优先使用元素ID
-      if (this.element.id) {
-        this.elementId = `id:${this.element.id}`;
-      } else if (this.element.dataset && this.element.dataset.testid) {
-        // 使用testid
-        this.elementId = `testid:${this.element.dataset.testid}`;
-      } else {
-        // 生成临时ID
-        this.elementId = `temp:${Date.now()}:${Math.random().toString(RANDOM_BASE).substr(RANDOM_START_INDEX, RANDOM_LENGTH)}`;
-        // 保存到元素上用于跟踪
-        this.element.dataset.virtualDomId = this.elementId;
-      }
-    } catch (_error) {
-      // 生成最基本的ID
-      this.elementId = `fallback:${Math.random().toString(RANDOM_BASE).substr(RANDOM_START_INDEX, RANDOM_LENGTH)}`;
-    }
-  }
-  /**
-   * 更新内容哈希
-   * @returns {string} 内容哈希值
-   */
-  updateContentHash() {
-    try {
-      const content = this.element.textContent || '';
-      this.contentHash = hashString(content);
-      return this.contentHash;
-    } catch (_error) {
-      this.contentHash = null;
-      return null;
-    }
-  }
-  /**
-   * 更新属性状态
-   */
-  updateAttributes() {
-    try {
-      // 只跟踪重要属性
-      const importantAttrs = CONFIG.performance.importantAttributes || [];
-      importantAttrs.forEach((attrName) => {
-        if (this.element.hasAttribute(attrName)) {
-          this.attributes.set(attrName, this.element.getAttribute(attrName));
-        } else {
-          this.attributes.delete(attrName);
-        }
-      });
-    } catch (error) {
-      if (CONFIG.debugMode) {
-        console.error('[GitHub 中文翻译] 更新属性状态失败:', error);
-      }
-    }
-  }
-  /**
-   * 检查内容是否发生变化
-   * @returns {boolean} 是否变化
-   */
-  hasContentChanged() {
-    const newHash = this.updateContentHash();
-    return newHash !== this.contentHash;
-  }
-  /**
-   * 检查属性是否发生变化
-   * @returns {boolean} 是否变化
-   */
-  hasAttributesChanged() {
-    const originalAttributes = new Map(this.attributes);
-    this.updateAttributes();
-    // 检查是否有变化
-    if (originalAttributes.size !== this.attributes.size) {
-      return true;
-    }
-    // 检查每个属性的值
-    for (const [key, value] of originalAttributes) {
-      if (!this.attributes.has(key) || this.attributes.get(key) !== value) {
-        return true;
-      }
-    }
-    return false;
-  }
-  /**
-   * 标记为已翻译
-   */
-  markAsTranslated() {
-    this.isTranslated = true;
-    this.lastUpdated = Date.now();
-    // 更新实际DOM元素上的标记
-    try {
-      this.element.dataset.githubZhTranslated = 'true';
-    } catch (_error) {
-      // 忽略错误
-    }
-  }
-  /**
-   * 重置翻译状态
-   */
-  resetTranslation() {
-    this.isTranslated = false;
-    this.lastUpdated = Date.now();
-    // 移除实际DOM元素上的标记
-    try {
-      delete this.element.dataset.githubZhTranslated;
-    } catch (_error) {
-      // 忽略错误
-    }
-  }
-}
-/**
- * 虚拟DOM管理器
- * 负责管理所有虚拟节点，提供查找、更新和清理功能
- */
-class VirtualDomManager {
-  /**
-   * 构造函数
-   */
-  constructor() {
-    this.nodes = new Map();
-    this.nodeCache = new Map(); // 快速查找缓存
-    this.lastCleanupTime = Date.now();
-    this.cleanupInterval = CLEANUP_INTERVAL_MS;
-    this.maxNodes = MAX_NODES_DEFAULT;
-    this.cleanupTimer = null;
-    this.isPageUnloading = false;
-    // 设置页面卸载处理
-    this.setupPageUnloadHandler();
-    // 自动清理定时器
-    this.startAutoCleanup();
-  }
-  /**
-   * 设置页面卸载处理器
-   */
-  setupPageUnloadHandler() {
-    // 监听页面卸载事件
-    const unloadHandler = () => {
-      this.isPageUnloading = true;
-      this.cleanup();
-    };
-    // 监听多种卸载事件以确保兼容性
-    window.addEventListener('beforeunload', unloadHandler);
-    window.addEventListener('unload', unloadHandler);
-    window.addEventListener('pagehide', unloadHandler);
-  }
-  /**
-   * 为元素获取或创建虚拟节点
-   * @param {HTMLElement} element - DOM元素
-   * @returns {VirtualNode|null} 虚拟节点
-   */
-  getOrCreateNode(element) {
-    try {
-      // 检查页面是否正在卸载
-      if (this.isPageUnloading) {
-        return null;
-      }
-      // 先尝试从缓存查找
-      if (element.dataset && element.dataset.virtualDomId) {
-        const cachedNode = this.nodeCache.get(element.dataset.virtualDomId);
-        if (cachedNode && cachedNode.element === element) {
-          return cachedNode;
-        }
-      }
-      // 检查节点数量限制
-      if (this.nodes.size >= this.maxNodes) {
-        // 强制清理一次
-        this.cleanup(true);
-        // 如果清理后仍然超过限制，删除最旧的节点
-        if (this.nodes.size >= this.maxNodes) {
-          const nodesToRemove = Math.floor(this.maxNodes * NODES_REMOVE_RATIO); // 删除20%的节点
-          const entries = Array.from(this.nodes.entries());
-          // 按最后更新时间排序，删除最旧的
-          entries.sort((a, b) => a[1].lastUpdated - b[1].lastUpdated);
-          for (let i = 0; i < nodesToRemove; i++) {
-            const [id] = entries[i];
-            this.nodes.delete(id);
-            this.nodeCache.delete(id);
-          }
-          if (CONFIG.debugMode) {
-            console.log(`[GitHub 中文翻译] 强制清理了${nodesToRemove}个虚拟节点`);
-          }
-        }
-      }
-      // 创建新节点
-      const node = new VirtualNode(element);
-      this.nodes.set(node.elementId, node);
-      this.nodeCache.set(node.elementId, node);
-      return node;
-    } catch (error) {
-      if (CONFIG.debugMode) {
-        console.error('[GitHub 中文翻译] 获取或创建虚拟节点失败:', error);
-      }
-      return null;
-    }
-  }
-  /**
-   * 通过ID查找虚拟节点
-   * @param {string} elementId - 元素ID
-   * @returns {VirtualNode|null} 虚拟节点
-   */
-  findNodeById(elementId) {
-    return this.nodes.get(elementId) || null;
-  }
-  /**
-   * 检查元素是否需要翻译
-   * @param {HTMLElement} element - 要检查的元素
-   * @returns {boolean} 是否需要翻译
-   */
-  shouldTranslate(element) {
-    try {
-      const node = this.getOrCreateNode(element);
-      if (!node) {
-        return true; // 如果无法创建虚拟节点，默认需要翻译
-      }
-      // 检查内容是否变化
-      const contentChanged = node.hasContentChanged();
-      // 检查属性是否变化
-      const attributesChanged = node.hasAttributesChanged();
-      // 如果内容或属性变化，需要重新翻译
-      if (contentChanged || attributesChanged) {
-        node.resetTranslation();
-        return true;
-      }
-      // 如果已经翻译过且内容没有变化，不需要再次翻译
-      if (node.isTranslated) {
-        return false;
-      }
-      // 其他情况需要翻译
-      return true;
-    } catch (error) {
-      if (CONFIG.debugMode) {
-        console.error('[GitHub 中文翻译] 检查翻译状态失败:', error);
-      }
-      // 出错时默认需要翻译
-      return true;
-    }
-  }
-  /**
-   * 标记元素为已翻译
-   * @param {HTMLElement} element - 已翻译的元素
-   */
-  markElementAsTranslated(element) {
-    try {
-      const node = this.getOrCreateNode(element);
-      if (node) {
-        node.markAsTranslated();
-      }
-    } catch (_error) {
-      // 忽略错误
-    }
-  }
-  /**
-   * 批量处理元素
-   * @param {NodeList|Array} elements - 要处理的元素列表
-   * @returns {Array} 需要翻译的元素列表
-   */
-  processElements(elements) {
-    const elementsToTranslate = [];
-    try {
-      elements.forEach((element) => {
-        if (this.shouldTranslate(element)) {
-          elementsToTranslate.push(element);
-        }
-      });
-    } catch (error) {
-      if (CONFIG.debugMode) {
-        console.error('[GitHub 中文翻译] 批量处理元素失败:', error);
-      }
-      // 出错时返回原始元素列表
-      elementsToTranslate.push(...elements);
-    }
-    return elementsToTranslate;
-  }
-  /**
-   * 开始自动清理
-   */
-  startAutoCleanup() {
-    this.stopAutoCleanup();
-    this.cleanupTimer = setInterval(() => {
-      // 如果页面正在卸载，停止清理
-      if (this.isPageUnloading) {
-        this.stopAutoCleanup();
-        return;
-      }
-      this.cleanup();
-    }, this.cleanupInterval);
-  }
-  /**
-   * 停止自动清理
-   */
-  stopAutoCleanup() {
-    if (this.cleanupTimer) {
-      clearInterval(this.cleanupTimer);
-      this.cleanupTimer = null;
-    }
-  }
-  /**
-   * 清理无效的虚拟节点
-   * @param {boolean} force - 是否强制清理所有节点
-   */
-  cleanup(force = false) {
-    try {
-      const now = Date.now();
-      // 如果不是强制清理且距离上次清理时间不足，则跳过
-      if (!force && now - this.lastCleanupTime < this.cleanupInterval) {
-        return;
-      }
-      this.lastCleanupTime = now;
-      let removedCount = 0;
-      // 如果页面正在卸载或强制清理，删除所有节点
-      if (force || this.isPageUnloading) {
-        removedCount = this.nodes.size;
-        this.nodes.clear();
-        this.nodeCache.clear();
-        if (CONFIG.debugMode) {
-          console.log(`[GitHub 中文翻译] 强制清理了${removedCount}个虚拟节点`);
-        }
-        return;
-      }
-      // 正常清理：删除DOM中不存在的节点或长时间未更新的节点
-      const nodesToRemove = [];
-      for (const [id, node] of this.nodes) {
-        // 检查节点是否仍在DOM中
-        if (!document.contains(node.element)) {
-          nodesToRemove.push(id);
-          continue;
-        }
-        // 检查节点是否长时间未更新
-        const timeSinceUpdate = now - node.lastUpdated;
-        const maxAge = MAX_AGE_MS; // 1小时
-        if (timeSinceUpdate > maxAge) {
-          nodesToRemove.push(id);
-        }
-      }
-      // 删除需要清理的节点
-      for (const id of nodesToRemove) {
-        this.nodes.delete(id);
-        this.nodeCache.delete(id);
-        removedCount++;
-      }
-      if (CONFIG.debugMode && removedCount > 0) {
-        console.log(
-          `[GitHub 中文翻译] 清理了${removedCount}个无效虚拟节点，当前节点数：${this.nodes.size}`,
-        );
-      }
-    } catch (error) {
-      if (CONFIG.debugMode) {
-        console.error('[GitHub 中文翻译] 清理虚拟节点失败:', error);
-      }
-    }
-  }
-  /**
-   * 清空所有虚拟节点
-   */
-  clear() {
-    this.nodes.clear();
-    this.nodeCache.clear();
-    this.lastCleanupTime = Date.now();
-  }
-  /**
-   * 获取统计信息
-   * @returns {Object} 统计信息
-   */
-  getStats() {
-    return {
-      nodeCount: this.nodes.size,
-      lastCleanupTime: this.lastCleanupTime,
-    };
-  }
-}
-// 创建单例实例
-const virtualDomManager = new VirtualDomManager();
-virtualDomManager;
 /**
  * GitHub 中文翻译主入口文件
  * @file main.js

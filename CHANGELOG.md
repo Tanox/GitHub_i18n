@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.9.20] - 2026-06-10
+
+### Added
+- 新增模块化工具函数：functionUtils、stringUtils、domUtils、urlUtils、securityUtils
+- 新增 virtualNode.js 模块，拆分虚拟DOM节点逻辑
+- 新增 versionUtils.js 模块，抽出版本比较和提取功能
+- 新增 updateNotification.js 模块，独立更新通知UI
+
+### Fixed
+- 修复 utils.js 中 obfuscateData 函数缩进问题
+- 修复 i18n.js 中 formatRelativeTime 时间计算逻辑
+- 修复 configUI.js 中静态方法调用错误
+- 修复 domUtils.js 语法错误（大括号不匹配）
+
+### Changed
+- 更新版本号至 1.9.20
+- 重构 utils.js，从单一文件拆分为多个专用模块
+- 重构 virtualDom.js，拆分为 VirtualNode 和 VirtualDomManager 两个模块
+- 重构 versionChecker.js，拆分为版本工具、通知UI和主逻辑
+- 优化构建脚本，纳入新拆分的模块文件
+- 代码格式化，统一代码风格
+
+---
+
 ## [1.9.19] - 2026-06-08
 
 ### Changed

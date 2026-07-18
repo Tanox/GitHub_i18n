@@ -63,7 +63,11 @@ function findUntranslated(texts, dictionary) {
     if (/^\d+$/.test(trimmed)) continue;
     if (/^[\s\p{P}]+$/u.test(trimmed)) continue;
 
-    if (dictionary[trimmed] || dictionary[trimmed.toLowerCase()] || dictionary[trimmed.toUpperCase()]) {
+    if (
+      dictionary[trimmed] ||
+      dictionary[trimmed.toLowerCase()] ||
+      dictionary[trimmed.toUpperCase()]
+    ) {
       translated.add(trimmed);
     } else {
       untranslated.push(trimmed);

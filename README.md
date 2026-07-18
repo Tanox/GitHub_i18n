@@ -49,23 +49,34 @@
 
 ```
 src/
-├── core/                    # 核心模块 (cacheManager/errorHandler/trie/virtualDom)
+├── core/                    # 核心模块
+│   ├── cacheManager.js      # LRU 缓存管理器
+│   ├── errorHandler.js      # 统一错误处理
+│   ├── trie.js              # Trie 树数据结构
+│   ├── virtualNode.js       # 虚拟 DOM 节点
+│   └── virtualDom.js        # 虚拟 DOM 管理器
 ├── dictionaries/            # 翻译词典 (common/codespaces/explore)
 ├── page-monitor/            # 页面监控 (DOM 监听、路径监听、翻译触发)
 ├── translation-core/        # 翻译核心 (词典管理、元素翻译、性能监控)
-├── ui/                      # UI 组件 (配置面板)
+├── ui/                      # UI 组件 (配置面板、性能监控)
 ├── utils/                   # 工具函数
-├── config.js                 # 配置
+│   ├── functionUtils.js     # 函数工具 (节流、防抖、延迟)
+│   ├── stringUtils.js       # 字符串工具 (JSON、正则、深拷贝)
+│   ├── domUtils.js          # DOM 工具 (文本节点收集)
+│   ├── urlUtils.js          # URL 工具 (路径解析、参数获取)
+│   ├── securityUtils.js     # 安全工具 (Base64、哈希、混淆)
+│   ├── tools.js             # 其他工具函数
+│   └── utils.js             # 工具函数统一导出
+├── config.js                # 全局配置
+├── i18n.js                  # 国际化框架
 ├── main.js                  # 主入口
-└── version.js              # 版本信息
-prototype/                    # 设计系统与高保真原型
-├── assets/                   # 共享 CSS
-├── design-system/         # 设计系统规范
-├── components/            # 组件库规范
-├── interaction/             # 交互标准
-└── prototypes/              # 高保真原型
-build/                         # 构建产物
-openspec/                      # 项目规范 (架构 / 代码风格 / 开发流程)
+├── version.js               # 版本信息
+├── versionUtils.js          # 版本工具函数
+├── versionChecker.js        # 版本更新检查
+└── updateNotification.js    # 更新通知 UI
+prototype/                   # 设计系统与高保真原型
+build/                       # 构建产物
+openspec/                    # 项目规范 (架构 / 代码风格 / 开发流程)
 ```
 
 ## 参与开发
