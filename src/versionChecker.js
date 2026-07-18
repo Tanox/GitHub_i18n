@@ -27,7 +27,7 @@ const MAX_HISTORY_LENGTH = 10; // 最大历史记录数
  * 在发布新版本时更新此值
  */
 const KNOWN_SCRIPT_HASHES = {
-  'https://github.com/Tanox/GitHub_i18n/raw/main/build/GitHub_i18n.user.js':
+  'https://github.com/Tanox/GitHub_Chinese/raw/main/build/GitHub_i18n.user.js':
     'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456',
 };
 

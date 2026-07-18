@@ -2,8 +2,8 @@
 
 让 GitHub 界面变成中文，提升使用体验。
 
-[![GitHub license](https://img.shields.io/github/license/Tanox/GitHub_i18n?color=blue)](LICENSE)
-[![GitHub release](https://img.shields.io/github/v/release/Tanox/GitHub_i18n?display_name=tag&color=green)](https://github.com/Tanox/GitHub_i18n/releases)
+[![GitHub license](https://img.shields.io/github/license/Tanox/GitHub_Chinese?color=blue)](LICENSE)
+[![GitHub release](https://img.shields.io/github/v/release/Tanox/GitHub_Chinese?display_name=tag&color=green)](https://github.com/Tanox/GitHub_Chinese/releases)
 
 ## 功能介绍
 
@@ -26,7 +26,7 @@
 
 ### 2. 安装脚本
 
-点击 [一键安装](https://github.com/Tanox/GitHub_i18n/raw/refs/heads/main/build/GitHub_i18n.user.js)，然后在 Tampermonkey 中点击「安装」。
+点击 [一键安装](https://github.com/Tanox/GitHub_Chinese/raw/refs/heads/main/build/GitHub_i18n.user.js)，然后在 Tampermonkey 中点击「安装」。
 
 ### 3. 开始使用
 
@@ -73,8 +73,8 @@ openspec/                      # 项目规范 (架构 / 代码风格 / 开发流
 克隆本仓库：
 
 ```bash
-git clone https://github.com/Tanox/GitHub_i18n.git
-cd GitHub_i18n
+git clone https://github.com/Tanox/GitHub_Chinese.git
+cd GitHub_Chinese
 npm install
 npm run build
 ```

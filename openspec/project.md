@@ -161,8 +161,8 @@ npm run format     # 代码格式化
 
 | 属性 | 值 |
 |------|------|
-| **项目名称** | GitHub_i18n |
-| **项目 URL** | https://github.com/Tanox/GitHub_i18n |
+| **项目名称** | GitHub_Chinese |
+| **项目 URL** | https://github.com/Tanox/GitHub_Chinese |
 | **当前版本** | 1.9.20 |
 | **核心语言** | JavaScript (ES6+) |
 | **目标平台** | 浏览器用户脚本 |

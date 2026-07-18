@@ -28,12 +28,12 @@
   "license": "GPL-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Tanox/GitHub_i18n.git"
+    "url": "https://github.com/Tanox/GitHub_Chinese.git"
   },
   "bugs": {
-    "url": "https://github.com/Tanox/GitHub_i18n/issues"
+    "url": "https://github.com/Tanox/GitHub_Chinese/issues"
   },
-  "homepage": "https://github.com/Tanox/GitHub_i18n#readme",
+  "homepage": "https://github.com/Tanox/GitHub_Chinese#readme",
   "engines": {
     "node": ">=18.0.0"
   },

@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GitHub 中文翻译
-// @namespace    https://github.com/Tanox/GitHub_i18n
+// @namespace    https://github.com/Tanox/GitHub_Chinese
 // @version      1.9.20
 // @description  GitHub页面自动翻译为中文
 // @author       Sut
@@ -16,10 +16,10 @@
 // @connect      github.com
 // @run-at       document-idle
 // @noframes
-// @updateURL    https://raw.githubusercontent.com/Tanox/GitHub_i18n/main/build/GitHub_i18n.user.js
-// @downloadURL  https://raw.githubusercontent.com/Tanox/GitHub_i18n/main/build/GitHub_i18n.user.js
+// @updateURL    https://raw.githubusercontent.com/Tanox/GitHub_Chinese/main/build/GitHub_i18n.user.js
+// @downloadURL  https://raw.githubusercontent.com/Tanox/GitHub_Chinese/main/build/GitHub_i18n.user.js
 // @license      GPL-2.0
-// @homepage     https://github.com/Tanox/GitHub_i18n
+// @homepage     https://github.com/Tanox/GitHub_Chinese
 // ==/UserScript==
 (function() {
 'use strict';
@@ -77,7 +77,7 @@ const CONFIG = {
   updateCheck: {
     enabled: true,
     intervalHours: 24,
-    scriptUrl: 'https://github.com/Tanox/GitHub_i18n/raw/main/build/GitHub_i18n.user.js',
+    scriptUrl: 'https://github.com/Tanox/GitHub_Chinese/raw/main/build/GitHub_i18n.user.js',
     autoUpdateVersion: true,
   },
   externalTranslation: {
@@ -4137,7 +4137,7 @@ const MAX_HISTORY_LENGTH = 10; // 最大历史记录数
  * 在发布新版本时更新此值
  */
 const KNOWN_SCRIPT_HASHES = {
-  'https://github.com/Tanox/GitHub_i18n/raw/main/build/GitHub_i18n.user.js':
+  'https://github.com/Tanox/GitHub_Chinese/raw/main/build/GitHub_i18n.user.js':
     'a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456',
 };
 /**

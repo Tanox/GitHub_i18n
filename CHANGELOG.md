@@ -52,7 +52,7 @@
 - 修复测试文件导入路径问题
 
 ### Changed
-- 更新项目 URL 至 https://github.com/Tanox/GitHub_i18n
+- 更新项目 URL 至 https://github.com/Tanox/GitHub_Chinese
 - 更新版本号至 1.9.16
 - 统一使用 Date.now() 进行计时
 - 优化浮动按钮创建逻辑和样式

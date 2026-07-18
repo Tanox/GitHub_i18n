@@ -46,7 +46,7 @@ const SOURCE_ORDER = [
 
 const USER_SCRIPT_HEADER = `// ==UserScript==
 // @name         GitHub 中文翻译
-// @namespace    https://github.com/Tanox/GitHub_i18n
+// @namespace    https://github.com/Tanox/GitHub_Chinese
 // @version      {VERSION}
 // @description  GitHub页面自动翻译为中文
 // @author       Sut
@@ -62,10 +62,10 @@ const USER_SCRIPT_HEADER = `// ==UserScript==
 // @connect      github.com
 // @run-at       document-idle
 // @noframes
-// @updateURL    https://raw.githubusercontent.com/Tanox/GitHub_i18n/main/build/GitHub_i18n.user.js
-// @downloadURL  https://raw.githubusercontent.com/Tanox/GitHub_i18n/main/build/GitHub_i18n.user.js
+// @updateURL    https://raw.githubusercontent.com/Tanox/GitHub_Chinese/main/build/GitHub_i18n.user.js
+// @downloadURL  https://raw.githubusercontent.com/Tanox/GitHub_Chinese/main/build/GitHub_i18n.user.js
 // @license      GPL-2.0
-// @homepage     https://github.com/Tanox/GitHub_i18n
+// @homepage     https://github.com/Tanox/GitHub_Chinese
 // ==/UserScript==
 
 (function() {
